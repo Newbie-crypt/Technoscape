@@ -16,7 +16,6 @@ int main(int argc, char* argv[]) {
     scene.addItem(player);
 
     QGraphicsView view(&scene);
-    view.setFixedSize(800, 600);
     view.show();
 
     return app.exec();
