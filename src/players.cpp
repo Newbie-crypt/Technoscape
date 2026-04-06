@@ -1,8 +1,9 @@
-#include "./player.hpp"
+#include "../include/players.hpp"
 #include <QBrush>
+#include <QTimer>
 
-Player::Player() {
-    setRect(0, 0, 50, 50);
+Player::Player(double x, double y, double width, double height) {
+    setRect(x, y, width, height);
     setBrush(Qt::red);
 
     setFlag(QGraphicsItem::ItemIsFocusable);
@@ -51,4 +52,16 @@ void Player::keyPressEvent(QKeyEvent* event) {
         }
     }
     
+}
+
+Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) {
+    setBrush(Qt::yellow);
+    srand(time(0));
+    QTimer* timer = new QTimer(this);
+    QObject::connect(timer, &QTimer::timeout, this, &Enemy::Motion);
+    timer->start(50);
+}
+
+void Enemy::Motion() {
+    moveBy(rand() % 20 - 10, rand() % 20 - 10);
 }
