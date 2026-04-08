@@ -5,13 +5,8 @@
 #include "../include/wall.hpp"
 #include <QTimer>
 
+// Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
 
-// TASKS:
-// -> We want the game to automatically be on full screen once it's opened.
-// -> Instead of the program ending when the enemy and player collide, add a health bar and decrease it
-// -> Instead of the enemy moving randomly, make it move towards the player
-// -> Character's design
-// -> Scene's design
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
