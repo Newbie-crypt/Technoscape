@@ -6,11 +6,14 @@
 #include <QObject>
 
 class Player : public QGraphicsRectItem {
-public:
-    Player(double x, double y, double width, double height);
-
-protected:
-    void keyPressEvent(QKeyEvent* event) override;
+    private:
+        int health = 100;
+    public:
+        Player(double x, double y, double width, double height);
+        void decreaseHealth();
+        int getHealth() {return health;}
+    protected:
+        void keyPressEvent(QKeyEvent* event) override;
 };
 
 class Enemy: public QObject, public QGraphicsRectItem {

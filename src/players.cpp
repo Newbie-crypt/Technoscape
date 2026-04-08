@@ -8,6 +8,11 @@ Player::Player(double x, double y, double width, double height) {
 
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFocus();
+
+}
+
+void Player::decreaseHealth() {
+    health -= 5;
 }
 
 void Player::keyPressEvent(QKeyEvent* event) {

@@ -34,7 +34,10 @@ int main(int argc, char* argv[]) {
 
     QTimer* timer = new QTimer(scene);
     QObject::connect(timer, &QTimer::timeout, [&player, &enemy]() {
-        if (player->collidesWithItem(enemy)) exit(0);
+        if (player->collidesWithItem(enemy)) {
+            player->decreaseHealth();
+            if (player->getHealth() == 0) exit(0);
+        }
     });
 
     timer->start(50);
