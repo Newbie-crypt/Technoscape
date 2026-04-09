@@ -4,9 +4,16 @@
 #include "../include/players.hpp"
 #include "../include/wall.hpp"
 #include <QTimer>
+#include "../include/classes.hpp"
+#include <QGraphicsPixmapItem>
 
 // Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
 
+// Classes to read about:
+// QGraphicsItem
+// QPainter
+// QPixMap
+// QRectF
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
@@ -23,6 +30,7 @@ int main(int argc, char* argv[]) {
     Wall* left = new Wall(0, 0, 20, 600);
     Wall* right = new Wall(780, 0, 20, 600);
 
+    HealthBar* healthBar = new HealthBar();
 
     // Adding items to the scene
     scene->addItem(top);
@@ -31,12 +39,13 @@ int main(int argc, char* argv[]) {
     scene->addItem(right);
     scene->addItem(player);
     scene->addItem(enemy);
+    scene->addItem(healthBar);
 
     QTimer* timer = new QTimer(scene);
-    QObject::connect(timer, &QTimer::timeout, [&player, &enemy]() {
+    QObject::connect(timer, &QTimer::timeout, [&player, &enemy, &healthBar]() {
         if (player->collidesWithItem(enemy)) {
-            player->decreaseHealth();
-            if (player->getHealth() == 0) exit(0);
+            healthBar->decreaseHP(10);
+            if (healthBar->getHP() == 0) exit(0);
         }
     });
 

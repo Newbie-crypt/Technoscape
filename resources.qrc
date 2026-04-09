@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/Full_Health.png</file>
+        <file>assets/No_Health.png</file>
+    </qresource>
+</RCC>
