@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>assets/Full_Health.png</file>
         <file>assets/No_Health.png</file>
+        <file>assets/blonde_man_shadow.png</file>
     </qresource>
 </RCC>

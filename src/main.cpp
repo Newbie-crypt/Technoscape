@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     scene->setSceneRect(0, 0, 800, 600);
 
     // Declaration of objects
-    Player* player = new Player(0,0, 200, 200);
+    Player* player = new Player(0,0);
     Enemy* enemy = new Enemy;
     player->setPos(400, 300);
     Wall* top = new Wall(0, 0, 800, 20);
