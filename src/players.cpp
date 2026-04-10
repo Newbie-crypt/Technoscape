@@ -59,14 +59,8 @@ void Player::keyPressEvent(QKeyEvent* event) {
     
 }
 
-Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) {
-    setBrush(Qt::yellow);
-    srand(time(0));
-    QTimer* timer = new QTimer(this);
-    QObject::connect(timer, &QTimer::timeout, this, &Enemy::Motion);
-    timer->start(50);
-}
+// Enemy::Enemy() {}
 
-void Enemy::Motion() {
-    moveBy(rand() % 20 - 10, rand() % 20 - 10);
-}
+// void Enemy::Motion() {
+//     moveBy(rand() % 20 - 10, rand() % 20 - 10);
+// }

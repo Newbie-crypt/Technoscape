@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>assets/Full_Health.png</file>
         <file>assets/No_Health.png</file>
+        <file>assets/Standing_Robot.png</file>
     </qresource>
 </RCC>

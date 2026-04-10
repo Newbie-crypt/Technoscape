@@ -9,11 +9,13 @@
 
 // Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
 
+
 // Classes to read about:
 // QGraphicsItem
 // QPainter
 // QPixMap
 // QRectF
+// QBrush
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
@@ -23,8 +25,10 @@ int main(int argc, char* argv[]) {
 
     // Declaration of objects
     Player* player = new Player(0,0, 200, 200);
-    Enemy* enemy = new Enemy;
+    Robot* robot = new Robot;
     player->setPos(400, 300);
+    robot->setPos(100,200);
+    robot->setScale(4.0);
     Wall* top = new Wall(0, 0, 800, 20);
     Wall* bottom = new Wall(0, 580, 800, 20);
     Wall* left = new Wall(0, 0, 20, 600);
@@ -38,12 +42,12 @@ int main(int argc, char* argv[]) {
     scene->addItem(left);
     scene->addItem(right);
     scene->addItem(player);
-    scene->addItem(enemy);
+    scene->addItem(robot);
     scene->addItem(healthBar);
 
     QTimer* timer = new QTimer(scene);
-    QObject::connect(timer, &QTimer::timeout, [&player, &enemy, &healthBar]() {
-        if (player->collidesWithItem(enemy)) {
+    QObject::connect(timer, &QTimer::timeout, [&player, &robot, &healthBar]() {
+        if (player->collidesWithItem(robot)) {
             healthBar->decreaseHP(10);
             if (healthBar->getHP() == 0) exit(0);
         }
