@@ -97,6 +97,8 @@ class Robot: public Enemy {
             connect(timer, &QTimer::timeout, [this]() {
                 currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
                 update(); // reconstruct the design.
+
+                // If the robot completes one whole swing of the sword it has, then the health bar of the player gets reduced.
                 if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) target->decreaseHealth(1);
             });
 
@@ -109,19 +111,27 @@ class Robot: public Enemy {
 
     protected:
         void changeAnimationState(AnimationState state) {
+            // The purpose of the if statement is to prevent the frame from being constant at zero due to how frequent we are changing
+            // the animation state.
             if (currentAnimationState == state) return;
             currentAnimationState = state;
             currentFrame = 0;
         }
 
+        // Called whenever update() is called. It draws the current frame of the object.
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override {
             painter->drawPixmap(0, 0, animations[currentAnimationState][currentFrame]);
         }
+
     public slots:
+
+        // Rarely used. It's only used for debugging or testing purposes.
         void Move() override {
             changeAnimationState(AnimationState::Running);
             moveBy(10, 0);
         }
+        
+        // Slot used to chase the player.
         void Chase() override {
             changeAnimationState(AnimationState::Running);
 
