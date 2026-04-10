@@ -3,5 +3,6 @@
         <file>assets/Full_Health.png</file>
         <file>assets/No_Health.png</file>
         <file>assets/Standing_Robot.png</file>
+        <file>assets/OrangeRobot_Idle.png</file>
     </qresource>
 </RCC>
