@@ -11,9 +11,6 @@ Player::Player(double x, double y, double width, double height) {
 
 }
 
-void Player::decreaseHealth() {
-    health -= 5;
-}
 
 void Player::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Left) {

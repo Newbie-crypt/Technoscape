@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QPainter>
 #include <QTimer>
+#include <QPointF>
+#include "classes.hpp"
 
 enum class AnimationState : int {
     Idle,
@@ -15,11 +17,16 @@ enum class AnimationState : int {
 
 class Player : public QGraphicsRectItem {
     private:
-        int health = 100;
+        HealthBar* health;
     public:
         Player(double x, double y, double width, double height);
-        void decreaseHealth();
-        int getHealth() {return health;}
+        void setHealthBar(HealthBar* h) {health = h;}
+        void decreaseHealth(int h) {
+            health->decreaseHP(h);
+        }
+        bool isDead() {
+            return health->getHP() == 0;
+        }
     protected:
         void keyPressEvent(QKeyEvent* event) override;
 };
@@ -31,7 +38,7 @@ class Enemy: public QGraphicsObject {
         QPixmap sprite;
         double speed;
         QPointF velocity;
-        QGraphicsItem* target;
+        Player* target;
     public:
         Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
             sprite.load(asset);
@@ -41,9 +48,11 @@ class Enemy: public QGraphicsObject {
             return QRectF(0, 0, sprite.width(), sprite.height());
         }
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) = 0;
-        void setTarget(QGraphicsItem* t) {target = t;}
+        void setTarget(Player* t) {target = t;}
+        virtual void Attack() = 0;
     public slots:
         virtual void Move() = 0;
+        virtual void Chase() = 0;
 };
 
 class Robot: public Enemy {
@@ -53,7 +62,7 @@ class Robot: public Enemy {
         std::map<AnimationState, std::vector<QPixmap>> animations;
         std::map<AnimationState, int> frame_count;
         int currentFrame = 0;
-        AnimationState currentAnimationState = AnimationState::Attacking;
+        AnimationState currentAnimationState = AnimationState::Idle;
         int frame_width;
         int frame_height;
         const int number_of_states = 3; // Idle, attacking, running
@@ -88,17 +97,50 @@ class Robot: public Enemy {
             connect(timer, &QTimer::timeout, [this]() {
                 currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
                 update(); // reconstruct the design.
+                if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) target->decreaseHealth(1);
             });
 
             timer->start(100);
         }
 
+        void Attack() override {
+            changeAnimationState(AnimationState::Attacking);
+        }
+
+    protected:
+        void changeAnimationState(AnimationState state) {
+            if (currentAnimationState == state) return;
+            currentAnimationState = state;
+            currentFrame = 0;
+        }
 
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override {
             painter->drawPixmap(0, 0, animations[currentAnimationState][currentFrame]);
         }
     public slots:
-        void Move() override {moveBy(rand() % 20 - 10, rand() % 20 - 10);}
+        void Move() override {
+            changeAnimationState(AnimationState::Running);
+            moveBy(10, 0);
+        }
+        void Chase() override {
+            changeAnimationState(AnimationState::Running);
+
+            // If the player is not present, then there's nothing to chase!
+            if (!target) return; 
+
+            // Difference between the enemy and the player in the 2D coordinate system
+            QPointF direction = target->pos() - pos(); 
+
+            double distance = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
+
+            // This way, direction is the unit vector of the velocity.
+            if (distance != 0) direction /= distance;
+
+            // Since in this case speed = magnitude of the velocity, then we can use the unit vector "direction" to find the velocity.
+            velocity = speed * direction;
+
+            moveBy(velocity.x(), velocity.y());
+        }
 };
 
 #endif // PLAYER_HPP

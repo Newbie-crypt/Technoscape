@@ -24,7 +24,9 @@ int main(int argc, char* argv[]) {
     scene->setSceneRect(0, 0, 800, 600);
 
     // Declaration of objects
+    HealthBar* health = new HealthBar;
     Player* player = new Player(0,0, 200, 200);
+    player->setHealthBar(health);
     Robot* robot = new Robot;
     player->setPos(400, 300);
     robot->setPos(100,200);
@@ -34,7 +36,6 @@ int main(int argc, char* argv[]) {
     Wall* left = new Wall(0, 0, 20, 600);
     Wall* right = new Wall(780, 0, 20, 600);
 
-    HealthBar* healthBar = new HealthBar();
 
     // Adding items to the scene
     scene->addItem(top);
@@ -43,17 +44,25 @@ int main(int argc, char* argv[]) {
     scene->addItem(right);
     scene->addItem(player);
     scene->addItem(robot);
-    scene->addItem(healthBar);
+    scene->addItem(health);
 
     QTimer* timer = new QTimer(scene);
-    QObject::connect(timer, &QTimer::timeout, [&player, &robot, &healthBar]() {
+
+    robot->setTarget(player);
+    QObject::connect(timer, &QTimer::timeout, [&player, &robot]() {
         if (player->collidesWithItem(robot)) {
-            healthBar->decreaseHP(10);
-            if (healthBar->getHP() == 0) exit(0);
+            robot->Attack();
+            if (player->isDead()) exit(0);
+        }
+        else {
+            robot->Chase();
         }
     });
 
     timer->start(50);
+
+
+
 
     QGraphicsView view(scene);
     view.show();
