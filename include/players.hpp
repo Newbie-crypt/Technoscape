@@ -7,6 +7,12 @@
 #include <QPainter>
 #include <QTimer>
 
+enum class AnimationState : int {
+    Idle,
+    Running,
+    Attacking
+};
+
 class Player : public QGraphicsRectItem {
     private:
         int health = 100;
@@ -43,27 +49,44 @@ class Enemy: public QGraphicsObject {
 class Robot: public Enemy {
     Q_OBJECT
     private:
-        std::vector<QPixmap> idle_frames;
-        QPixmap idle_spritesheet;
-        int idle_frame_count = 4;
-        int current_idle_frame = 0;
+        std::map<AnimationState, QPixmap> spritesheets;
+        std::map<AnimationState, std::vector<QPixmap>> animations;
+        std::map<AnimationState, int> frame_count;
+        int currentFrame = 0;
+        AnimationState currentAnimationState = AnimationState::Attacking;
+        int frame_width;
+        int frame_height;
+        const int number_of_states = 3; // Idle, attacking, running
     public:
         Robot() : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
-            idle_spritesheet.load(":assets/OrangeRobot_Idle.png");
+            // Loading all the spritesheets
+            spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png");
+            spritesheets[AnimationState::Attacking].load(":assets/OrangeRobot_Attack1.png");
+            spritesheets[AnimationState::Running].load(":assets/OrangeRobot_Run.png");
 
-            int idle_frame_width = idle_spritesheet.width() / 4;
-            int idle_frame_height = idle_spritesheet.height() / 2;
+            // Keeping track of the number of frames in each spritesheet
+            frame_count[AnimationState::Idle] = 4;
+            frame_count[AnimationState::Running] = 6;
+            frame_count[AnimationState::Attacking] = 4;
 
-            // Storing all the frames in one vector container
-            for (int i = 0; i < idle_frame_count; i++) {
-                idle_frames.push_back(idle_spritesheet.copy(i * idle_frame_height, 0, idle_frame_width, idle_frame_height));
+            // All frames in the spritesheets are of the same size, independent of the object's state.
+            frame_width = spritesheets[AnimationState::Idle].width() / 4;
+            frame_height = spritesheets[AnimationState::Idle].height() / 2;
+
+            // Storing all the frames in vector containers for each state
+            for (int i = 0; i < number_of_states; i++) {
+                for (int j = 0; j < frame_count[(AnimationState)i]; j++) {
+                    AnimationState state = (AnimationState)i;
+                    animations[state].push_back(spritesheets[state].copy(j * frame_height, 0, frame_width, frame_height));
+                }
             }
+
 
             QTimer* timer = new QTimer(this);
 
             connect(timer, &QTimer::timeout, [this]() {
-                current_idle_frame = (current_idle_frame + 1) % idle_frame_count;
+                currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
                 update(); // reconstruct the design.
             });
 
@@ -72,7 +95,7 @@ class Robot: public Enemy {
 
 
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override {
-            painter->drawPixmap(0, 0, idle_frames[current_idle_frame]);
+            painter->drawPixmap(0, 0, animations[currentAnimationState][currentFrame]);
         }
     public slots:
         void Move() override {moveBy(rand() % 20 - 10, rand() % 20 - 10);}

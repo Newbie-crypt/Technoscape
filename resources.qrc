@@ -4,5 +4,7 @@
         <file>assets/No_Health.png</file>
         <file>assets/Standing_Robot.png</file>
         <file>assets/OrangeRobot_Idle.png</file>
+        <file>assets/OrangeRobot_Run.png</file>
+        <file>assets/OrangeRobot_Attack1.png</file>
     </qresource>
 </RCC>
