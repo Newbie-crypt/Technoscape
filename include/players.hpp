@@ -10,13 +10,20 @@ class Player : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
     private:
         int health = 100;
-        QPixmap spriteSheet;
-        QPixmap currentFrame;
+        QPixmap walkSheet;
+        QPixmap idleSheet;
+        bool newMove = false;
+        int lastrow;
+        int currentFrame = 0;
+        int currentMove = 0;
+        int diagonalBuffer = 0;
         QTimer* movementTimer;
+
 
     public:
         Player(double x, double y);
         void decreaseHealth();
+        void decrementBuffer();
         int getHealth() {return health;}
         bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0;
         ~Player();
