@@ -59,8 +59,10 @@ class Robot: public Enemy {
     Q_OBJECT
     private:
         std::map<AnimationState, QPixmap> spritesheets;
-        std::map<AnimationState, std::vector<QPixmap>> animations;
+        std::map<AnimationState, int> spritesheet_rows;
+        std::map<AnimationState, int> spritesheet_columns;
         std::map<AnimationState, int> frame_count;
+        std::map<AnimationState, std::vector<QPixmap>> animations;
         int currentFrame = 0;
         AnimationState currentAnimationState = AnimationState::Idle;
         int frame_width;
@@ -75,7 +77,7 @@ class Robot: public Enemy {
             spritesheets[AnimationState::Running].load(":assets/OrangeRobot_Run.png");
 
             // Keeping track of the number of frames in each spritesheet
-            frame_count[AnimationState::Idle] = 4;
+            frame_count[AnimationState::Idle] = 5;
             frame_count[AnimationState::Running] = 6;
             frame_count[AnimationState::Attacking] = 4;
 
@@ -83,12 +85,27 @@ class Robot: public Enemy {
             frame_width = spritesheets[AnimationState::Idle].width() / 4;
             frame_height = spritesheets[AnimationState::Idle].height() / 2;
 
+            // Keeping track of the number of rows and columns for each spritesheet.
+            spritesheet_rows[AnimationState::Idle] = 2;
+            spritesheet_columns[AnimationState::Idle] = 4;
+            spritesheet_rows[AnimationState::Running] = 2;
+            spritesheet_columns[AnimationState::Running] = 4;
+            spritesheet_rows[AnimationState::Attacking] = 2;
+            spritesheet_columns[AnimationState::Attacking] = 2;
+
+
+            int r = 0;
+            int c = 0;
             // Storing all the frames in vector containers for each state
             for (int i = 0; i < number_of_states; i++) {
                 for (int j = 0; j < frame_count[(AnimationState)i]; j++) {
                     AnimationState state = (AnimationState)i;
-                    animations[state].push_back(spritesheets[state].copy(j * frame_height, 0, frame_width, frame_height));
+                    animations[state].push_back(spritesheets[state].copy(c * frame_width, r * frame_height, frame_width, frame_height));
+                    c = (c + 1) % spritesheet_columns[state];
+                    if (c == 0) r++;
                 }
+                r = 0;
+                c = 0;
             }
 
 
