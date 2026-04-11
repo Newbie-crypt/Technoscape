@@ -4,5 +4,6 @@
         <file>assets/No_Health.png</file>
         <file>assets/walk.png</file>
         <file>assets/idle.png</file>
+        <file>assets/bullet.png</file>
     </qresource>
 </RCC>

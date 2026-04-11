@@ -1,7 +1,9 @@
 #include "../include/players.hpp"
+#include "../include/classes.hpp"
 #include <QBrush>
 #include <QTimer>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsScene>
 #include <QPixmap>
 #include <QTransform>
 
@@ -27,8 +29,6 @@ Player::Player(double x, double y) {
 
 void Player::processMovement()
 {
-
-
     int dir = 0;    //for direction calculation, to be used in switch-case.
     int row = lastrow ;        //for sprite-map coordinate calculations
     int s = isSprinting ? 2 : 1;
@@ -42,6 +42,14 @@ void Player::processMovement()
     currentMove = currentFrame / 10;
     currentFrame = (currentFrame + s) % 80;
     QPixmap* activeSheet = &walkSheet;
+
+    // Saving direction for gun shot. Always trust diagonal, only trust non-diagonal if buffer is empty.
+    if (dir == 9 || dir == 10 || dir == 6 || dir == 5) {
+        lastDirection = dir;
+    }
+    else if (dir != 0 && diagonalBuffer == 0) {
+        lastDirection = dir;
+    }
 
     if(dir == 0) //handles Idling by switching to idle sheet and keeping row = last_row
     {
@@ -75,10 +83,12 @@ void Player::processMovement()
         case 10:    //sixth row of sprite sheet, moving down-right.
             row = 5;
             moveBy(s * 3.535, s * 3.535);
+            diagonalBuffer = 5;
             break;
         case 6:     //second row of sprite sheet, moving down-left.
             row = 1;
             moveBy(s * -3.535, s * 3.535);
+            diagonalBuffer = 5;
             break;
         case 5:     //third row of sprite sheet, moving top-left.
             row = 2;
@@ -88,12 +98,63 @@ void Player::processMovement()
 
         }
 
-        if (diagonalBuffer > 0 && dir !=9 && dir != 5) {diagonalBuffer--; row = lastrow;}
+        if (diagonalBuffer > 0 && dir !=5 && dir != 6 && dir != 9 && dir != 10) {diagonalBuffer--; row = lastrow;}
         if (diagonalBuffer == 0) {lastrow = row;}
         if (dir == 9 || dir == 5) {lastrow = row;}
     }
 
+
         setPixmap(activeSheet->copy(currentMove * 48, row * 64, 48, 64));
+}
+
+void Player::shoot() {
+
+    // if (!canShoot) return;
+
+    int oX = 96;    //offsets for x and y
+    int oY = 110;
+
+    switch(lastDirection) {
+    case 1:     // Up
+        oY -= 36;
+        break;
+    case 2:     // Down
+        oY += 4;
+        break;
+    case 4:     // Left
+        oX -= 30;
+        break;
+    case 8:     // Right
+        oX += 30;
+        break;
+    case 9:     // Up-Right
+        oX += 24;
+        oY -= 24;
+        break;
+    case 10:    // Down-Right
+        oX += 24;
+        oY += 24;
+        break;
+    case 6:     // Down-Left
+        oX -= 24;
+        oY += 24;
+        break;
+    case 5:     // Up-Left
+        oX -= 24;
+        oY -= 24;
+        break;
+    }
+
+    // Projectile* bullet = new Projectile(x() + offsetX, y() + offsetY, lastDirection);
+    // scene()->addItem(bullet);
+
+    // canShoot = false;
+    // QTimer::singleShot(300, this, [this]() { canShoot = true; });
+    QGraphicsRectItem* dot = new QGraphicsRectItem;
+    dot->setRect(0, 0, 5, 5);
+    dot->setBrush(Qt::red);
+    dot->setPos(x() + oX, y() + oY);
+    scene() -> addItem(dot);
 }
 
 void Player::decrementBuffer()
@@ -108,7 +169,7 @@ void Player::decreaseHealth() {
 
 void Player::keyPressEvent(QKeyEvent* event) {
     if(event->isAutoRepeat()) {return;}
-    if (event->modifiers() & Qt::ShiftModifier) {isSprinting = true;}
+    if (event->key() == Qt::Key_Shift) {isSprinting = true;}
     if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = true;}
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = true;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
@@ -117,11 +178,12 @@ void Player::keyPressEvent(QKeyEvent* event) {
 
 void Player::keyReleaseEvent(QKeyEvent* event) {
     if(event->isAutoRepeat()) {return;}
-    if (event->modifiers() & Qt::ShiftModifier) {isSprinting = false;}
+    if (event->key() == Qt::Key_Shift) {isSprinting = false;}
     if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = false;}
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = false;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = false;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = false;}
+    if (event->key() == Qt::Key_Space) {shoot();}
 }
 
 Player::~Player() {delete movementTimer;}

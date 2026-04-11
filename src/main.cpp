@@ -3,8 +3,8 @@
 #include <QGraphicsView>
 #include "../include/players.hpp"
 #include "../include/wall.hpp"
-#include <QTimer>
 #include "../include/classes.hpp"
+#include <QTimer>
 #include <QGraphicsPixmapItem>
 
 // Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
@@ -12,7 +12,7 @@
 // Classes to read about:
 // QGraphicsItem
 // QPainter
-// QPixMap
+// QPixmap
 // QRectF
 
 int main(int argc, char* argv[]) {

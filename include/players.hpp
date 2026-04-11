@@ -14,6 +14,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         QPixmap idleSheet;
         bool newMove = false;
         int lastrow;
+        int lastDirection = 2;
         int currentFrame = 0;
         int currentMove = 0;
         int diagonalBuffer = 0;
@@ -24,8 +25,10 @@ class Player : public QObject, public QGraphicsPixmapItem {
         Player(double x, double y);
         void decreaseHealth();
         void decrementBuffer();
+        void shoot();
         int getHealth() {return health;}
         bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0;
+        bool canShoot = true;
         ~Player();
     public slots:
         void processMovement();
