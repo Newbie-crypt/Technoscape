@@ -103,6 +103,9 @@ class Robot: public Enemy {
             });
 
             timer->start(100);
+            
+            // This is useful for when we flip the sprite horizontally in the Chase() function
+            setTransformOriginPoint(boundingRect().center());
         }
 
         void Attack() override {
@@ -149,7 +152,17 @@ class Robot: public Enemy {
             // Since in this case speed = magnitude of the velocity, then we can use the unit vector "direction" to find the velocity.
             velocity = speed * direction;
 
+            // If it's moving to the left, flip the sprite horizontally
+            // else, don't change it, but if the sprite was already flipped, flip it back to its original form.
+            if (direction.x() < 0) {
+                setTransform(QTransform().scale(-1, 1));
+            }
+            else {
+                setTransform(QTransform().scale(1, 1));
+            }
+
             moveBy(velocity.x(), velocity.y());
+            
         }
 };
 
