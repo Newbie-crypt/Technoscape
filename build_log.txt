@@ -1,0 +1,77 @@
+Change Dir: 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+
+Run Build Command(s): "C:/Program Files/CMake/bin/cmake.exe" -E env VERBOSE=1 C:/msys64/ucrt64/bin/mingw32-make.exe -f Makefile
+"C:\Program Files\CMake\bin\cmake.exe" -SC:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project -BC:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build --check-build-system CMakeFiles\Makefile.cmake 0
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_progress_start C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build\CMakeFiles C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build\\CMakeFiles\progress.marks
+C:/msys64/ucrt64/bin/mingw32-make.exe  -f CMakeFiles\Makefile2 all
+mingw32-make[1]: Entering directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+C:/msys64/ucrt64/bin/mingw32-make.exe  -f CMakeFiles\main_autogen_timestamp_deps.dir\build.make CMakeFiles/main_autogen_timestamp_deps.dir/depend
+mingw32-make[2]: Entering directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_depends "MinGW Makefiles" C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build\CMakeFiles\main_autogen_timestamp_deps.dir\DependInfo.cmake "--color=" main_autogen_timestamp_deps
+mingw32-make[2]: Leaving directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+C:/msys64/ucrt64/bin/mingw32-make.exe  -f CMakeFiles\main_autogen_timestamp_deps.dir\build.make CMakeFiles/main_autogen_timestamp_deps.dir/build
+mingw32-make[2]: Entering directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+mingw32-make[2]: Nothing to be done for 'CMakeFiles/main_autogen_timestamp_deps.dir/build'.
+mingw32-make[2]: Leaving directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+[  0%] Built target main_autogen_timestamp_deps
+C:/msys64/ucrt64/bin/mingw32-make.exe  -f CMakeFiles\main_autogen.dir\build.make CMakeFiles/main_autogen.dir/depend
+mingw32-make[2]: Entering directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_depends "MinGW Makefiles" C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build\CMakeFiles\main_autogen.dir\DependInfo.cmake "--color=" main_autogen
+mingw32-make[2]: Leaving directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+C:/msys64/ucrt64/bin/mingw32-make.exe  -f CMakeFiles\main_autogen.dir\build.make CMakeFiles/main_autogen.dir/build
+mingw32-make[2]: Entering directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+[  9%] Automatic MOC and UIC for target main
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build/CMakeFiles/main_autogen.dir/AutogenInfo.json ""
+AutoGen: Refreshing parse cache because it doesn't exist.
+AutoMoc: Generating "SRC:/build/main_autogen/moc_predefs.h", because it doesn't exist.
+C:/msys64/ucrt64/bin/c++.exe -std=gnu++17 -w -dM -E "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp" -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -IC:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/include -IC:/Qt/6.11.0/mingw_64/include/QtWidgets -IC:/Qt/6.11.0/mingw_64/include -IC:/Qt/6.11.0/mingw_64/include/QtCore -IC:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -IC:/Qt/6.11.0/mingw_64/include/QtGui -IC:/msys64/ucrt64/include/c++/15.2.0 -IC:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32 -IC:/msys64/ucrt64/include/c++/15.2.0/backward -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include -IC:/msys64/ucrt64/include -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include-fixed
+AutoGen: Parsing "SRC:/src/door.cpp"
+AutoGen: Parsing "SRC:/src/machine.cpp"
+AutoGen: Parsing "SRC:/src/furniture.cpp"
+AutoGen: Parsing "SRC:/src/main.cpp"
+AutoGen: Parsing "SRC:/src/players.cpp"
+AutoGen: Parsing "SRC:/src/trap.cpp"
+AutoGen: Parsing "SRC:/src/wall.cpp"
+AutoMoc: Generating MOC compilation "SRC:/build/main_autogen/mocs_compilation.cpp"
+AutoMoc: Merging MOC dependencies into "SRC:/build/main_autogen/deps"
+AutoGen: Writing the parse cache file "SRC:/build/CMakeFiles/main_autogen.dir/ParseCache.txt"
+AutoGen: Writing the settings file "SRC:/build/CMakeFiles/main_autogen.dir/AutogenUsed.txt"
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build/main_autogen/timestamp
+mingw32-make[2]: Leaving directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+[  9%] Built target main_autogen
+C:/msys64/ucrt64/bin/mingw32-make.exe  -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/depend
+mingw32-make[2]: Entering directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_depends "MinGW Makefiles" C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build\CMakeFiles\main.dir\DependInfo.cmake "--color=" main
+Dependencies file "main_autogen/deps" is newer than depends file "C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build/CMakeFiles/main.dir/compiler_depend.internal".
+Consolidate compiler generated dependencies of target main
+mingw32-make[2]: Leaving directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+C:/msys64/ucrt64/bin/mingw32-make.exe  -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/build
+mingw32-make[2]: Entering directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+[ 18%] Building CXX object CMakeFiles/main.dir/main_autogen/mocs_compilation.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/main_autogen/mocs_compilation.cpp.obj -MF CMakeFiles\main.dir\main_autogen\mocs_compilation.cpp.obj.d -o CMakeFiles\main.dir\main_autogen\mocs_compilation.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\build\main_autogen\mocs_compilation.cpp
+[ 27%] Building CXX object CMakeFiles/main.dir/src/main.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/src/main.cpp.obj -MF CMakeFiles\main.dir\src\main.cpp.obj.d -o CMakeFiles\main.dir\src\main.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\src\main.cpp
+[ 36%] Building CXX object CMakeFiles/main.dir/src/players.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/src/players.cpp.obj -MF CMakeFiles\main.dir\src\players.cpp.obj.d -o CMakeFiles\main.dir\src\players.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\src\players.cpp
+[ 45%] Building CXX object CMakeFiles/main.dir/src/wall.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/src/wall.cpp.obj -MF CMakeFiles\main.dir\src\wall.cpp.obj.d -o CMakeFiles\main.dir\src\wall.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\src\wall.cpp
+[ 54%] Building CXX object CMakeFiles/main.dir/src/furniture.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/src/furniture.cpp.obj -MF CMakeFiles\main.dir\src\furniture.cpp.obj.d -o CMakeFiles\main.dir\src\furniture.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\src\furniture.cpp
+[ 63%] Building CXX object CMakeFiles/main.dir/src/machine.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/src/machine.cpp.obj -MF CMakeFiles\main.dir\src\machine.cpp.obj.d -o CMakeFiles\main.dir\src\machine.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\src\machine.cpp
+[ 72%] Building CXX object CMakeFiles/main.dir/src/door.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/src/door.cpp.obj -MF CMakeFiles\main.dir\src\door.cpp.obj.d -o CMakeFiles\main.dir\src\door.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\src\door.cpp
+[ 81%] Building CXX object CMakeFiles/main.dir/src/trap.cpp.obj
+C:\msys64\ucrt64\bin\c++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 @CMakeFiles/main.dir/includes_CXX.rsp -std=gnu++17 -MD -MT CMakeFiles/main.dir/src/trap.cpp.obj -MF CMakeFiles\main.dir\src\trap.cpp.obj.d -o CMakeFiles\main.dir\src\trap.cpp.obj -c C:\Users\AdminOS\OneDrive\Desktop\CSII-Final-Project\src\trap.cpp
+[ 90%] Linking CXX executable main.exe
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\main.dir\link.txt --verbose=1
+collect2.exe: error: ld returned 1 exit status
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\main.dir/objects.a
+C:\msys64\ucrt64\bin\ar.exe qc CMakeFiles\main.dir/objects.a @CMakeFiles\main.dir\objects1.rsp
+C:\msys64\ucrt64\bin\c++.exe -Wl,--whole-archive CMakeFiles\main.dir/objects.a -Wl,--no-whole-archive -o main.exe -Wl,--out-implib,libmain.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\main.dir\linkLibs.rsp
+mingw32-make[2]: *** [CMakeFiles\main.dir\build.make:231: main.exe] Error 1
+mingw32-make[2]: Leaving directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+mingw32-make[1]: *** [CMakeFiles\Makefile2:89: CMakeFiles/main.dir/all] Error 2
+mingw32-make[1]: Leaving directory 'C:/Users/AdminOS/OneDrive/Desktop/CSII-Final-Project/build'
+mingw32-make: *** [Makefile:90: all] Error 2
+
