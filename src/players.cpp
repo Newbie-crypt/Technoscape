@@ -67,7 +67,9 @@ Player::Player(double x, double y, double width, double height) {
 
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFocus();
+
 }
+
 
 void Player::keyPressEvent(QKeyEvent* event) {
     if (paused) {
@@ -431,7 +433,7 @@ void Player::showToBeContinued() {
     hide();
 }
 
-Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) {
+Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) { //take other constructor from player.cpp and add here.
     setBrush(Qt::NoBrush);
     srand(time(0));
     QTimer* timer = new QTimer(this);
@@ -473,3 +475,6 @@ void Enemy::checkCollision(double dx, double dy) {
         }
     }
 }
+// void Enemy::Motion() {
+//     moveBy(rand() % 20 - 10, rand() % 20 - 10);
+// }

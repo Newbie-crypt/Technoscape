@@ -20,13 +20,25 @@
 #include <QCoreApplication>
 #include <QEnterEvent>
 #include <QUrl>
-
 #include "../include/players.hpp"
 #include "../include/wall.hpp"
 #include "../include/furniture.hpp"
 #include "../include/door.hpp"
 #include "../include/trap.hpp"
 #include "../include/machine.hpp"
+#include "../include/classes.hpp"
+
+
+// Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
+
+
+// Classes to read about:
+// QGraphicsItem
+// QPainter
+// QPixMap
+// QRectF
+// QBrush
+
 
 // GLOBAL MUSIC
 QMediaPlayer* music;
@@ -82,6 +94,10 @@ private:
 };
 
 QGraphicsView* createGameView() {
+
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+
     QGraphicsScene* scene = new QGraphicsScene;
 
     QPixmap levelBg("assets/level1_closed.png");
