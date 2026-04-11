@@ -11,10 +11,30 @@ using namespace std;
 Projectile::Projectile(double x, double y, int d)
 {
     dir = d;
-    bulletSheet = QPixmap(":/assets/bullet.png");
-    setPixmap(bulletSheet.copy(0, 0, 32, 32));
-    this->setScale(0.25);
 
+
+    QPixmap rawSheet(":/assets/bullet.png");
+    bulletSheet = rawSheet;
+
+    int angle = 0;
+
+    switch(dir) {
+    case 8:  angle = 0; break;    // Right
+    case 10: angle = 45; break;   // Down-Right
+    case 2:  angle = 90; break;   // Down
+    case 6:  angle = 135; break;  // Down-Left
+    case 4:  angle = 180; break;  // Left
+    case 5:  angle = 225; break;  // Top-Left
+    case 1:  angle = 270; break;  // Up
+    case 9:  angle = 315; break;  // Top-Right
+    }
+
+    QTransform t;
+    t.rotate(angle);
+    bulletSheet = bulletSheet.transformed(t);
+
+    setPixmap(bulletSheet);
+    this->setScale(0.25);
     setPos(x,y);
 
     movementTimer = new QTimer;

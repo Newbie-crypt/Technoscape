@@ -78,22 +78,22 @@ void Player::processMovement()
         case 9:     // fifth row of sprite sheet, moving top-right
             row = 4;
             moveBy(s * 3.535, s * -3.535);
-            diagonalBuffer = 5;
+            diagonalBuffer = 3;
             break;
         case 10:    //sixth row of sprite sheet, moving down-right.
             row = 5;
             moveBy(s * 3.535, s * 3.535);
-            diagonalBuffer = 5;
+            diagonalBuffer = 3;
             break;
         case 6:     //second row of sprite sheet, moving down-left.
             row = 1;
             moveBy(s * -3.535, s * 3.535);
-            diagonalBuffer = 5;
+            diagonalBuffer = 3;
             break;
         case 5:     //third row of sprite sheet, moving top-left.
             row = 2;
             moveBy(s * -3.535, s * -3.535);
-            diagonalBuffer = 5;
+            diagonalBuffer = 3;
             break;
 
         }
@@ -109,7 +109,7 @@ void Player::processMovement()
 
 void Player::shoot() {
 
-    // if (!canShoot) return;
+    if (!canShoot) return;
 
     int oX = 96;    //offsets for x and y
     int oY = 110;
@@ -122,10 +122,10 @@ void Player::shoot() {
         oY += 4;
         break;
     case 4:     // Left
-        oX -= 30;
+        oX -= 40;
         break;
     case 8:     // Right
-        oX += 30;
+        oX += 20;
         break;
     case 9:     // Up-Right
         oX += 24;
@@ -145,16 +145,16 @@ void Player::shoot() {
         break;
     }
 
-    // Projectile* bullet = new Projectile(x() + offsetX, y() + offsetY, lastDirection);
-    // scene()->addItem(bullet);
+    Projectile* bullet = new Projectile(x() + oX, y() + oY, lastDirection);
+    scene()->addItem(bullet);
 
-    // canShoot = false;
-    // QTimer::singleShot(300, this, [this]() { canShoot = true; });
-    QGraphicsRectItem* dot = new QGraphicsRectItem;
-    dot->setRect(0, 0, 5, 5);
-    dot->setBrush(Qt::red);
-    dot->setPos(x() + oX, y() + oY);
-    scene() -> addItem(dot);
+    canShoot = false;
+    QTimer::singleShot(300, this, [this]() { canShoot = true; });
+//     QGraphicsRectItem* dot = new QGraphicsRectItem;
+//     dot->setRect(0, 0, 5, 5);
+//     dot->setBrush(Qt::red);
+//     dot->setPos(x() + oX, y() + oY);
+//     scene() -> addItem(dot);
 }
 
 void Player::decrementBuffer()
@@ -201,43 +201,3 @@ void Enemy::Motion() {
 }
 
 
-
-// else{
-//     switch(dir) //for walking & animation
-//     {
-//     case 1:     //fourth row of sprite sheet, moving up.
-//         row = (diagonalBuffer == 0)? 3: lastrow;
-//         moveBy(0, s * -5);
-//         break;
-//     case 2:     //first row of sprite sheet, moving down.
-//         row = (diagonalBuffer == 0)? 0: lastrow;
-//         moveBy(0, s * 5);
-//         break;
-//     case 4:     //second row of sprite sheet, moving left.
-//         row = (diagonalBuffer == 0)? 1: lastrow;
-//         moveBy(s * -5, 0);
-//         break;
-//     case 8:     //sixth row of sprite sheet, moving right.
-//         row = (diagonalBuffer == 0)? 5: lastrow;
-//         moveBy(s * 5, 0);
-//         break;
-//     case 9:     // fifth row of sprite sheet, moving top-right
-//         row = 4;
-//         moveBy(s * 3.535, s * -3.535);
-//         diagonalBuffer = 5;
-//         break;
-//     case 10:    //sixth row of sprite sheet, moving down-right.
-//         row = (diagonalBuffer == 0)? 5: lastrow;
-//         moveBy(s * 3.535, s * 3.535);
-//         break;
-//     case 6:     //second row of sprite sheet, moving down-left.
-//         row = (diagonalBuffer == 0)? 1: lastrow;
-//         moveBy(s * -3.535, s * 3.535);
-//         break;
-//     case 5:     //third row of sprite sheet, moving top-left.
-//         row = 2;
-//         moveBy(s * -3.535, s * -3.535);
-//         diagonalBuffer = 5;
-//         break;
-
-//     }
