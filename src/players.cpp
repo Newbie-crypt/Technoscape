@@ -51,47 +51,46 @@ void Player::processMovement()
     else{
         switch(dir) //for walking & animation
         {
+        case 1:     //fourth row of sprite sheet, moving up.
+            row = 3;
+            moveBy(0, s * -5);
+            break;
         case 2:     //first row of sprite sheet, moving down.
             row = 0;
             moveBy(0, s * 5);
-            decrementBuffer();
             break;
         case 4:     //second row of sprite sheet, moving left.
             row = 1;
             moveBy(s * -5, 0);
-            decrementBuffer();
-            break;
-        case 6:     //second row of sprite sheet, moving down-left.
-            row = 1;
-            moveBy(s * -3.535, s * 3.535);
-            decrementBuffer();
-            break;
-        case 5:     //third row of sprite sheet, moving top-left.
-            row = 2;
-            moveBy(-s * 3.535, s * -3.535);
-            diagonalBuffer = 5;
-            break;
-        case 1:     //fourth row of sprite sheet, moving up.
-            row = 3;
-            moveBy(0, s * -5);
-            decrementBuffer();
-            break;
-        case 9:     // fifth row of sprite sheet, moving top-right
-            row = 4;
-            moveBy(s * 3.535, s * -3.535);
-            decrementBuffer();
             break;
         case 8:     //sixth row of sprite sheet, moving right.
             row = 5;
             moveBy(s * 5, 0);
-            decrementBuffer();
             break;
-        case 10:
+        case 9:     // fifth row of sprite sheet, moving top-right
+            row = 4;
+            moveBy(s * 3.535, s * -3.535);
+            diagonalBuffer = 5;
+            break;
+        case 10:    //sixth row of sprite sheet, moving down-right.
             row = 5;
             moveBy(s * 3.535, s * 3.535);
-            decrementBuffer(); break; //sixth row of sprite sheet, moving down-right.
+            break;
+        case 6:     //second row of sprite sheet, moving down-left.
+            row = 1;
+            moveBy(s * -3.535, s * 3.535);
+            break;
+        case 5:     //third row of sprite sheet, moving top-left.
+            row = 2;
+            moveBy(s * -3.535, s * -3.535);
+            diagonalBuffer = 5;
+            break;
+
         }
-        lastrow = row;
+
+        if (diagonalBuffer > 0 && dir !=9 && dir != 5) {diagonalBuffer--; row = lastrow;}
+        if (diagonalBuffer == 0) {lastrow = row;}
+        if (dir == 9 || dir == 5) {lastrow = row;}
     }
 
         setPixmap(activeSheet->copy(currentMove * 48, row * 64, 48, 64));
@@ -138,3 +137,45 @@ Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) {
 void Enemy::Motion() {
     moveBy(rand() % 20 - 10, rand() % 20 - 10);
 }
+
+
+
+// else{
+//     switch(dir) //for walking & animation
+//     {
+//     case 1:     //fourth row of sprite sheet, moving up.
+//         row = (diagonalBuffer == 0)? 3: lastrow;
+//         moveBy(0, s * -5);
+//         break;
+//     case 2:     //first row of sprite sheet, moving down.
+//         row = (diagonalBuffer == 0)? 0: lastrow;
+//         moveBy(0, s * 5);
+//         break;
+//     case 4:     //second row of sprite sheet, moving left.
+//         row = (diagonalBuffer == 0)? 1: lastrow;
+//         moveBy(s * -5, 0);
+//         break;
+//     case 8:     //sixth row of sprite sheet, moving right.
+//         row = (diagonalBuffer == 0)? 5: lastrow;
+//         moveBy(s * 5, 0);
+//         break;
+//     case 9:     // fifth row of sprite sheet, moving top-right
+//         row = 4;
+//         moveBy(s * 3.535, s * -3.535);
+//         diagonalBuffer = 5;
+//         break;
+//     case 10:    //sixth row of sprite sheet, moving down-right.
+//         row = (diagonalBuffer == 0)? 5: lastrow;
+//         moveBy(s * 3.535, s * 3.535);
+//         break;
+//     case 6:     //second row of sprite sheet, moving down-left.
+//         row = (diagonalBuffer == 0)? 1: lastrow;
+//         moveBy(s * -3.535, s * 3.535);
+//         break;
+//     case 5:     //third row of sprite sheet, moving top-left.
+//         row = 2;
+//         moveBy(s * -3.535, s * -3.535);
+//         diagonalBuffer = 5;
+//         break;
+
+//     }
