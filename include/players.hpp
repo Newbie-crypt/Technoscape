@@ -50,12 +50,6 @@ class Player : public QGraphicsRectItem {
         }
     protected:
         void keyPressEvent(QKeyEvent* event) override;
-
-
-protected:
-    void keyPressEvent(QKeyEvent* event) override;
-
-
 };
 
 class Enemy: public QGraphicsObject {
@@ -69,16 +63,13 @@ class Enemy: public QGraphicsObject {
         QPointF velocity;
         Player* target;
     public:
-        Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
-            sprite.load(asset);
-        }
-
         QRectF boundingRect() const override {
             return QRectF(0, 0, sprite.width(), sprite.height());
         }
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) = 0;
         void setTarget(Player* t) {target = t;}
         virtual void Attack() = 0;
+        void Motion();
     public slots:
         virtual void Move() = 0;
         virtual void Chase() = 0;

@@ -77,7 +77,6 @@ public:
             clickPlayer->play();
         });
     }
-
 protected:
     void enterEvent(QEnterEvent* event) override {
         hoverPlayer->stop();
@@ -94,9 +93,6 @@ private:
 };
 
 QGraphicsView* createGameView() {
-
-int main(int argc, char* argv[]) {
-    QApplication app(argc, argv);
 
     QGraphicsScene* scene = new QGraphicsScene;
 
