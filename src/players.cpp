@@ -5,20 +5,36 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QPixmap>
+#include <QUrl>
 #include <QTransform>
 
 Player::Player(double x, double y) {
 
-    walkSheet = QPixmap(":/assets/walk.png");
+    shotPool = new QSoundEffect*[5];
+    footstepPool = new QSoundEffect*[8];
+    for(int i = 0; i < 5; i++)
+    {
+        shotPool[i] = new QSoundEffect(this); //passes this class as parent to prevent memory leak. QT handles memory clean-up for individual pointers :)
+        shotPool[i] -> setSource(QUrl("qrc:/assets/fire.wav")); // Preload fire sound for whole pool.
+        shotPool[i] -> setVolume(1);
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        footstepPool[i] = new QSoundEffect(this);
+        footstepPool[i] -> setSource(QUrl("qrc:/assets/footstep.wav")); // Preload footstep sound for whole pool.
+        footstepPool[i] -> setVolume(1);
+    }
+
+    walkSheet = QPixmap(":/assets/walk.png");   // Preload walk and idle sprite sheets
     idleSheet = QPixmap (":/assets/idle.png");
     setPixmap(walkSheet.copy(0, 0, 48, 64));
     this->setScale(4.0);
 
-    setPos(x,y);
+    setPos(x,y);    // Move player to provided (x, y) coordinates
 
     movementTimer = new QTimer;
     QObject::connect(movementTimer, &QTimer::timeout, this, &Player::processMovement);
-    movementTimer->start(16);
+    movementTimer->start(16);   //start processing player actions.
 
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFocus();
@@ -29,82 +45,79 @@ Player::Player(double x, double y) {
 
 void Player::processMovement()
 {
-    int dir = 0;    //for direction calculation, to be used in switch-case.
-    int row = lastrow ;        //for sprite-map coordinate calculations
-    int s = isSprinting ? 2 : 1;
+    int moveDirection = getInputMask();    //for direction calculation, to be used in switch-case.
+    int speedMultiplier = isSprinting ? 1.5 : 1;
 
+    applyPhysics(moveDirection, speedMultiplier); // Move character
+    updateSprite(moveDirection, speedMultiplier);    // Animate character
+    handleFootsteps(moveDirection);
+}
 
-    if(isMovingUp) {dir += 1 ;}
-    if(isMovingDown) {dir += 2;}
-    if(isMovingLeft) {dir += 4;}
-    if(isMovingRight) {dir += 8;}
+int Player::getInputMask() // Get the direction in which the player is moving.
+{
+    int inputSum = 0;
+    if(isMovingUp)    {inputSum += 1;}
+    if(isMovingDown)  {inputSum += 2;}
+    if(isMovingLeft)  {inputSum += 4;}
+    if(isMovingRight) {inputSum += 8;}
+    return inputSum;
+}
 
-    currentMove = currentFrame / 10;
-    currentFrame = (currentFrame + s) % 80;
-    QPixmap* activeSheet = &walkSheet;
-
-    // Saving direction for gun shot. Always trust diagonal, only trust non-diagonal if buffer is empty.
-    if (dir == 9 || dir == 10 || dir == 6 || dir == 5) {
-        lastDirection = dir;
+void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the player.
+{
+    switch(moveDirection)
+    {
+        case 1: moveBy(0, speedMultiplier * -5); targetRow = 3; break; // Up
+        case 2: moveBy(0, speedMultiplier * 5);  targetRow = 0; break;  // Down
+        case 4: moveBy(speedMultiplier * -5, 0); targetRow = 1; break; // Left
+        case 8: moveBy(speedMultiplier * 5, 0);  targetRow = 5; break;  //Right
+        case 9: moveBy(speedMultiplier * 3.535, speedMultiplier * -3.535);  diagonalBuffer = 3; targetRow = 4;  break;  // Top-Right
+        case 10: moveBy(speedMultiplier * 3.535, speedMultiplier * 3.535);  diagonalBuffer = 3; targetRow = 5;  break;  // Bottom-Left
+        case 6: moveBy(speedMultiplier * -3.535, speedMultiplier * 3.535);  diagonalBuffer = 3; targetRow = 1;  break;  // Bottom-Left
+        case 5: moveBy(speedMultiplier * -3.535, speedMultiplier * -3.535); diagonalBuffer = 3; targetRow = 2;  break;  // Top-Left
     }
-    else if (dir != 0 && diagonalBuffer == 0) {
-        lastDirection = dir;
-    }
 
-    if(dir == 0) //handles Idling by switching to idle sheet and keeping row = last_row
+    // Saving direction for gun shot. Always trust diagonal.
+    if (moveDirection == 9 || moveDirection == 10 || moveDirection == 6 || moveDirection == 5) {
+        lastAimDirection = moveDirection;
+    }
+    else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
+
+}
+
+void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet checker and animator.
+{
+    QPixmap* activeSheet = &walkSheet; // Assume walking.
+
+    if(moveDirection == 0) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow
     {
         activeSheet = &idleSheet;
-        row = lastrow;
+        targetRow = lastSpriteRow;
+        if (diagonalBuffer > 0) {diagonalBuffer--;}
     }
-    else{
-        switch(dir) //for walking & animation
-        {
-        case 1:     //fourth row of sprite sheet, moving up.
-            row = 3;
-            moveBy(0, s * -5);
-            break;
-        case 2:     //first row of sprite sheet, moving down.
-            row = 0;
-            moveBy(0, s * 5);
-            break;
-        case 4:     //second row of sprite sheet, moving left.
-            row = 1;
-            moveBy(s * -5, 0);
-            break;
-        case 8:     //sixth row of sprite sheet, moving right.
-            row = 5;
-            moveBy(s * 5, 0);
-            break;
-        case 9:     // fifth row of sprite sheet, moving top-right
-            row = 4;
-            moveBy(s * 3.535, s * -3.535);
-            diagonalBuffer = 3;
-            break;
-        case 10:    //sixth row of sprite sheet, moving down-right.
-            row = 5;
-            moveBy(s * 3.535, s * 3.535);
-            diagonalBuffer = 3;
-            break;
-        case 6:     //second row of sprite sheet, moving down-left.
-            row = 1;
-            moveBy(s * -3.535, s * 3.535);
-            diagonalBuffer = 3;
-            break;
-        case 5:     //third row of sprite sheet, moving top-left.
-            row = 2;
-            moveBy(s * -3.535, s * -3.535);
-            diagonalBuffer = 3;
-            break;
 
+    else // Walking animation, bunch of checks to fix bug where letting go of W a second before A leads to left animation.
+    {
+        currentFrameIndex = animationTicker / 10; // Variable used to switch between the 8 available images
+        animationTicker = (animationTicker + speedMultiplier) % 80; // Ticker.
+        if (diagonalBuffer > 0 && moveDirection !=5 && moveDirection != 6 && moveDirection != 9 && moveDirection != 10) {diagonalBuffer--; targetRow = lastSpriteRow;} // If buffer isn't empty, and we aren't moving diagonally, decrement buffer and keep the target row the same as last run (to stop flickering to side/up animation before diagonal).
+        if (diagonalBuffer == 0 || moveDirection == 5 || moveDirection == 6 || moveDirection == 9 || moveDirection == 10) {lastSpriteRow = targetRow;} // If the buffer is empty (no recent diagonal movement) OR we're moving diagonally, update lastSpriteRow normally
+    }
+
+    setPixmap(activeSheet->copy(currentFrameIndex * 48, targetRow * 64, 48, 64)); // Updating Pixmap to current animation
+}
+
+void Player::handleFootsteps(int moveDirection) // Footsteps sound
+{
+    if (moveDirection != 0) {
+        if ((currentFrameIndex == 1 || currentFrameIndex == 5) && currentFrameIndex != previousFrameIndex) {    //Footstep sound, 2 per second.
+            footstepPool[currentFootSound] -> play();
+            currentFootSound++;
+            if(currentFootSound >= 8) {currentFootSound = 0;}
         }
-
-        if (diagonalBuffer > 0 && dir !=5 && dir != 6 && dir != 9 && dir != 10) {diagonalBuffer--; row = lastrow;}
-        if (diagonalBuffer == 0) {lastrow = row;}
-        if (dir == 9 || dir == 5) {lastrow = row;}
     }
 
-
-        setPixmap(activeSheet->copy(currentMove * 48, row * 64, 48, 64));
+    previousFrameIndex = currentFrameIndex;
 }
 
 void Player::shoot() {
@@ -114,9 +127,10 @@ void Player::shoot() {
     int oX = 96;    //offsets for x and y
     int oY = 110;
 
-    switch(lastDirection) {
+    switch(lastAimDirection) { // TODO: fix rotation pivot math later
     case 1:     // Up
-        oY -= 36;
+        oY -= 64;
+        oX -= 18;
         break;
     case 2:     // Down
         oY += 4;
@@ -128,39 +142,37 @@ void Player::shoot() {
         oX += 20;
         break;
     case 9:     // Up-Right
-        oX += 24;
-        oY -= 24;
+        oX += 12;
+        oY -= 48;
         break;
     case 10:    // Down-Right
         oX += 24;
         oY += 24;
         break;
     case 6:     // Down-Left
-        oX -= 24;
+        oX -= 80;
         oY += 24;
         break;
     case 5:     // Up-Left
-        oX -= 24;
-        oY -= 24;
+        oX -= 80;
+        oY -= 64;
         break;
     }
 
-    Projectile* bullet = new Projectile(x() + oX, y() + oY, lastDirection);
+    Projectile* bullet = new Projectile(x() + oX, y() + oY, lastAimDirection);
     scene()->addItem(bullet);
+    shotPool[currentShotSound] -> play();
+    currentShotSound++;
+    if(currentShotSound >= 5) {currentShotSound = 0;}
 
     canShoot = false;
     QTimer::singleShot(300, this, [this]() { canShoot = true; });
-//     QGraphicsRectItem* dot = new QGraphicsRectItem;
-//     dot->setRect(0, 0, 5, 5);
-//     dot->setBrush(Qt::red);
-//     dot->setPos(x() + oX, y() + oY);
-//     scene() -> addItem(dot);
-}
 
-void Player::decrementBuffer()
-{
-    if(diagonalBuffer > 0) {diagonalBuffer--;}
-    else return;
+    // QGraphicsRectItem* dot = new QGraphicsRectItem; // for debugging fire directions
+    // dot->setRect(0, 0, 5, 5);
+    // dot->setBrush(Qt::red);
+    // dot->setPos(x() + oX, y() + oY);
+    // scene() -> addItem(dot);
 }
 
 void Player::decreaseHealth() {
@@ -186,7 +198,11 @@ void Player::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Space) {shoot();}
 }
 
-Player::~Player() {delete movementTimer;}
+Player::~Player() {
+    delete[] shotPool;
+    delete[] footstepPool;
+    delete movementTimer;
+}
 
 Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) {
     setBrush(Qt::yellow);

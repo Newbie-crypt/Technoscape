@@ -4,11 +4,11 @@ set(CMAKE_AUTORCC ON)
 
 set(SOURCE_FILES ./src/main.cpp ./src/players.cpp ./src/wall.cpp ./include/players.hpp ./src/classes.cpp ./include/classes.hpp)
 project(app)
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia)
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)
 
-target_link_libraries(main PRIVATE Qt6::Widgets)
+target_link_libraries(main PRIVATE Qt6::Widgets Qt6::Multimedia)
 target_include_directories(main PRIVATE include)
 
 qt_finalize_executable(main)

@@ -5,5 +5,7 @@
         <file>assets/walk.png</file>
         <file>assets/idle.png</file>
         <file>assets/bullet.png</file>
+        <file>assets/fire.wav</file>
+        <file>assets/footstep.wav</file>
     </qresource>
 </RCC>
