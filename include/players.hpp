@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QSoundEffect>
+#include "../include/weapon.hpp"
 
 class Player : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
@@ -15,9 +16,10 @@ class Player : public QObject, public QGraphicsPixmapItem {
         // Images
         QPixmap walkSheet;
         QPixmap idleSheet;
-        // Variables
+        // Code Variables
         bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0, canShoot = 1; // Bools
         int targetRow = 0;
+        int walkAngle = 2;
         int lastSpriteRow;
         int currentShotSound = 0, currentFootSound = 0; // For the pool of sounds to cycle.
         int lastAimDirection = 2;       // Defaults to 2 (down)
@@ -27,6 +29,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         int diagonalBuffer = 0;
         QSoundEffect** shotPool;        // Sound and footstep pools, for audio to run smoothly without crashes.
         QSoundEffect** footstepPool;
+        // Related Objects
         QTimer* movementTimer;          // Timer for everything.
 
 
@@ -36,11 +39,14 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void applyPhysics(int moveDirection, int speedMultiplier); // Moves the player.
         void updateSprite(int moveDirection, int speedMultiplier); // Sheet checker and animator.
         void handleFootsteps(int moveDirection); // Footsteps sound
+        void passMousePosition(QPointF mousePosition);
         Player(double x, double y);
         void decreaseHealth();
         int getHealth() {return health;}
         void shoot();   // For firing the gun
         ~Player();  // Destructor.
+        //Pointers;
+        Weapon* gun; // Should change later, shouldn't be public, but just to make main work for now.
     public slots:
         void processMovement();
 

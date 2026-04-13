@@ -1,11 +1,13 @@
 #include <QApplication>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <cassert>
 #include "../include/players.hpp"
 #include "../include/wall.hpp"
 #include "../include/classes.hpp"
 #include <QTimer>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsSceneMouseEvent>
 
 // Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
 
@@ -15,10 +17,20 @@
 // QPixmap
 // QRectF
 
+class GameScene : public QGraphicsScene{
+    private:
+    Player* targetPlayer;
+    public:
+    GameScene(QObject* parent = nullptr) : QGraphicsScene(parent) { }
+    void setTargetPlayer(Player* p) {targetPlayer = p;}
+    protected:
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+};
+
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-
-    QGraphicsScene* scene = new QGraphicsScene;
+    GameScene* scene = new GameScene();
     scene->setSceneRect(0, 0, 800, 600);
 
     // Declaration of objects
@@ -41,6 +53,8 @@ int main(int argc, char* argv[]) {
     scene->addItem(enemy);
     scene->addItem(healthBar);
 
+    scene->setTargetPlayer(player);
+
     QTimer* timer = new QTimer(scene);
     QObject::connect(timer, &QTimer::timeout, [&player, &enemy, &healthBar]() {
         if (player->collidesWithItem(enemy)) {
@@ -52,7 +66,27 @@ int main(int argc, char* argv[]) {
     timer->start(50);
 
     QGraphicsView view(scene);
+    view.setMouseTracking(true);
     view.show();
 
     return app.exec();
+}
+
+void GameScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    if(targetPlayer)
+    {
+        targetPlayer -> passMousePosition(event->scenePos());
+        QGraphicsScene::mouseMoveEvent(event);
+    }
+}
+
+void GameScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    if(targetPlayer)
+    {
+        targetPlayer -> gun -> shoot();
+        QGraphicsScene::mousePressEvent(event);
+        targetPlayer->setFocus();
+    }
 }

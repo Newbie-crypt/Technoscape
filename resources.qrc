@@ -7,5 +7,6 @@
         <file>assets/bullet.png</file>
         <file>assets/fire.wav</file>
         <file>assets/footstep.wav</file>
+        <file>assets/33.png</file>
     </qresource>
 </RCC>

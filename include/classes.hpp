@@ -57,17 +57,28 @@ class Projectile : public QObject, public QGraphicsPixmapItem{
     private:
         QTimer* movementTimer;
         int damage;
-        int dir;
-        int s = 10;
+        double xMove, yMove;
+        double angle;
+        int speed;
         QPixmap bulletSheet;
     public:
-        Projectile(double x, double y, int d);
+        Projectile(double x, double y, double ang, int sp);
         virtual ~Projectile();
 
     public slots:
         void processMovement();
-
 };
+
+// class Weapon : public QObject, public QGraphicsPixmapItem{
+//     Q_OBJECT
+//     private:
+//     QTimer* movementTimer;
+//     int damage;
+//     int dir;
+//     int s = 10;
+//     QPixmap bulletSheet;
+
+// };
 
 //for variable names, in the class I used whatever was logical, and for constructors I either took the first letter of the variable name, or the capital version
 //if it was already used.
