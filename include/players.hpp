@@ -10,8 +10,9 @@
 #include <QSoundEffect>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <map>
 #include "../include/weapon.hpp"
-#include "classes.hpp"
+#include "../include/classes.hpp"
 
 
 enum class AnimationState : int {
@@ -41,8 +42,6 @@ class Player : public QObject, public QGraphicsPixmapItem {
         QAudioOutput* trapAudio;
         QMediaPlayer* doorPlayer;
         QAudioOutput* doorAudio;
-        // Hamar's
-        int health = 100;
         // Images
         QPixmap walkSheet;
         QPixmap idleSheet;
@@ -79,7 +78,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void handleFootsteps(int moveDirection); // Footsteps sound
         Player(double x, double y);
         void decreaseHealth();
-        int getHealth() {return health;}
+        int getHealth() {return health->getHP();}
         ~Player();  // Destructor.
     public slots:
         void processMovement();
