@@ -12,9 +12,11 @@ Projectile::Projectile(double x, double y, int d)
 {
     dir = d;
 
-
     QPixmap rawSheet(":/assets/bullet.png");
     bulletSheet = rawSheet;
+    setPixmap(bulletSheet);
+    this->setScale(0.25);
+    setPos(x - (bulletSheet.width() / 2), y - (bulletSheet.height() / 2)); //Offset
 
     int angle = 0;
 
@@ -29,15 +31,10 @@ Projectile::Projectile(double x, double y, int d)
     case 9:  angle = 315; break;  // Top-Right
     }
 
-    QTransform t;
-    t.rotate(angle);
-    bulletSheet = bulletSheet.transformed(t);
+    setTransformOriginPoint(boundingRect().center());
+    setRotation(angle);
 
-    setPixmap(bulletSheet);
-    this->setScale(0.25);
-    setPos(x,y);
-
-    movementTimer = new QTimer;
+    movementTimer = new QTimer(this);
     QObject::connect(movementTimer, &QTimer::timeout, this, &Projectile::processMovement);
     movementTimer->start(16);
 }
@@ -45,8 +42,6 @@ Projectile::Projectile(double x, double y, int d)
 
 void Projectile::processMovement()
 {
-    QPixmap* activeSheet = &bulletSheet;
-
         switch(dir) //for walking & animation
         {
         case 1:  moveBy(0, -s); break;
@@ -59,11 +54,10 @@ void Projectile::processMovement()
         case 5:  moveBy(-7.071, -7.071); break;
     }
 
-    setPixmap(*activeSheet);
     if (pos().y() < -100 || pos().y() > 700 || pos().x() < -100 || pos().x() > 900) { //boundary checking so that projectiles are deleted once they're off screen. We should add collisions with walls later.
         scene()->removeItem(this);
         delete this;
     }
 }
 
-Projectile::~Projectile() {}
+Projectile::~Projectile() {delete movementTimer;}

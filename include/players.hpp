@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QSoundEffect>
+#include "../include/weapon.hpp"
 
 class Player : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
@@ -28,6 +29,8 @@ class Player : public QObject, public QGraphicsPixmapItem {
         QSoundEffect** shotPool;        // Sound and footstep pools, for audio to run smoothly without crashes.
         QSoundEffect** footstepPool;
         QTimer* movementTimer;          // Timer for everything.
+        // Related Objects
+        Weapon* gun;
 
 
     public:

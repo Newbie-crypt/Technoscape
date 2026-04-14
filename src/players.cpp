@@ -7,23 +7,26 @@
 #include <QPixmap>
 #include <QUrl>
 #include <QTransform>
+#include "../include/weapon.hpp"
 
 Player::Player(double x, double y) {
 
-    shotPool = new QSoundEffect*[5];
     footstepPool = new QSoundEffect*[8];
-    for(int i = 0; i < 5; i++)
-    {
-        shotPool[i] = new QSoundEffect(this); //passes this class as parent to prevent memory leak. QT handles memory clean-up for individual pointers :)
-        shotPool[i] -> setSource(QUrl("qrc:/assets/fire.wav")); // Preload fire sound for whole pool.
-        shotPool[i] -> setVolume(1);
-    }
-    for (int i = 0; i < 8; i++)
-    {
+
+    for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
-        footstepPool[i] -> setSource(QUrl("qrc:/assets/footstep.wav")); // Preload footstep sound for whole pool.
-        footstepPool[i] -> setVolume(1);
+        footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
+        footstepPool[i]->setVolume(0);
+        footstepPool[i]->play(); // Forces the audio system to load the file now
     }
+
+    // After the loop, restore volumes
+    for (int i = 0; i < 8; i++) {
+        footstepPool[i]->setVolume(1);
+    }
+
+    gun = new Weapon(this);
+
 
     walkSheet = QPixmap(":/assets/walk.png");   // Preload walk and idle sprite sheets
     idleSheet = QPixmap (":/assets/idle.png");
@@ -32,7 +35,7 @@ Player::Player(double x, double y) {
 
     setPos(x,y);    // Move player to provided (x, y) coordinates
 
-    movementTimer = new QTimer;
+    movementTimer = new QTimer(this);
     QObject::connect(movementTimer, &QTimer::timeout, this, &Player::processMovement);
     movementTimer->start(16);   //start processing player actions.
 
@@ -83,6 +86,7 @@ void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the p
     }
     else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
 
+    gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
 }
 
 void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet checker and animator.
@@ -124,54 +128,12 @@ void Player::shoot() {
 
     if (!canShoot) return;
 
-    int oX = 96;    //offsets for x and y
-    int oY = 110;
-
-    switch(lastAimDirection) { // TODO: fix rotation pivot math later
-    case 1:     // Up
-        oY -= 64;
-        oX -= 18;
-        break;
-    case 2:     // Down
-        oY += 4;
-        break;
-    case 4:     // Left
-        oX -= 40;
-        break;
-    case 8:     // Right
-        oX += 20;
-        break;
-    case 9:     // Up-Right
-        oX += 12;
-        oY -= 48;
-        break;
-    case 10:    // Down-Right
-        oX += 24;
-        oY += 24;
-        break;
-    case 6:     // Down-Left
-        oX -= 80;
-        oY += 24;
-        break;
-    case 5:     // Up-Left
-        oX -= 80;
-        oY -= 64;
-        break;
-    }
-
-    Projectile* bullet = new Projectile(x() + oX, y() + oY, lastAimDirection);
-    scene()->addItem(bullet);
-    shotPool[currentShotSound] -> play();
-    currentShotSound++;
-    if(currentShotSound >= 5) {currentShotSound = 0;}
-
-    canShoot = false;
-    QTimer::singleShot(300, this, [this]() { canShoot = true; });
+    gun->shoot();
 
     // QGraphicsRectItem* dot = new QGraphicsRectItem; // for debugging fire directions
     // dot->setRect(0, 0, 5, 5);
     // dot->setBrush(Qt::red);
-    // dot->setPos(x() + oX, y() + oY);
+    // dot->setPos(x() + oX, y() +oY);
     // scene() -> addItem(dot);
 }
 
@@ -195,13 +157,11 @@ void Player::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = false;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = false;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = false;}
-    if (event->key() == Qt::Key_Space) {shoot();}
+    if (event->key() == Qt::Key_Space) {gun->shoot();}
 }
 
 Player::~Player() {
-    delete[] shotPool;
     delete[] footstepPool;
-    delete movementTimer;
 }
 
 Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) {

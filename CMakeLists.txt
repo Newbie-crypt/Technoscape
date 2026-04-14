@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(SOURCE_FILES ./src/main.cpp ./src/players.cpp ./src/wall.cpp ./include/players.hpp ./src/classes.cpp ./include/classes.hpp)
+set(SOURCE_FILES ./src/main.cpp ./src/players.cpp ./src/wall.cpp ./src/weapon.cpp ./include/players.hpp ./src/classes.cpp ./include/classes.hpp ./include/weapon.hpp)
 project(app)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia)
 

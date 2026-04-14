@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
     // Declaration of objects
     Player* player = new Player(0,0);
-    Enemy* enemy = new Enemy;
+    // Enemy* enemy = new Enemy;
     player->setPos(400, 300);
     Wall* top = new Wall(0, 0, 800, 20);
     Wall* bottom = new Wall(0, 580, 800, 20);
@@ -38,18 +38,18 @@ int main(int argc, char* argv[]) {
     scene->addItem(left);
     scene->addItem(right);
     scene->addItem(player);
-    scene->addItem(enemy);
+    // scene->addItem(enemy);
     scene->addItem(healthBar);
 
-    QTimer* timer = new QTimer(scene);
-    QObject::connect(timer, &QTimer::timeout, [&player, &enemy, &healthBar]() {
-        if (player->collidesWithItem(enemy)) {
-            healthBar->decreaseHP(10);
-            if (healthBar->getHP() == 0) exit(0);
-        }
-    });
+    // QTimer* timer = new QTimer(scene);
+    // QObject::connect(timer, &QTimer::timeout, [&player, &enemy, &healthBar]() {
+    //     if (player->collidesWithItem(enemy)) {
+    //         healthBar->decreaseHP(10);
+    //         if (healthBar->getHP() == 0) exit(0);
+    //     }
+    // });
 
-    timer->start(50);
+    // timer->start(50);
 
     QGraphicsView view(scene);
     view.show();
