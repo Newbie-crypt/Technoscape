@@ -20,6 +20,7 @@ set(SOURCE_FILES
     src/door.cpp
     src/trap.cpp
     src/weapon.cpp
+    src/classes.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -27,6 +28,7 @@ set(SOURCE_FILES
     include/door.hpp
     include/trap.hpp
     include/weapon.hpp
+    include/classes.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

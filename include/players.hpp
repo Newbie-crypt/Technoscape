@@ -99,6 +99,9 @@ class Enemy: public QGraphicsObject {
         QPointF velocity;
         Player* target;
     public:
+        Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
+            sprite.load(asset);
+        }
         QRectF boundingRect() const override {
             return QRectF(0, 0, sprite.width(), sprite.height());
         }

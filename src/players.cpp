@@ -449,21 +449,21 @@ void Player::showToBeContinued() {
     }
 }
 
-void keyPressEvent(QKeyEvent* event){
+void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_U) {
         unlockDoor();
         return;
     }
-    else {
-        QGraphicsRectItem::keyPressEvent(event);
-        return;
-    }
+
     if(event->isAutoRepeat()) {return;}
     if (event->key() == Qt::Key_Shift) {isSprinting = true;}
     if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = true;}
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = true;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
+
+    // Passing the control to Qt for it to do its necessary magic.
+    QGraphicsPixmapItem::keyPressEvent(event);
 }
 
 void Player::keyReleaseEvent(QKeyEvent* event) {
