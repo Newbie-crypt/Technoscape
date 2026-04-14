@@ -93,7 +93,7 @@ void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet check
 {
     QPixmap* activeSheet = &walkSheet; // Assume walking.
 
-    if(moveDirection == 0) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow
+    if(moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow
     {
         activeSheet = &idleSheet;
         targetRow = lastSpriteRow;
@@ -124,18 +124,6 @@ void Player::handleFootsteps(int moveDirection) // Footsteps sound
     previousFrameIndex = currentFrameIndex;
 }
 
-void Player::shoot() {
-
-    if (!canShoot) return;
-
-    gun->shoot();
-
-    // QGraphicsRectItem* dot = new QGraphicsRectItem; // for debugging fire directions
-    // dot->setRect(0, 0, 5, 5);
-    // dot->setBrush(Qt::red);
-    // dot->setPos(x() + oX, y() +oY);
-    // scene() -> addItem(dot);
-}
 
 void Player::decreaseHealth() {
     health -= 5;

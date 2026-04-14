@@ -17,7 +17,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         QPixmap walkSheet;
         QPixmap idleSheet;
         // Variables
-        bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0, canShoot = 1; // Bools
+        bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Bools
         int targetRow = 0;
         int lastSpriteRow;
         int currentShotSound = 0, currentFootSound = 0; // For the pool of sounds to cycle.
@@ -42,7 +42,6 @@ class Player : public QObject, public QGraphicsPixmapItem {
         Player(double x, double y);
         void decreaseHealth();
         int getHealth() {return health;}
-        void shoot();   // For firing the gun
         ~Player();  // Destructor.
     public slots:
         void processMovement();
