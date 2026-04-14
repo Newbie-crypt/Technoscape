@@ -16,14 +16,9 @@ Player::Player(double x, double y) {
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
         footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
-        footstepPool[i]->setVolume(0);
-        footstepPool[i]->play(); // Forces the audio system to load the file now
+    footstepPool[i]->setVolume(1);
     }
 
-    // After the loop, restore volumes
-    for (int i = 0; i < 8; i++) {
-        footstepPool[i]->setVolume(1);
-    }
 
     gun = new Weapon(this);
 
