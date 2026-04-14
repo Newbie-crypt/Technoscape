@@ -3,6 +3,7 @@
 #include "../include/furniture.hpp"
 #include "../include/door.hpp"
 #include "../include/trap.hpp"
+#include "../include/classes.hpp"
 #include <QBrush>
 #include <QTimer>
 #include <QGraphicsScene>
@@ -21,31 +22,19 @@
 #include <QAudioOutput>
 #include <QPen>
 #include <QColor>
+#include <QTransform>
+#include "../include/weapon.hpp"
 
 extern bool paused;
 
-Player::Player(double x, double y, double width, double height) {
-    setRect(x, y, width, height);
-    setBrush(Qt::red);
+
+
+Player::Player(double x, double y) {
 
     trapCooldown = false;
     isMoving = false;
-    isRunning = false;
+    isSprinting = false; // Renamed to isSprinting instead of isRunning
 
-    footstepTimer = new QTimer();
-
-    walkSound.setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/walk.wav"
-    ));
-    walkSound.setVolume(0.12);
-
-    QObject::connect(footstepTimer, &QTimer::timeout, [this]() {
-        if (isMoving) {
-            walkSound.play();
-        }
-    });
-
-    footstepTimer->start(300);
 
     trapPlayer = new QMediaPlayer();
     trapAudio = new QAudioOutput();
@@ -65,92 +54,116 @@ Player::Player(double x, double y, double width, double height) {
     ));
     doorAudio->setVolume(0.95);
 
+    footstepPool = new QSoundEffect*[8];
+
+    for (int i = 0; i < 8; i++) {
+        footstepPool[i] = new QSoundEffect(this);
+        footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
+    footstepPool[i]->setVolume(1);
+    }
+
+
+    gun = new Weapon(this);
+
+
+    walkSheet = QPixmap(":/assets/walk.png");   // Preload walk and idle sprite sheets
+    idleSheet = QPixmap (":/assets/idle.png");
+    setPixmap(walkSheet.copy(0, 0, 48, 64));
+    this->setScale(4.0);
+
+    setPos(x,y);    // Move player to provided (x, y) coordinates
+
+    movementTimer = new QTimer(this);
+    QObject::connect(movementTimer, &QTimer::timeout, this, &Player::processMovement);
+    movementTimer->start(16);   //start processing player actions.
+
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFocus();
 
 }
 
 
-void Player::keyPressEvent(QKeyEvent* event) {
-    if (paused) {
-        return;
-    }
 
-    if (event->key() == Qt::Key_U) {
-        unlockDoor();
-        return;
-    }
+void Player::processMovement()
+{
+    int moveDirection = getInputMask();    //for direction calculation, to be used in switch-case.
+    int speedMultiplier = isSprinting ? 1.5 : 1;
 
-    int dx = 0;
-    int dy = 0;
-
-    bool shiftPressed = (event->modifiers() & Qt::ShiftModifier);
-
-    if (event->key() == Qt::Key_Left) {
-        dx = shiftPressed ? -20 : -10;
-    }
-    else if (event->key() == Qt::Key_Right) {
-        dx = shiftPressed ? 20 : 10;
-    }
-    else if (event->key() == Qt::Key_Up) {
-        dy = shiftPressed ? -20 : -10;
-    }
-    else if (event->key() == Qt::Key_Down) {
-        dy = shiftPressed ? 20 : 10;
-    }
-    else {
-        QGraphicsRectItem::keyPressEvent(event);
-        return;
-    }
-
-    isMoving = true;
-    isRunning = shiftPressed;
-
-    if (isRunning) {
-        footstepTimer->setInterval(170);
-    }
-    else {
-        footstepTimer->setInterval(300);
-    }
-
-    walkSound.play();
-    moveStepByStep(dx, dy);
-    isMoving = false;
+    applyPhysics(moveDirection, speedMultiplier); // Move character
+    updateSprite(moveDirection, speedMultiplier);    // Animate character
+    handleFootsteps(moveDirection);
 }
 
-void Player::moveStepByStep(int dx, int dy) {
-    int steps;
-
-    if (dx != 0) {
-        steps = abs(dx);
-    }
-    else {
-        steps = abs(dy);
-    }
-
-    int oneStepX = 0;
-    int oneStepY = 0;
-
-    if (dx > 0) {
-        oneStepX = 1;
-    }
-    if (dx < 0) {
-        oneStepX = -1;
-    }
-    if (dy > 0) {
-        oneStepY = 1;
-    }
-    if (dy < 0) {
-        oneStepY = -1;
-    }
-
-    for (int i = 0; i < steps; i++) {
-        moveBy(oneStepX, oneStepY);
-        checkCollision(oneStepX, oneStepY);
-        checkTrapCollision();
-        checkDoorOpen();
-    }
+int Player::getInputMask() // Get the direction in which the player is moving.
+{
+    int inputSum = 0;
+    if(isMovingUp)    {inputSum += 1;}
+    if(isMovingDown)  {inputSum += 2;}
+    if(isMovingLeft)  {inputSum += 4;}
+    if(isMovingRight) {inputSum += 8;}
+    return inputSum;
 }
+
+void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the player.
+{
+    switch(moveDirection)
+    {
+        case 1: moveBy(0, speedMultiplier * -5); targetRow = 3; break; // Up
+        case 2: moveBy(0, speedMultiplier * 5);  targetRow = 0; break;  // Down
+        case 4: moveBy(speedMultiplier * -5, 0); targetRow = 1; break; // Left
+        case 8: moveBy(speedMultiplier * 5, 0);  targetRow = 5; break;  //Right
+        case 9: moveBy(speedMultiplier * 3.535, speedMultiplier * -3.535);  diagonalBuffer = 3; targetRow = 4;  break;  // Top-Right
+        case 10: moveBy(speedMultiplier * 3.535, speedMultiplier * 3.535);  diagonalBuffer = 3; targetRow = 5;  break;  // Bottom-Left
+        case 6: moveBy(speedMultiplier * -3.535, speedMultiplier * 3.535);  diagonalBuffer = 3; targetRow = 1;  break;  // Bottom-Left
+        case 5: moveBy(speedMultiplier * -3.535, speedMultiplier * -3.535); diagonalBuffer = 3; targetRow = 2;  break;  // Top-Left
+    }
+
+    // Saving direction for gun shot. Always trust diagonal.
+    if (moveDirection == 9 || moveDirection == 10 || moveDirection == 6 || moveDirection == 5) {
+        lastAimDirection = moveDirection;
+    }
+    else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
+
+    gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
+}
+
+void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet checker and animator.
+{
+    QPixmap* activeSheet = &walkSheet; // Assume walking.
+
+    if(moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow
+    {
+        activeSheet = &idleSheet;
+        targetRow = lastSpriteRow;
+        if (diagonalBuffer > 0) {diagonalBuffer--;}
+    }
+
+    else // Walking animation, bunch of checks to fix bug where letting go of W a second before A leads to left animation.
+    {
+        currentFrameIndex = animationTicker / 10; // Variable used to switch between the 8 available images
+        animationTicker = (animationTicker + speedMultiplier) % 80; // Ticker.
+        if (diagonalBuffer > 0 && moveDirection !=5 && moveDirection != 6 && moveDirection != 9 && moveDirection != 10) {diagonalBuffer--; targetRow = lastSpriteRow;} // If buffer isn't empty, and we aren't moving diagonally, decrement buffer and keep the target row the same as last run (to stop flickering to side/up animation before diagonal).
+        if (diagonalBuffer == 0 || moveDirection == 5 || moveDirection == 6 || moveDirection == 9 || moveDirection == 10) {lastSpriteRow = targetRow;} // If the buffer is empty (no recent diagonal movement) OR we're moving diagonally, update lastSpriteRow normally
+    }
+
+    setPixmap(activeSheet->copy(currentFrameIndex * 48, targetRow * 64, 48, 64)); // Updating Pixmap to current animation
+}
+
+void Player::handleFootsteps(int moveDirection) // Footsteps sound
+{
+    if (moveDirection != 0) {
+        if ((currentFrameIndex == 1 || currentFrameIndex == 5) && currentFrameIndex != previousFrameIndex) {    //Footstep sound, 2 per second.
+            footstepPool[currentFootSound] -> play();
+            currentFootSound++;
+            if(currentFootSound >= 8) {currentFootSound = 0;}
+        }
+    }
+
+    previousFrameIndex = currentFrameIndex;
+}
+
+
+
 
 void Player::checkTrapCollision() {
     if (trapCooldown) {
@@ -254,7 +267,7 @@ void Player::unlockDoor() {
     // Unlock logically first
     targetDoor->unlock();
 
-    // Door coordinates you gave
+    // Door coordinates you gave (shelha ya kareem.)
     int doorX = 672;
     int doorY = 116;
     int doorW = 67;
@@ -431,23 +444,47 @@ void Player::showToBeContinued() {
     mainText->setPos(textX, textY);
 
     hide();
+        if (paused) {
+        return;
+    }
 }
 
-Enemy::Enemy() : QGraphicsRectItem(500, 500, 100, 100) { //take other constructor from player.cpp and add here.
-    setBrush(Qt::NoBrush);
-    srand(time(0));
-    QTimer* timer = new QTimer(this);
-    QObject::connect(timer, &QTimer::timeout, this, &Enemy::Motion);
-    timer->start(50);
+void keyPressEvent(QKeyEvent* event){
+    if (event->key() == Qt::Key_U) {
+        unlockDoor();
+        return;
+    }
+    else {
+        QGraphicsRectItem::keyPressEvent(event);
+        return;
+    }
+    if(event->isAutoRepeat()) {return;}
+    if (event->key() == Qt::Key_Shift) {isSprinting = true;}
+    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = true;}
+    if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = true;}
+    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
+    if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
 }
+
+void Player::keyReleaseEvent(QKeyEvent* event) {
+    if(event->isAutoRepeat()) {return;}
+    if (event->key() == Qt::Key_Shift) {isSprinting = false;}
+    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = false;}
+    if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = false;}
+    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = false;}
+    if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = false;}
+    if (event->key() == Qt::Key_Space) {gun->shoot();}
+}
+
+Player::~Player() {
+    delete[] footstepPool;
+}
+
 
 void Player::resetTrapCooldown() {
     trapCooldown = false;
 }
 
-void Enemy::Motion() {
-    moveBy(rand() % 20 - 10, rand() % 20 - 10);
-}
 
 void Enemy::checkCollision(double dx, double dy) {
     QList<QGraphicsItem*> colliding_items = collidingItems();
@@ -475,6 +512,4 @@ void Enemy::checkCollision(double dx, double dy) {
         }
     }
 }
-// void Enemy::Motion() {
-//     moveBy(rand() % 20 - 10, rand() % 20 - 10);
-// }
+

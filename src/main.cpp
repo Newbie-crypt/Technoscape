@@ -35,7 +35,7 @@
 // Classes to read about:
 // QGraphicsItem
 // QPainter
-// QPixMap
+// QPixmap
 // QRectF
 // QBrush
 
@@ -118,7 +118,7 @@ QGraphicsView* createGameView() {
         scene->addItem(new Trap(x, y, w, h));
     };
 
-    Player* player = new Player(0, 0, 35, 32);
+    Player* player = new Player(0, 0);
     player->setPos(568, 421);
     scene->addItem(player);
     scene->setFocusItem(player);

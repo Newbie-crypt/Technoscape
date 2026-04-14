@@ -19,12 +19,14 @@ set(SOURCE_FILES
     src/machine.cpp
     src/door.cpp
     src/trap.cpp
+    src/weapon.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
     include/machine.hpp
     include/door.hpp
     include/trap.hpp
+    include/weapon.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)
