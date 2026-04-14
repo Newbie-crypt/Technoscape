@@ -32,7 +32,6 @@ extern bool paused;
 Player::Player(double x, double y) {
 
     trapCooldown = false;
-    isMoving = false;
     isSprinting = false; // Renamed to isSprinting instead of isRunning
 
 
@@ -69,7 +68,7 @@ Player::Player(double x, double y) {
     walkSheet = QPixmap(":/assets/walk.png");   // Preload walk and idle sprite sheets
     idleSheet = QPixmap (":/assets/idle.png");
     setPixmap(walkSheet.copy(0, 0, 48, 64));
-    this->setScale(4.0);
+    this->setScale(2.0);
 
     setPos(x,y);    // Move player to provided (x, y) coordinates
 
@@ -108,14 +107,58 @@ void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the p
 {
     switch(moveDirection)
     {
-        case 1: moveBy(0, speedMultiplier * -5); targetRow = 3; break; // Up
-        case 2: moveBy(0, speedMultiplier * 5);  targetRow = 0; break;  // Down
-        case 4: moveBy(speedMultiplier * -5, 0); targetRow = 1; break; // Left
-        case 8: moveBy(speedMultiplier * 5, 0);  targetRow = 5; break;  //Right
-        case 9: moveBy(speedMultiplier * 3.535, speedMultiplier * -3.535);  diagonalBuffer = 3; targetRow = 4;  break;  // Top-Right
-        case 10: moveBy(speedMultiplier * 3.535, speedMultiplier * 3.535);  diagonalBuffer = 3; targetRow = 5;  break;  // Bottom-Left
-        case 6: moveBy(speedMultiplier * -3.535, speedMultiplier * 3.535);  diagonalBuffer = 3; targetRow = 1;  break;  // Bottom-Left
-        case 5: moveBy(speedMultiplier * -3.535, speedMultiplier * -3.535); diagonalBuffer = 3; targetRow = 2;  break;  // Top-Left
+        case 1: { // Up
+            moveBy(0, speedMultiplier * -2.5);
+            targetRow = 3;
+            checkCollision(0, speedMultiplier * -2.5);
+            break;
+        }
+        case 2: { // Down
+            moveBy(0, speedMultiplier * 2.5);
+            targetRow = 0;
+            checkCollision(0, speedMultiplier * 2.5);
+            break;
+        }
+        case 4: {  // Left
+            moveBy(speedMultiplier * -2.5, 0);
+            targetRow = 1;
+            checkCollision(0, speedMultiplier * 2.5);
+            break;
+        }
+        case 8: { //Right
+            moveBy(speedMultiplier * 2.5, 0);
+            targetRow = 5;
+            checkCollision(0, speedMultiplier * 2.5);
+            break;
+        }
+        case 9: { // Top-Right
+            moveBy(speedMultiplier * 2.236, speedMultiplier * -2.236);
+            checkCollision(0, speedMultiplier * 2.5);
+            diagonalBuffer = 3;
+            targetRow = 4;
+            break;
+        }
+        case 10: { // Bottom-Left
+            moveBy(speedMultiplier * 2.236, speedMultiplier * 2.236);
+            checkCollision(0, speedMultiplier * 2.5);
+            diagonalBuffer = 3;
+            targetRow = 5;
+            break;
+        }
+        case 6: { // Bottom-Left
+            moveBy(speedMultiplier * -2.236, speedMultiplier * 2.236);
+            checkCollision(0, speedMultiplier * 2.5);
+            diagonalBuffer = 3;
+            targetRow = 1;
+            break;
+        }
+        case 5: {
+            moveBy(speedMultiplier * -2.236, speedMultiplier * -2.236);
+            checkCollision(0, speedMultiplier * 2.5);
+            diagonalBuffer = 3;
+            targetRow = 2;
+            break;  // Top-Left
+        }
     }
 
     // Saving direction for gun shot. Always trust diagonal.
@@ -131,7 +174,7 @@ void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet check
 {
     QPixmap* activeSheet = &walkSheet; // Assume walking.
 
-    if(moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow
+    if(moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow, Added isColliding to merge Kareem's collide logic with my walking
     {
         activeSheet = &idleSheet;
         targetRow = lastSpriteRow;
@@ -151,7 +194,7 @@ void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet check
 
 void Player::handleFootsteps(int moveDirection) // Footsteps sound
 {
-    if (moveDirection != 0) {
+    if (moveDirection != 0) { // Added isColliding to merge Kareem's collide logic with my walking
         if ((currentFrameIndex == 1 || currentFrameIndex == 5) && currentFrameIndex != previousFrameIndex) {    //Footstep sound, 2 per second.
             footstepPool[currentFootSound] -> play();
             currentFootSound++;

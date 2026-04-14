@@ -26,18 +26,16 @@ class Player : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
     private:
         HealthBar* health;
-        void checkCollision(double dx, double dy);
+        bool isColliding();
         void checkDoorOpen();
         void checkTrapCollision();
         void showToBeContinued();
-        void moveStepByStep(int dx, int dy);
+        void checkCollision(double dx, double dy);
         void unlockDoor();
         bool trapCooldown;
         void resetTrapCooldown();
         QSoundEffect walkSound;
         QTimer* footstepTimer;
-        bool isMoving;
-        bool isRunning;
         QMediaPlayer* trapPlayer;
         QAudioOutput* trapAudio;
         QMediaPlayer* doorPlayer;

@@ -15,7 +15,7 @@ Projectile::Projectile(double x, double y, int d)
     QPixmap rawSheet(":/assets/bullet.png");
     bulletSheet = rawSheet;
     setPixmap(bulletSheet);
-    this->setScale(0.25);
+    this->setScale(0.125);
     setPos(x - (bulletSheet.width() / 2), y - (bulletSheet.height() / 2)); //Offset
 
     int angle = 0;
