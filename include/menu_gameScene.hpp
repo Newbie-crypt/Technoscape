@@ -24,6 +24,7 @@
 #include <QCoreApplication>
 #include <QEnterEvent>
 #include <QUrl>
+#include <QSoundEffect>
 #include "../include/players.hpp"
 #include "../include/wall.hpp"
 #include "../include/furniture.hpp"
@@ -55,52 +56,24 @@ bool paused = false;
 class MenuWindow;
 void showMainMenu(QGraphicsView* currentView);
 
-class SoundButton : public QPushButton {
+class HoverSoundFilter : public QObject {
 public:
-    SoundButton(const QString& text, QWidget* parent = nullptr)
-        : QPushButton(text, parent) {
-
-        clickPlayer = new QMediaPlayer(this);
-        clickAudio = new QAudioOutput(this);
-        clickPlayer->setAudioOutput(clickAudio);
-        clickPlayer->setSource(QUrl::fromLocalFile(
-            QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
-        ));
-        clickAudio->setVolume(1.0);
-
-        hoverPlayer = new QMediaPlayer(this);
-        hoverAudio = new QAudioOutput(this);
-        hoverPlayer->setAudioOutput(hoverAudio);
-        hoverPlayer->setSource(QUrl::fromLocalFile(
-            QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
-        ));
-        hoverAudio->setVolume(1.0);
-
-        QObject::connect(this, &QPushButton::clicked, [this]() {
-            QTimer::singleShot(0, this, [this]() {
-                clickPlayer->stop();
-                clickPlayer->setPosition(0);
-                clickPlayer->play();
-            });
-        });
-    }
+    HoverSoundFilter(QSoundEffect* player, QObject* parent = nullptr)
+        : QObject(parent), hoverPlayer(player) {}
 
 protected:
-    void enterEvent(QEnterEvent* event) override {
-        QPushButton::enterEvent(event);
-
-        QTimer::singleShot(0, this, [this]() {
-            hoverPlayer->stop();
-            hoverPlayer->setPosition(0);
-            hoverPlayer->play();
-        });
+    bool eventFilter(QObject* watched, QEvent* event) override {
+        if (event->type() == QEvent::Enter) {
+            if (hoverPlayer) {
+                hoverPlayer->stop();
+                hoverPlayer->play();
+            }
+        }
+        return QObject::eventFilter(watched, event);
     }
 
 private:
-    QMediaPlayer* clickPlayer;
-    QAudioOutput* clickAudio;
-    QMediaPlayer* hoverPlayer;
-    QAudioOutput* hoverAudio;
+    QSoundEffect* hoverPlayer;
 };
 
 QGraphicsView* createGameView() {
@@ -706,9 +679,45 @@ public:
         panelLayout->setSpacing(28);
         panelLayout->setContentsMargins(32, 32, 32, 32);
 
-        SoundButton* startButton = new SoundButton("START GAME");
-        SoundButton* settingsButton = new SoundButton("SETTINGS");
-        SoundButton* exitButton = new SoundButton("EXIT");
+        QMediaPlayer* clickPlayer = new QMediaPlayer(this);
+QAudioOutput* clickAudio = new QAudioOutput(this);
+clickPlayer->setAudioOutput(clickAudio);
+clickPlayer->setSource(QUrl::fromLocalFile(
+    QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
+));
+clickAudio->setVolume(1.0);
+
+QSoundEffect* hoverPlayer = new QSoundEffect(this);
+hoverPlayer->setSource(QUrl::fromLocalFile(
+    QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
+));
+hoverPlayer->setVolume(1.0);
+
+        QPushButton* startButton = new QPushButton("START GAME");
+        QPushButton* settingsButton = new QPushButton("SETTINGS");
+        QPushButton* exitButton = new QPushButton("EXIT");
+        HoverSoundFilter* hoverFilter = new HoverSoundFilter(hoverPlayer, this);
+startButton->installEventFilter(hoverFilter);
+settingsButton->installEventFilter(hoverFilter);
+exitButton->installEventFilter(hoverFilter);
+
+QObject::connect(startButton, &QPushButton::clicked, [=]() {
+    clickPlayer->stop();
+    clickPlayer->setPosition(0);
+    clickPlayer->play();
+});
+
+QObject::connect(settingsButton, &QPushButton::clicked, [=]() {
+    clickPlayer->stop();
+    clickPlayer->setPosition(0);
+    clickPlayer->play();
+});
+
+QObject::connect(exitButton, &QPushButton::clicked, [=]() {
+    clickPlayer->stop();
+    clickPlayer->setPosition(0);
+    clickPlayer->play();
+});
 
         QString btnStyle =
             "QPushButton {"
