@@ -21,6 +21,7 @@ set(SOURCE_FILES
     src/trap.cpp
     src/weapon.cpp
     src/classes.cpp
+    src/keyitem.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -31,6 +32,7 @@ set(SOURCE_FILES
     include/classes.hpp
     include/leghitbox.hpp
     include/menu_gameScene.hpp
+    include/keyitem.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QGraphicsDropShadowEffect>
+#include <QPropertyAnimation>
 #include <QFrame>
 #include <QResizeEvent>
 #include <QLinearGradient>
@@ -30,6 +31,7 @@
 #include "../include/trap.hpp"
 #include "../include/machine.hpp"
 #include "../include/classes.hpp"
+#include "../include/keyitem.hpp"
 
 
 // Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
@@ -127,11 +129,44 @@ QGraphicsView* createGameView() {
         scene->addItem(new Trap(x, y, w, h));
     };
 
-    Player* player = new Player(0, 0);
-    player->setPos(568, 400);
-    scene->addItem(player);
-    scene->setFocusItem(player);
-    player->setFocus();
+        auto spawnAccessKey = [&](QPointF pos) {
+        KeyItem* worldKey = new KeyItem(
+            QCoreApplication::applicationDirPath() + "/assets/key.gif",
+            60, 90
+        );
+
+        worldKey->setPos(pos.x(), pos.y());
+        worldKey->setZValue(300);
+        scene->addItem(worldKey);
+    };
+
+Player* player = new Player(0, 0);
+player->setPos(568, 400);
+scene->addItem(player);
+
+// TEMP hidden health bar, only so damage/death works until teammate merges HUD
+HealthBar* hiddenHealthBar = new HealthBar();
+hiddenHealthBar->setVisible(false);
+scene->addItem(hiddenHealthBar);
+player->setHealthBar(hiddenHealthBar);
+
+// HUD KEY (hidden until collected)
+KeyItem* hudKey = new KeyItem(
+    QCoreApplication::applicationDirPath() + "/assets/key.gif",
+    90,140
+);
+hudKey->setPos(729, 488);
+hudKey->setZValue(1500);
+hudKey->hide();
+scene->addItem(hudKey);
+
+player->setHudKey(hudKey);
+
+scene->setFocusItem(player);
+player->setFocus();
+
+    // TEMP TEST: spawn key in scene
+    spawnAccessKey(QPointF(500, 300));
 
     // WALLS
     addWall(48, 0, 723, 46);
@@ -309,7 +344,11 @@ overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
     pauseLayout->addWidget(continueButton);
     pauseLayout->addWidget(leaveButton);
 
- QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
+QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
+    if (player->isDead()) {
+        return;
+    }
+
     paused = true;
     pauseOverlay->setGeometry(view->viewport()->rect());
     pauseOverlay->show();
@@ -328,7 +367,244 @@ overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
         paused = false;
         showMainMenu(view);
     });
-    // ===== END PAUSE UI =====
+    // ===== DEATH FADE OVERLAY =====
+    QWidget* deathFadeOverlay = new QWidget(view->viewport());
+    deathFadeOverlay->setGeometry(view->viewport()->rect());
+    deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+    deathFadeOverlay->hide();
+    deathFadeOverlay->raise();
+       
+    // ===== GAME OVER UI =====
+    QWidget* gameOverOverlay = new QWidget(view->viewport());
+    gameOverOverlay->setGeometry(view->viewport()->rect());
+    gameOverOverlay->setStyleSheet("background-color: rgba(0,0,0,255);");
+    gameOverOverlay->hide();
+    gameOverOverlay->raise();
+
+    QVBoxLayout* gameOverLayout = new QVBoxLayout(gameOverOverlay);
+    gameOverLayout->setContentsMargins(0, 0, 0, 0);
+    gameOverLayout->setAlignment(Qt::AlignCenter);
+
+    // Main container
+    QWidget* gameOverContainer = new QWidget(gameOverOverlay);
+    gameOverContainer->setStyleSheet("background: transparent;");
+    QVBoxLayout* gameOverContainerLayout = new QVBoxLayout(gameOverContainer);
+    gameOverContainerLayout->setAlignment(Qt::AlignCenter);
+    gameOverContainerLayout->setSpacing(20);
+    gameOverContainerLayout->setContentsMargins(0, 0, 0, 0);
+
+    // ===== GLITCH TITLE =====
+    QWidget* titleWrap = new QWidget;
+    titleWrap->setFixedSize(720, 230);
+    titleWrap->setStyleSheet("background: transparent;");
+
+    QLabel* cyanText = new QLabel("GAME\nOVER", titleWrap);
+    cyanText->setAlignment(Qt::AlignCenter);
+    cyanText->setGeometry(0, 0, 720, 230);
+    cyanText->move(6, 0);
+    cyanText->setStyleSheet(
+        "color: rgb(0,255,255);"
+        "background: transparent;"
+        "font-size: 78px;"
+        "font-weight: 900;"
+        "font-family: Impact, Arial Black, sans-serif;"
+        "letter-spacing: 4px;"
+    );
+
+    QLabel* magentaText = new QLabel("GAME\nOVER", titleWrap);
+    magentaText->setAlignment(Qt::AlignCenter);
+    magentaText->setGeometry(0, 0, 720, 230);
+    magentaText->move(-6, 0);
+    magentaText->setStyleSheet(
+        "color: rgb(255,0,200);"
+        "background: transparent;"
+        "font-size: 78px;"
+        "font-weight: 900;"
+        "font-family: Impact, Arial Black, sans-serif;"
+        "letter-spacing: 4px;"
+    );
+
+    QLabel* mainText = new QLabel("GAME\nOVER", titleWrap);
+    mainText->setAlignment(Qt::AlignCenter);
+    mainText->setGeometry(0, 0, 720, 230);
+    mainText->setStyleSheet(
+        "color: white;"
+        "background: transparent;"
+        "font-size: 78px;"
+        "font-weight: 900;"
+        "font-family: Impact, Arial Black, sans-serif;"
+        "letter-spacing: 4px;"
+    );
+
+    // ===== SMALL GLITCH LINES =====
+    QFrame* glitch1 = new QFrame(gameOverOverlay);
+    glitch1->setGeometry(130, 120, 180, 4);
+    glitch1->setStyleSheet("background-color: rgba(0,255,255,180); border: none;");
+
+    QFrame* glitch2 = new QFrame(gameOverOverlay);
+    glitch2->setGeometry(900, 180, 140, 4);
+    glitch2->setStyleSheet("background-color: rgba(255,0,200,180); border: none;");
+
+    QFrame* glitch3 = new QFrame(gameOverOverlay);
+    glitch3->setGeometry(260, 300, 220, 3);
+    glitch3->setStyleSheet("background-color: rgba(255,255,255,120); border: none;");
+
+    QFrame* glitch4 = new QFrame(gameOverOverlay);
+    glitch4->setGeometry(760, 330, 170, 3);
+    glitch4->setStyleSheet("background-color: rgba(0,255,255,150); border: none;");
+
+    // ===== BUTTONS =====
+    QPushButton* tryAgainButton = new QPushButton("TRY AGAIN");
+    QPushButton* gameOverMenuButton = new QPushButton("MAIN MENU");
+
+    tryAgainButton->setFixedSize(320, 72);
+    gameOverMenuButton->setFixedSize(320, 72);
+
+    QString gameOverBtnStyle =
+        "QPushButton {"
+        "   background-color: rgba(0,0,0,210);"
+        "   color: white;"
+        "   border: 3px solid white;"
+        "   border-radius: 0px;"
+        "   font-size: 24px;"
+        "   font-weight: bold;"
+        "   padding: 12px;"
+        "}"
+        "QPushButton:hover {"
+        "   background-color: rgba(20,20,20,255);"
+        "   border: 3px solid rgb(0,255,255);"
+        "   color: rgb(0,255,255);"
+        "}";
+
+    tryAgainButton->setStyleSheet(gameOverBtnStyle);
+    gameOverMenuButton->setStyleSheet(gameOverBtnStyle);
+
+    gameOverContainerLayout->addWidget(titleWrap, 0, Qt::AlignCenter);
+    gameOverContainerLayout->addSpacing(25);
+    gameOverContainerLayout->addWidget(tryAgainButton, 0, Qt::AlignCenter);
+    gameOverContainerLayout->addWidget(gameOverMenuButton, 0, Qt::AlignCenter);
+
+    gameOverLayout->addWidget(gameOverContainer, 0, Qt::AlignCenter);
+
+    // Simple glitch animation
+    QTimer* glitchTimer = new QTimer(gameOverOverlay);
+
+    QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
+        static bool flip = false;
+        flip = !flip;
+
+        if (flip) {
+            cyanText->move(8, 0);
+            magentaText->move(-8, 0);
+            glitch1->setGeometry(110, 118, 210, 4);
+            glitch2->setGeometry(920, 184, 120, 4);
+            glitch3->setGeometry(240, 296, 250, 3);
+            glitch4->setGeometry(740, 334, 200, 3);
+        } else {
+            cyanText->move(4, 0);
+            magentaText->move(-4, 0);
+            glitch1->setGeometry(130, 120, 180, 4);
+            glitch2->setGeometry(900, 180, 140, 4);
+            glitch3->setGeometry(260, 300, 220, 3);
+            glitch4->setGeometry(760, 330, 170, 3);
+        }
+    });
+
+    QObject::connect(player, &Player::died, [=]() {
+    paused = true;
+
+    // stop player focus
+    view->clearFocus();
+
+    // make sure overlays fill full screen
+    deathFadeOverlay->setGeometry(view->viewport()->rect());
+    gameOverOverlay->setGeometry(view->viewport()->rect());
+
+    // ===== SCREEN SHAKE =====
+    QTransform baseTransform = view->transform();
+
+QTimer* shakeTimer = new QTimer(view);
+int* shakeStep = new int(0);
+
+QObject::connect(shakeTimer, &QTimer::timeout, [=]() mutable {
+    (*shakeStep)++;
+
+    int dx = 0;
+    int dy = 0;
+
+    switch ((*shakeStep) % 6) {
+        case 0: dx = -10; dy = 0; break;
+        case 1: dx = 10; dy = 0; break;
+        case 2: dx = 0; dy = -8; break;
+        case 3: dx = 0; dy = 8; break;
+        case 4: dx = -6; dy = -6; break;
+        case 5: dx = 6; dy = 6; break;
+    }
+
+    view->setTransform(baseTransform);
+    view->translate(dx, dy);
+
+    if (*shakeStep >= 12) {
+        shakeTimer->stop();
+        view->setTransform(baseTransform);
+        delete shakeStep;
+        shakeTimer->deleteLater();
+    }
+});
+
+shakeTimer->start(30);
+
+    // ===== FADE TO BLACK =====
+    deathFadeOverlay->show();
+    deathFadeOverlay->raise();
+
+    QTimer* fadeTimer = new QTimer(deathFadeOverlay);
+    int* alpha = new int(0);
+
+    QObject::connect(fadeTimer, &QTimer::timeout, [=]() mutable {
+        *alpha += 20;
+        if (*alpha > 255) *alpha = 255;
+
+        deathFadeOverlay->setStyleSheet(
+            QString("background-color: rgba(0,0,0,%1);").arg(*alpha)
+        );
+
+        if (*alpha >= 255) {
+            fadeTimer->stop();
+            delete alpha;
+            fadeTimer->deleteLater();
+
+            gameOverOverlay->show();
+            gameOverOverlay->raise();
+            glitchTimer->start(120);
+        }
+    });
+
+    fadeTimer->start(35);
+});
+
+    QObject::connect(tryAgainButton, &QPushButton::clicked, [=]() {
+    glitchTimer->stop();
+    paused = false;
+
+    deathFadeOverlay->hide();
+    deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+
+    QGraphicsView* newGameView = createGameView();
+    newGameView->show();
+    view->hide();
+    view->close();
+});
+
+    QObject::connect(gameOverMenuButton, &QPushButton::clicked, [=]() {
+    glitchTimer->stop();
+    paused = false;
+
+    deathFadeOverlay->hide();
+    deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+
+    showMainMenu(view);
+});
 
     return view;
 }

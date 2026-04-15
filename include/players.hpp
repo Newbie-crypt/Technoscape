@@ -11,6 +11,9 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <map>
+#include <QGraphicsTextItem>
+#include "../include/door.hpp"
+#include "../include/keyitem.hpp"
 #include "../include/weapon.hpp"
 #include "../include/classes.hpp"
 #include "../include/leghitbox.hpp"
@@ -26,13 +29,23 @@ enum class AnimationState : int {
 class Player : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
     private:
-        HealthBar* health;
+        HealthBar* health = nullptr;
+        bool hasAccessKey = false;
+        Door* nearbyDoor = nullptr;
+        KeyItem* nearbyKey = nullptr;
+        KeyItem* hudKey = nullptr;
+        QGraphicsTextItem* interactionText = nullptr;
         bool isColliding();
         void checkDoorOpen();
         void checkTrapCollision();
         void showToBeContinued();
         void checkCollision(double dx, double dy);
         void unlockDoor();
+        void updateInteractionPrompt();
+        void collectNearbyKey();
+        void useKeyOnDoor();
+        void showInteractionText(const QString& text);
+        void hideInteractionText();
         bool trapCooldown;
         void resetTrapCooldown();
         QSoundEffect walkSound;
@@ -65,21 +78,24 @@ class Player : public QObject, public QGraphicsPixmapItem {
     public:
 
         void setHealthBar(HealthBar* h) {health = h;}
-        void decreaseHealth(int h) {
-            health->decreaseHP(h);
-        }
+        void setHudKey(KeyItem* key) {hudKey = key;}
+        bool hasKey() const { return hasAccessKey; }
+        void decreaseHealth(int h);
         bool isDead() {
-            return health->getHP() == 0;
-        }
+    return health && health->getHP() == 0;
+}
         // Functions
         int getInputMask(); // Get the direction in which the player is moving.
         void applyPhysics(int moveDirection, int speedMultiplier); // Moves the player.
         void updateSprite(int moveDirection, int speedMultiplier); // Sheet checker and animator.
         void handleFootsteps(int moveDirection); // Footsteps sound
         Player(double x, double y);
-        void decreaseHealth();
-        int getHealth() {return health->getHP();}
+        int getHealth() {return health ? health->getHP() : 0;}
         ~Player();  // Destructor.
+    
+    signals:
+    void died();
+    
     public slots:
         void processMovement();
 
