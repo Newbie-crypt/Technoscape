@@ -22,6 +22,7 @@ set(SOURCE_FILES
     src/weapon.cpp
     src/classes.cpp
     src/enemies.cpp
+    src/menu_gameScene.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
