@@ -24,10 +24,7 @@
 #include <QColor>
 #include <QTransform>
 #include "../include/weapon.hpp"
-
 extern bool paused;
-
-
 
 Player::Player(double x, double y) {
 

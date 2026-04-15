@@ -78,7 +78,7 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     QObject::connect(timer2, &QTimer::timeout, [this] () {
         if (target->collidesWithItem(this)) {
             this->Attack();
-            if (target->isDead()) exit(0);
+            // if (target->isDead()) exit(0);
         }
         else {
             this->Chase();

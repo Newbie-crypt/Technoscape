@@ -24,12 +24,13 @@
 // GLOBAL PAUSE STATE
 bool paused = false;
 
-QGraphicsScene* scene = new QGraphicsScene;
+
 // GLOBAL MUSIC
 QMediaPlayer* music;
 QAudioOutput* audio;
 
 QGraphicsView* createGameView();
+void showMainMenu(QGraphicsView* currentView, QGraphicsScene* scene);
 
 
 
@@ -131,12 +132,13 @@ protected:
 };
 
 class MenuWindow : public QWidget {
+    Q_OBJECT
 public:
     QLabel* background;
     TitleWidget* title;
     QFrame* panel;
 
-    MenuWindow() {
+    MenuWindow(QGraphicsScene* scene) {
 
         // MAIN MENU DESIGN SECTION
         setWindowTitle("Technoscape");
@@ -229,13 +231,14 @@ public:
         // END OF MAIN MENU DESIGN SECTION
 
         // Events when the buttons are pressed
-        QObject::connect(startButton, &QPushButton::clicked, [this]() {
-            QTimer::singleShot(120, [this]() {
+        QObject::connect(startButton, &QPushButton::clicked, [this, scene]() {
+            QTimer::singleShot(120, [this, scene]() {
                 paused = false;
                 audio->setVolume(0.02);
-                QGraphicsView* gameView = createGameView();
+                QGraphicsView* gameView = createGameView(scene);
                 gameView->show();
                 this->close();
+                emit gameStarted();
             });
         });
 
@@ -248,25 +251,7 @@ public:
         showFullScreen();
     }
 
-protected:
-    void resizeEvent(QResizeEvent* event) override {
-        QWidget::resizeEvent(event);
-
-        if (background) {
-            background->setGeometry(0, 0, width(), height());
-        }
-    }
-};
-
-void showMainMenu(QGraphicsView* currentView) {
-    MenuWindow* menu = new MenuWindow();
-    menu->showFullScreen();
-    QApplication::processEvents();
-    currentView->hide();
-    currentView->close();
-}
-
-QGraphicsView* createGameView() {
+QGraphicsView* createGameView(QGraphicsScene* scene) {
 
 
 
@@ -386,7 +371,7 @@ QGraphicsView* createGameView() {
     scene->setFocusItem(player);
     player->setFocus();
 
-    auto fitScene = [view]() {
+    auto fitScene = [view, scene]() {
         view->fitInView(scene->sceneRect(), Qt::IgnoreAspectRatio);
     };
 
@@ -503,9 +488,30 @@ pausePanel->move(panelX, panelY);
 
     QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
         paused = false;
-        showMainMenu(view);
+        showMainMenu(view, scene);
     });
     // ===== END PAUSE UI =====
 
     return view;
 }
+
+protected:
+    void resizeEvent(QResizeEvent* event) override {
+        QWidget::resizeEvent(event);
+
+        if (background) {
+            background->setGeometry(0, 0, width(), height());
+        }
+    }
+signals:
+    void gameStarted();
+};
+
+void showMainMenu(QGraphicsView* currentView, QGraphicsScene* scene) {
+    MenuWindow* menu = new MenuWindow(scene);
+    menu->showFullScreen();
+    QApplication::processEvents();
+    currentView->hide();
+    currentView->close();
+}
+

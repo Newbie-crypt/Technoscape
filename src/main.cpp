@@ -32,6 +32,7 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
+    QGraphicsScene* scene = new QGraphicsScene;
 
     music = new QMediaPlayer;
     audio = new QAudioOutput;
@@ -44,27 +45,24 @@ int main(int argc, char* argv[]) {
     audio->setVolume(0.12);
     music->play();
 
-    MenuWindow menu;
+    MenuWindow menu(scene);
 
-    // Every 50 ms, the program will check whether the robot collided with the player or not.
-    // Once they collide, the robot will attack!
-    // QTimer* timer = new QTimer;
-    // QObject::connect(timer, &QTimer::timeout, [] () {
-    //     Robot* robot;
-    //     QList<QGraphicsItem*> items = player->collidingItems();
-    //         for (int i = 0; i < items.size(); i++) {
-    //             if (robot = dynamic_cast<Robot*>(items.at(i))) {
-    //                 robot->Attack();
-    //             }
-    //         }
-    //         if (player->isDead()) exit(0);
-    //     }
-    //     else {
-    //         robot->Chase();
-    //     }
-    // });
+    QObject::connect(&menu, &MenuWindow::gameStarted, [&]() {
+        Player* player;
+        for (QGraphicsItem* item : scene->items()) {
+            if (dynamic_cast<Player*>(item)) {
+                player = dynamic_cast<Player*>(item);
+                break;
+            }
+        }
 
-    // timer->start(50);
-    // scene->addItem(robot);
+        Robot* robot = new Robot(player);
+
+        robot->setZValue(10);
+        scene->addItem(robot);
+        robot->setPos(200, 100);
+    });
+
+    
     return app.exec();
 }
