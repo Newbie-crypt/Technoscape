@@ -46,7 +46,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         // Variables
         bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Bools
         int targetRow = 0;
-        int lastSpriteRow;
+        int lastSpriteRow = 0;
         int currentShotSound = 0, currentFootSound = 0; // For the pool of sounds to cycle.
         int lastAimDirection = 2;       // Defaults to 2 (down)
         int animationTicker = 0;        // Ticker that resets every 80 ticks
@@ -84,8 +84,6 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void keyPressEvent(QKeyEvent* event) override;
         void keyReleaseEvent(QKeyEvent* event) override;
 };
-
-
 
 #endif // PLAYER_HPP
 

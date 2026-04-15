@@ -4,6 +4,7 @@
 #include "../include/door.hpp"
 #include "../include/trap.hpp"
 #include "../include/classes.hpp"
+#include "../include/weapon.hpp"
 #include <QBrush>
 #include <QTimer>
 #include <QGraphicsScene>
@@ -23,7 +24,12 @@
 #include <QPen>
 #include <QColor>
 #include <QTransform>
+<<<<<<< HEAD
 #include "../include/weapon.hpp"
+=======
+
+
+>>>>>>> remotes/origin/feature/damageAnimation
 extern bool paused;
 
 Player::Player(double x, double y) {
@@ -164,14 +170,15 @@ void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the p
     }
     else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
 
-    gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
+    if(moveDirection != 3 && moveDirection != 12 && moveDirection != 15)
+        gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
 }
 
 void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet checker and animator.
 {
     QPixmap* activeSheet = &walkSheet; // Assume walking.
 
-    if(moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow, Added isColliding to merge Kareem's collide logic with my walking
+    if(moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow.
     {
         activeSheet = &idleSheet;
         targetRow = lastSpriteRow;
@@ -490,6 +497,10 @@ void Player::showToBeContinued() {
     }
 }
 
+// void Enemy::onHit(int damage){
+//     health -= damage;
+// }
+
 void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_U) {
         unlockDoor();
@@ -525,7 +536,6 @@ Player::~Player() {
 void Player::resetTrapCooldown() {
     trapCooldown = false;
 }
-
 
 
 

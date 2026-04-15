@@ -14,12 +14,13 @@
 #include "../include/classes.hpp"
 #include "players.hpp"
 
-class Enemy: public QGraphicsObject {
+class Enemy: public QGraphicsObject, public Hittable {
     Q_OBJECT
     private:
     void checkCollision(double dx, double dy);
     protected:
         int health;
+        bool isDead = false;
         QPixmap sprite;
         double speed;
         QPointF velocity;
@@ -27,6 +28,7 @@ class Enemy: public QGraphicsObject {
         virtual void changeAnimationState(AnimationState state) = 0;
     public:
         Enemy(int h, const QString& asset, double s);
+        void onHit(int damage) override;
         QRectF boundingRect() const override;
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) = 0;
         void setTarget(Player* t);

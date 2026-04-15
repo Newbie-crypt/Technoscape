@@ -5,13 +5,15 @@
         <file>assets/walk.png</file>
         <file>assets/idle.png</file>
         <file>assets/bullet.png</file>
-        <file>assets/fire.wav</file>
-        <file>assets/footstep.wav</file>
         <file>assets/gun.png</file>
         <file>assets/Standing_Robot.png</file>
         <file>assets/OrangeRobot_Idle.png</file>
         <file>assets/OrangeRobot_Run.png</file>
         <file>assets/OrangeRobot_Attack1.png</file>
         <file>assets/health_symbol.png</file>
+        <file>assets/collide.png</file>
+        <file>assets/fire.wav</file>
+        <file>assets/footstep.wav</file>
+        <file>assets/grunt.wav</file>
     </qresource>
 </RCC>

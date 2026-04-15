@@ -15,6 +15,18 @@ void Robot::Attack() {
 
 void Enemy::setTarget(Player* t) {target = t;}
 
+void Enemy::onHit(int damage)
+{
+    health -= damage;
+    if (health < 0)
+    {
+        isDead = true;
+    }
+    // Call the destructor after Abu Hamar is done with the code.
+}
+
+
+
 Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
     // Loading all the spritesheets

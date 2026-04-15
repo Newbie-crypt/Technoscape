@@ -8,10 +8,8 @@
 using namespace std;
 
 
-Projectile::Projectile(double x, double y, int d)
+Projectile::Projectile(double x, double y, int d, QGraphicsItem* shooter) : dir(d), Player(shooter)
 {
-    dir = d;
-
     QPixmap rawSheet(":/assets/bullet.png");
     bulletSheet = rawSheet;
     setPixmap(bulletSheet);
@@ -46,20 +44,54 @@ void Projectile::processMovement()
 {
         switch(dir) //for walking & animation
         {
-        case 1:  moveBy(0, -s); break;
-        case 2:  moveBy(0, s); break;
-        case 4:  moveBy(-s, 0); break;
-        case 8:  moveBy(s, 0); break;
+        case 1:  moveBy(0, -speed); break;
+        case 2:  moveBy(0, speed); break;
+        case 4:  moveBy(-speed, 0); break;
+        case 8:  moveBy(speed, 0); break;
         case 9:  moveBy(7.071, -7.071); break;
         case 10: moveBy(7.071, 7.071); break;
         case 6:  moveBy(-7.071, 7.071); break;
         case 5:  moveBy(-7.071, -7.071); break;
     }
+        auto colliding_items = collidingItems();
 
-//     if (pos().y() < -100 || pos().y() > 700 || pos().x() < -100 || pos().x() > 900) { //boundary checking so that projectiles are deleted once they're off screen. We should add collisions with walls later.
-//         scene()->removeItem(this);
-//         delete this;
-//     }
+        for (int i = 0; i < colliding_items.size(); i++) {
+            auto item = colliding_items[i];
+            if (item->parentItem() != nullptr || item == Player || item->zValue() < 0) continue;
+            // qDebug() << "\nColliding with:" << typeid(*item).name(); // For debugging collisions.
+            Hittable* h = dynamic_cast<Hittable*>(item);
+            if (h) {
+                h->onHit(damage);
+            }
+
+            movementTimer->stop();
+
+            QPixmap collide(":assets/collide.png");
+            setPixmap(collide.copy(0, 0, 273, 375));
+            switch(dir) //for offsets with bullets
+            {
+            case 1:  moveBy(-0.125 * collide.height()/2, 0); break;
+            case 2:  moveBy(0.125 * collide.height()/2, 0); break;
+            case 4:  moveBy(0, 0.125 * collide.height()/2); break;
+            case 8:  moveBy(0, -0.125 * collide.height()/2); break;
+            case 9:  moveBy(-0.125 * collide.height()/2, 0); break; //This (top right)
+            case 10: moveBy(0.125 * collide.height()/2, 0); break;
+            case 6:  moveBy(0.125 * collide.height()/2, 0); break; //This (bottom left)
+            case 5:  moveBy(-0.125 * collide.height()/2, 0); break;
+            }
+
+            QTimer::singleShot(200, [this]() {
+                scene()->removeItem(this);
+                delete this;
+            });
+            return;
+
+
+        }
 }
 
-Projectile::~Projectile() {delete movementTimer;}
+Hittable::~Hittable() {}
+
+Projectile::~Projectile() {
+    delete movementTimer;
+}

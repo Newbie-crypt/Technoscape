@@ -43,7 +43,7 @@ void Weapon::aimAt(int direction) {
 
     QTransform t;
 
-    // Left-facing cases, flip the gun
+    // Left-facing cases, flip the gun initially, 2 was added by accident, but is kept for setPos() purposes. 3,
     if (direction == 4 || direction == 2 || direction == 5 || direction == 6) {
         t.scale(-1, 1);
         setTransform(t);
@@ -75,7 +75,7 @@ void Weapon::shoot() {
     if (!canShoot) return;
 
     // Spawn the projectile.
-    Projectile* bullet = new Projectile(mapToScene(boundingRect().center()).x(), mapToScene(boundingRect().center()).y(), currentAimDirection);
+    Projectile* bullet = new Projectile(mapToScene(boundingRect().center()).x(), mapToScene(boundingRect().center()).y(), currentAimDirection, parentItem());
     scene()->addItem(bullet);
 
     // Audio

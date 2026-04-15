@@ -56,17 +56,23 @@ class Projectile : public QObject, public QGraphicsPixmapItem{
     Q_OBJECT
     private:
         QTimer* movementTimer;
+        QGraphicsItem* Player;
         int damage;
         int dir;
-        int s = 10;
+        int speed = 10;
         QPixmap bulletSheet;
     public:
-        Projectile(double x, double y, int d);
+        Projectile(double x = 0, double y = 0, int d = 35, QGraphicsItem* shooter = nullptr);
         virtual ~Projectile();
 
     public slots:
         void processMovement();
+};
 
+class Hittable{
+    public:
+    virtual void onHit(int damage) = 0;
+    virtual ~Hittable();
 };
 
 //for variable names, in the class I used whatever was logical, and for constructors I either took the first letter of the variable name, or the capital version
