@@ -1,3 +1,6 @@
+#ifndef MENU_GAMESCENE_HPP
+#define MENU_GAMESCENE_HPP
+
 #include <QApplication>
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -492,24 +495,25 @@ public:
     }
 
 protected:
-  void resizeEvent(QResizeEvent* event) override {
-    QWidget::resizeEvent(event);
+    void resizeEvent(QResizeEvent* event) override {
+        QWidget::resizeEvent(event);
 
-    if (background) {
-        background->setGeometry(0, 0, width(), height());
-    }
+        if (background) {
+            background->setGeometry(0, 0, width(), height());
+        }
 
-    if (panel) {
-        int panelW = 450;
-        int panelH = 430;
+        if (panel) {
+            int panelW = 450;
+            int panelH = 430;
 
-        int panelX = (width() - panelW) / 2;
-        int panelY = (height() - panelH) / 2 + 80;
+            int panelX = (width() - panelW) / 2;
+            int panelY = (height() - panelH) / 2 + 80;
 
-        panel->setGeometry(panelX, panelY, panelW, panelH);
+            panel->setGeometry(panelX, panelY, panelW, panelH);
 
-        if (title) {
-            title->setGeometry(panelX - 90, panelY - 270, panelW + 180, 229);
+            if (title) {
+                title->setGeometry(panelX - 90, panelY - 270, panelW + 180, 229);
+            }
         }
     }
 };
@@ -521,3 +525,5 @@ void showMainMenu(QGraphicsView* currentView) {
     currentView->hide();
     currentView->close();
 }
+
+#endif // MENU_GAMESCENE_HPP
