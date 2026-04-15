@@ -75,17 +75,23 @@ public:
         hoverAudio->setVolume(1.0);
 
         QObject::connect(this, &QPushButton::clicked, [this]() {
-            clickPlayer->stop();
-            clickPlayer->setPosition(0);
-            clickPlayer->play();
+            QTimer::singleShot(0, this, [this]() {
+                clickPlayer->stop();
+                clickPlayer->setPosition(0);
+                clickPlayer->play();
+            });
         });
     }
+
 protected:
     void enterEvent(QEnterEvent* event) override {
-        hoverPlayer->stop();
-        hoverPlayer->setPosition(0);
-        hoverPlayer->play();
         QPushButton::enterEvent(event);
+
+        QTimer::singleShot(0, this, [this]() {
+            hoverPlayer->stop();
+            hoverPlayer->setPosition(0);
+            hoverPlayer->play();
+        });
     }
 
 private:
@@ -390,20 +396,16 @@ public:
     MenuWindow() {
         setWindowTitle("Technoscape");
 
-        //background = new QLabel(this);
-        //QPixmap bg("assets/menu_bg.png");
-       // if (bg.isNull()) {
-            //qDebug() << "ERROR: IMAGE NOT FOUND: assets/menu_bg.png";
-        //}
-        //background->setPixmap(bg);
-       // background->setScaledContents(true);
-        //background->setGeometry(0, 0, width(), height());
-        //background->lower();
-
         background = new QLabel(this);
-background->setGeometry(0, 0, width(), height());
-background->setStyleSheet("background-color: black;");
-background->lower();
+        QPixmap bg("assets/menu_bg.png");
+        if (bg.isNull()) {
+            //qDebug() << "ERROR: IMAGE NOT FOUND: assets/menu_bg.png";
+        }
+        background->setPixmap(bg);
+        background->setScaledContents(true);
+        background->setGeometry(0, 0, width(), height());
+        background->lower();
+
 
         panel = new QFrame(this);
         panel->setGeometry(0, 0, 450, 430);
