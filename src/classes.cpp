@@ -56,10 +56,10 @@ void Projectile::processMovement()
         case 5:  moveBy(-7.071, -7.071); break;
     }
 
-    if (pos().y() < -100 || pos().y() > 700 || pos().x() < -100 || pos().x() > 900) { //boundary checking so that projectiles are deleted once they're off screen. We should add collisions with walls later.
-        scene()->removeItem(this);
-        delete this;
-    }
+//     if (pos().y() < -100 || pos().y() > 700 || pos().x() < -100 || pos().x() > 900) { //boundary checking so that projectiles are deleted once they're off screen. We should add collisions with walls later.
+//         scene()->removeItem(this);
+//         delete this;
+//     }
 }
 
 Projectile::~Projectile() {delete movementTimer;}

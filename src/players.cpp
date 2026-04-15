@@ -183,11 +183,12 @@ void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet check
 
     else // Walking animation, bunch of checks to fix bug where letting go of W a second before A leads to left animation.
     {
-        currentFrameIndex = animationTicker / 10; // Variable used to switch between the 8 available images
-        animationTicker = (animationTicker + speedMultiplier) % 80; // Ticker.
         if (diagonalBuffer > 0 && moveDirection !=5 && moveDirection != 6 && moveDirection != 9 && moveDirection != 10) {diagonalBuffer--; targetRow = lastSpriteRow;} // If buffer isn't empty, and we aren't moving diagonally, decrement buffer and keep the target row the same as last run (to stop flickering to side/up animation before diagonal).
         if (diagonalBuffer == 0 || moveDirection == 5 || moveDirection == 6 || moveDirection == 9 || moveDirection == 10) {lastSpriteRow = targetRow;} // If the buffer is empty (no recent diagonal movement) OR we're moving diagonally, update lastSpriteRow normally
     }
+
+    currentFrameIndex = animationTicker / 10; // Variable used to switch between the 8 available images
+    animationTicker = (animationTicker + speedMultiplier) % 80; // Ticker.
 
     setPixmap(activeSheet->copy(currentFrameIndex * 48, targetRow * 64, 48, 64)); // Updating Pixmap to current animation
 }
