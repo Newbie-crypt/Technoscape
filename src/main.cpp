@@ -119,7 +119,7 @@ QGraphicsView* createGameView() {
     };
 
     Player* player = new Player(0, 0);
-    player->setPos(568, 421);
+    player->setPos(568, 400);
     scene->addItem(player);
     scene->setFocusItem(player);
     player->setFocus();

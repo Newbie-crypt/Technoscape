@@ -122,39 +122,39 @@ void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the p
         case 4: {  // Left
             moveBy(speedMultiplier * -2.5, 0);
             targetRow = 1;
-            checkCollision(0, speedMultiplier * 2.5);
+            checkCollision(speedMultiplier * -2.5, 0);
             break;
         }
         case 8: { //Right
             moveBy(speedMultiplier * 2.5, 0);
             targetRow = 5;
-            checkCollision(0, speedMultiplier * 2.5);
+            checkCollision(speedMultiplier * 2.5, 0);
             break;
         }
         case 9: { // Top-Right
             moveBy(speedMultiplier * 2.236, speedMultiplier * -2.236);
-            checkCollision(0, speedMultiplier * 2.5);
+            checkCollision(speedMultiplier * 2.236, speedMultiplier * -2.236);
             diagonalBuffer = 3;
             targetRow = 4;
             break;
         }
         case 10: { // Bottom-Left
             moveBy(speedMultiplier * 2.236, speedMultiplier * 2.236);
-            checkCollision(0, speedMultiplier * 2.5);
+            checkCollision(speedMultiplier * 2.236, speedMultiplier * 2.236);
             diagonalBuffer = 3;
             targetRow = 5;
             break;
         }
         case 6: { // Bottom-Left
             moveBy(speedMultiplier * -2.236, speedMultiplier * 2.236);
-            checkCollision(0, speedMultiplier * 2.5);
+            checkCollision(speedMultiplier * -2.236, speedMultiplier * 2.236);
             diagonalBuffer = 3;
             targetRow = 1;
             break;
         }
         case 5: {
             moveBy(speedMultiplier * -2.236, speedMultiplier * -2.236);
-            checkCollision(0, speedMultiplier * 2.5);
+            checkCollision(speedMultiplier * -2.236, speedMultiplier * -2.236);
             diagonalBuffer = 3;
             targetRow = 2;
             break;  // Top-Left

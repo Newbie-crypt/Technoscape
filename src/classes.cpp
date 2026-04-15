@@ -18,6 +18,8 @@ Projectile::Projectile(double x, double y, int d)
     this->setScale(0.125);
     setPos(x - (bulletSheet.width() / 2), y - (bulletSheet.height() / 2)); //Offset
 
+    // setFlag(QGraphicsItem::ItemStacksBehindParent); // Use this later to make the bullets appear from inside the gun, instead of behind the scene.
+
     int angle = 0;
 
     switch(dir) {
