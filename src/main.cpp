@@ -29,7 +29,6 @@
 #include "../include/classes.hpp"
 #include "../include/menu_gameScene.hpp"
 
-
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     QGraphicsScene* scene = new QGraphicsScene;

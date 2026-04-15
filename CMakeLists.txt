@@ -23,6 +23,7 @@ set(SOURCE_FILES
     src/classes.cpp
     src/enemies.cpp
     src/menu_gameScene.cpp
+    src/keyitem.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -33,6 +34,8 @@ set(SOURCE_FILES
     include/classes.hpp
     include/enemies.hpp
     include/menu_gameScene.hpp
+    include/leghitbox.hpp
+    include/keyitem.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

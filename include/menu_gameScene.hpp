@@ -1,14 +1,24 @@
-#pragma once
-#include <QWidget>
+#ifndef MENU_GAMESCENE_HPP
+#define MENU_GAMESCENE_HPP
+
+#include <QApplication>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsPixmapItem>
+#include <QPixmap>
+#include <QDebug>
 #include <QPainter>
-#include <QPainterPath>
-#include <QLabel>
-#include <QFrame>
-#include <QGraphicsDropShadowEffect>
-#include <QVBoxLayout>
-#include <QObject>
+#include <QTimer>
+#include <QWidget>
 #include <QPushButton>
-#include <QCoreApplication>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QGraphicsDropShadowEffect>
+#include <QPropertyAnimation>
+#include <QFrame>
+#include <QResizeEvent>
+#include <QLinearGradient>
+#include <QPainterPath>
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QTimer>
@@ -21,25 +31,17 @@
 #include "trap.hpp"
 #include "door.hpp"
 #include "enemies.hpp"
-
+#include <QCoreApplication>
+#include <QEnterEvent>
+#include <QUrl>
+#include <QSoundEffect>
+#include "machine.hpp"
+#include "classes.hpp"
+#include "keyitem.hpp"
 
 extern bool paused;
 extern QMediaPlayer* music;
 extern QAudioOutput* audio;
-
-class SoundButton : public QPushButton {
-    public:
-        SoundButton(const QString& text, QWidget* parent = nullptr);
-    protected:
-        void enterEvent(QEnterEvent* event) override;
-
-    private:
-        QMediaPlayer* clickPlayer;
-        QAudioOutput* clickAudio;
-        QMediaPlayer* hoverPlayer;
-        QAudioOutput* hoverAudio;
-};
-
 
 class TitleWidget : public QWidget {
     public:
@@ -49,12 +51,33 @@ class TitleWidget : public QWidget {
         void paintEvent(QPaintEvent*) override;
 };
 
+class HoverSoundFilter : public QObject {
+public:
+    HoverSoundFilter(QSoundEffect* player, QObject* parent = nullptr)
+        : QObject(parent), hoverPlayer(player) {}
+
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override {
+        if (event->type() == QEvent::Enter) {
+            if (hoverPlayer) {
+                hoverPlayer->stop();
+                hoverPlayer->play();
+            }
+        }
+        return QObject::eventFilter(watched, event);
+    }
+
+private:
+    QSoundEffect* hoverPlayer;
+};
+
 class MenuWindow : public QWidget {
     Q_OBJECT
 public:
     QLabel* background;
     TitleWidget* title;
     QFrame* panel;
+
 
     MenuWindow(QGraphicsScene* scene);
     QGraphicsView* createGameView(QGraphicsScene* scene);
@@ -67,3 +90,4 @@ signals:
 
 void showMainMenu(QGraphicsView* currentView, QGraphicsScene* scene);
 
+#endif // MENU_GAMESCENE_HPP

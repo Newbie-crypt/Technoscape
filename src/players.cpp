@@ -25,6 +25,7 @@
 #include <QColor>
 #include <QTransform>
 #include "../include/weapon.hpp"
+#include "../include/keyitem.hpp"
 
 
 extern bool paused;
@@ -63,6 +64,7 @@ Player::Player(double x, double y) {
 
 
     gun = new Weapon(this);
+    legs = new LegHitbox(this);
 
 
     walkSheet = QPixmap(":/assets/walk.png");   // Preload walk and idle sprite sheets
@@ -81,16 +83,152 @@ Player::Player(double x, double y) {
 
 }
 
+void Player::decreaseHealth(int h) {
+    if (!health) {
+        return;
+    }
+
+    if (health->getHP() == 0) {
+        return;
+    }
+
+    health->decreaseHP(h);
+
+    if (health->getHP() <= 0) {
+        emit died();
+    }
+}
+
+void Player::showInteractionText(const QString& text) {
+    if (!scene()) {
+        return;
+    }
+
+    if (!interactionText) {
+        interactionText = scene()->addText("");
+        interactionText->setDefaultTextColor(Qt::white);
+        interactionText->setFont(QFont("Arial", 18, QFont::Bold));
+        interactionText->setZValue(2000);
+    }
+
+    interactionText->setPlainText(text);
+
+    QRectF rect = interactionText->boundingRect();
+    double textX = (800 - rect.width()) / 2;
+    double textY = 555;
+
+    interactionText->setPos(textX, textY);
+    interactionText->show();
+}
+
+void Player::hideInteractionText() {
+    if (interactionText) {
+        interactionText->hide();
+    }
+}
+
+void Player::updateInteractionPrompt() {
+    nearbyDoor = nullptr;
+    nearbyKey = nullptr;
+
+    QList<QGraphicsItem*> colliding_items = legs->collidingItems();
+
+    // -------- KEY DETECTION --------
+    for (int i = 0; i < colliding_items.size(); i++) {
+        KeyItem* key = dynamic_cast<KeyItem*>(colliding_items[i]);
+        if (key && key != hudKey) {
+            nearbyKey = key;
+        }
+    }
+
+    // -------- DOOR DETECTION (SCENE-BASED, MORE RELIABLE) --------
+    if (scene()) {
+        QRectF playerRect = legs->sceneBoundingRect().adjusted(-8, -8, 8, 8);
+        QList<QGraphicsItem*> sceneItems = scene()->items();
+
+        for (int i = 0; i < sceneItems.size(); i++) {
+            Door* door = dynamic_cast<Door*>(sceneItems[i]);
+            if (!door) {
+                continue;
+            }
+
+            if (door->isLocked() && playerRect.intersects(door->sceneBoundingRect())) {
+                nearbyDoor = door;
+                break;
+            }
+        }
+    }
+
+    if (nearbyKey && !hasAccessKey) {
+        showInteractionText("Press C to collect");
+        return;
+    }
+
+    if (nearbyDoor) {
+        if (hasAccessKey) {
+            showInteractionText("Press O to use the key");
+        } else {
+            showInteractionText("Door locked");
+        }
+        return;
+    }
+
+    hideInteractionText();
+}
+
+void Player::collectNearbyKey() {
+    if (!nearbyKey || hasAccessKey) {
+        return;
+    }
+
+    hasAccessKey = true;
+
+    if (hudKey) {
+        hudKey->show();
+    }
+
+    if (scene()) {
+        scene()->removeItem(nearbyKey);
+    }
+
+    delete nearbyKey;
+    nearbyKey = nullptr;
+
+    hideInteractionText();
+}
+
+void Player::useKeyOnDoor() {
+    if (!hasAccessKey || !nearbyDoor || !nearbyDoor->isLocked()) {
+        return;
+    }
+
+    hasAccessKey = false;
+
+    if (hudKey) {
+        hudKey->hide();
+    }
+
+    hideInteractionText();
+    unlockDoor();
+}
 
 
 void Player::processMovement()
 {
+   if (health && health->getHP() <= 0) {
+        movementTimer->stop();
+        return;
+    }
     int moveDirection = getInputMask();    //for direction calculation, to be used in switch-case.
     int speedMultiplier = isSprinting ? 1.5 : 1;
 
     applyPhysics(moveDirection, speedMultiplier); // Move character
     updateSprite(moveDirection, speedMultiplier);    // Animate character
     handleFootsteps(moveDirection);
+
+    checkTrapCollision();
+    checkDoorOpen();
+    updateInteractionPrompt();
 }
 
 int Player::getInputMask() // Get the direction in which the player is moving.
@@ -215,7 +353,7 @@ void Player::checkTrapCollision() {
         return;
     }
 
-    QList<QGraphicsItem*> colliding_items = collidingItems();
+    QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
     for (int i = 0; i < colliding_items.size(); i++) {
         Trap* trap = dynamic_cast<Trap*>(colliding_items[i]);
@@ -240,7 +378,7 @@ void Player::checkTrapCollision() {
 }
 
 void Player::checkCollision(double dx, double dy) {
-    QList<QGraphicsItem*> colliding_items = collidingItems();
+    QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
     for (int i = 0; i < colliding_items.size(); i++) {
         if (typeid(*(colliding_items[i])) == typeid(Wall)) {
@@ -267,7 +405,7 @@ void Player::checkCollision(double dx, double dy) {
 }
 
 void Player::checkDoorOpen() {
-    QList<QGraphicsItem*> colliding_items = collidingItems();
+    QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
     for (int i = 0; i < colliding_items.size(); i++) {
         Door* door = dynamic_cast<Door*>(colliding_items[i]);
@@ -499,6 +637,24 @@ void Player::showToBeContinued() {
 // }
 
 void Player::keyPressEvent(QKeyEvent* event){
+
+    if (event->key() == Qt::Key_C) {
+        collectNearbyKey();
+        return;
+    }
+
+    if (event->key() == Qt::Key_O) {
+        useKeyOnDoor();
+        return;
+    }
+
+    // TEMP TEST: press K to kill player
+    if (event->key() == Qt::Key_K) {
+        decreaseHealth(999);
+        return;
+    }
+
+    // TEMP TEST: press U to unlock door
     if (event->key() == Qt::Key_U) {
         unlockDoor();
         return;
@@ -511,7 +667,6 @@ void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
 
-    // Passing the control to Qt for it to do its necessary magic.
     QGraphicsPixmapItem::keyPressEvent(event);
 }
 

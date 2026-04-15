@@ -12,8 +12,8 @@ Wall::Wall(int x, int y, int w, int h)
         setBrush(QColor(255,0,0,90));
         setPen(QPen(Qt::red,2));
     } else {
-        setBrush(Qt::NoBrush);
-        setPen(Qt::NoPen);
+        setBrush(QColor(255,0,0,90));
+        setPen(QPen(Qt::red,2));
     }
 
     setPos(x, y);
