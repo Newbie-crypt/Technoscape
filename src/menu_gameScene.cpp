@@ -236,7 +236,7 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
     // May the main character spawn!
     Player* player = new Player(0, 0);
     player->setHealthBar(health_bar);
-    player->setPos(568, 421);
+    player->setPos(568, 300);
     scene->addItem(player);
     scene->addItem(health_bar);
     scene->setFocusItem(player);

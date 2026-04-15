@@ -75,7 +75,7 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     // If they are colliding, the robot will attack.
     // Otherwise, the robot will chase the player!
     QTimer* timer2 = new QTimer(this);
-    QObject::connect(timer2, &QTimer::timeout, [this] () {
+    QObject::connect(timer2, &QTimer::timeout, [this] () {  
         if (target->collidesWithItem(this)) {
             this->Attack();
             // if (target->isDead()) exit(0);
