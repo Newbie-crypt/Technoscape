@@ -46,7 +46,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         // Variables
         bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Bools
         int targetRow = 0;
-        int lastSpriteRow;
+        int lastSpriteRow = 0;
         int currentShotSound = 0, currentFootSound = 0; // For the pool of sounds to cycle.
         int lastAimDirection = 2;       // Defaults to 2 (down)
         int animationTicker = 0;        // Ticker that resets every 80 ticks
@@ -92,6 +92,7 @@ class Enemy: public QGraphicsObject, public Hittable {
     void checkCollision(double dx, double dy);
     protected:
         int health;
+        bool isDead = false;
         QPixmap sprite;
         double speed;
         QPointF velocity;
@@ -178,7 +179,7 @@ class Robot: public Enemy {
             });
 
             timer->start(100);
-            
+
             // This is useful for when we flip the sprite horizontally in the Chase() function
             setTransformOriginPoint(boundingRect().center());
         }
@@ -208,16 +209,16 @@ class Robot: public Enemy {
             changeAnimationState(AnimationState::Running);
             moveBy(10, 0);
         }
-        
+
         // Slot used to chase the player.
         void Chase() override {
             changeAnimationState(AnimationState::Running);
 
             // If the player is not present, then there's nothing to chase!
-            if (!target) return; 
+            if (!target) return;
 
             // Difference between the enemy and the player in the 2D coordinate system
-            QPointF direction = target->pos() - pos(); 
+            QPointF direction = target->pos() - pos();
 
             double distance = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
 
@@ -237,10 +238,10 @@ class Robot: public Enemy {
             }
 
             moveBy(velocity.x(), velocity.y());
-            
+
         }
 
-        
+
 };
 
 #endif // PLAYER_HPP
