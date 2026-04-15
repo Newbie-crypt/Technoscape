@@ -15,9 +15,9 @@ class HealthBar : public QGraphicsItem {
     public:
         HealthBar() : maxHP(100), currentHP(100) {
             frame = QPixmap(":/assets/No_Health.png");
-            frame = frame.scaled(100, 100, Qt::KeepAspectRatio);
+            frame = frame.scaled(150, 50, Qt::KeepAspectRatio);
             fill = QPixmap(":/assets/Full_Health.png");
-            fill = fill.scaled(100, 100, Qt::KeepAspectRatio);
+            fill = fill.scaled(150, 50, Qt::KeepAspectRatio);
         }
 
         void setHP(int hp) {

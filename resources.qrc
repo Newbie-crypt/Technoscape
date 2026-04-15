@@ -12,5 +12,6 @@
         <file>assets/OrangeRobot_Idle.png</file>
         <file>assets/OrangeRobot_Run.png</file>
         <file>assets/OrangeRobot_Attack1.png</file>
+        <file>assets/health_symbol.png</file>
     </qresource>
 </RCC>

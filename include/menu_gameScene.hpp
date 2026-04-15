@@ -20,12 +20,17 @@
 #include "players.hpp"
 #include "trap.hpp"
 #include "door.hpp"
+#include "enemies.hpp"
 // GLOBAL PAUSE STATE
 bool paused = false;
 
+QGraphicsScene* scene = new QGraphicsScene;
 // GLOBAL MUSIC
 QMediaPlayer* music;
 QAudioOutput* audio;
+
+QGraphicsView* createGameView();
+
 
 
 class SoundButton : public QPushButton {
@@ -132,6 +137,8 @@ public:
     QFrame* panel;
 
     MenuWindow() {
+
+        // MAIN MENU DESIGN SECTION
         setWindowTitle("Technoscape");
 
         background = new QLabel(this);
@@ -219,6 +226,9 @@ public:
         panelLayout->addWidget(settingsButton);
         panelLayout->addWidget(exitButton);
 
+        // END OF MAIN MENU DESIGN SECTION
+
+        // Events when the buttons are pressed
         QObject::connect(startButton, &QPushButton::clicked, [this]() {
             QTimer::singleShot(120, [this]() {
                 paused = false;
@@ -258,7 +268,7 @@ void showMainMenu(QGraphicsView* currentView) {
 
 QGraphicsView* createGameView() {
 
-    QGraphicsScene* scene = new QGraphicsScene;
+
 
     QPixmap levelBg("assets/level1_closed.png");
     if (levelBg.isNull()) {
@@ -282,11 +292,26 @@ QGraphicsView* createGameView() {
         scene->addItem(new Trap(x, y, w, h));
     };
 
+
+    // w = h = 60, y= 517, x=15 (heart)
+    // x 76, y = 542 (bar)
+    QPixmap health_symbol_image (":/assets/health_symbol.png");
+    health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QGraphicsPixmapItem* health_symbol = scene->addPixmap(health_symbol_image);
+    health_symbol->setPos(15, 540);
+    HealthBar* health_bar = new HealthBar;
+    health_bar->setPos(76, 542);
+    health_bar->setZValue(1000);
+    // May the main character spawn!
     Player* player = new Player(0, 0);
+    player->setHealthBar(health_bar);
     player->setPos(568, 421);
     scene->addItem(player);
+    scene->addItem(health_bar);
     scene->setFocusItem(player);
     player->setFocus();
+
+    // May a robot spawn!
 
     // WALLS
     addWall(48, 0, 723, 46);
@@ -361,7 +386,7 @@ QGraphicsView* createGameView() {
     scene->setFocusItem(player);
     player->setFocus();
 
-    auto fitScene = [view, scene]() {
+    auto fitScene = [view]() {
         view->fitInView(scene->sceneRect(), Qt::IgnoreAspectRatio);
     };
 

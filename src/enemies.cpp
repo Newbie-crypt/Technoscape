@@ -15,7 +15,7 @@ void Robot::Attack() {
 
 void Enemy::setTarget(Player* t) {target = t;}
 
-Robot::Robot() : Enemy(100, ":/assets/Standing_Robot.png", 3) {
+Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
     // Loading all the spritesheets
     spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png");
@@ -66,7 +66,27 @@ Robot::Robot() : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     });
 
     timer->start(100);
-    
+
+    setTarget(t);
+
+
+    // The "Chase & Attack" Algorithm
+    // Every 50ms, we are checking whether the player is colliding with the robot
+    // If they are colliding, the robot will attack.
+    // Otherwise, the robot will chase the player!
+    QTimer* timer2 = new QTimer(this);
+    QObject::connect(timer2, &QTimer::timeout, [this] () {
+        if (target->collidesWithItem(this)) {
+            this->Attack();
+            if (target->isDead()) exit(0);
+        }
+        else {
+            this->Chase();
+        }
+    });
+
+    timer2->start(50);
+
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
 }

@@ -530,30 +530,5 @@ void Player::resetTrapCooldown() {
 }
 
 
-void Enemy::checkCollision(double dx, double dy) {
-    QList<QGraphicsItem*> colliding_items = collidingItems();
 
-    for (int i = 0; i < colliding_items.size(); i++) {
-        if (typeid(*(colliding_items[i])) == typeid(Wall)) {
-            moveBy(-dx, -dy);
-            return;
-        }
-
-        if (typeid(*(colliding_items[i])) == typeid(Furniture)) {
-            moveBy(-dx, -dy);
-            return;
-        }
-
-        Door* door = dynamic_cast<Door*>(colliding_items[i]);
-
-        if (!door && colliding_items[i]->group()) {
-            door = dynamic_cast<Door*>(colliding_items[i]->group());
-        }
-
-        if (door && door->isLocked()) {
-            moveBy(-dx, -dy);
-            return;
-        }
-    }
-}
 

@@ -52,7 +52,7 @@ class Robot: public Enemy {
         int frame_height;
         const int number_of_states = 3; // Idle, attacking, running
     public:
-        Robot();
+        Robot(Player* t);
         void Attack() override;
     protected:
         void changeAnimationState(AnimationState state) override;
