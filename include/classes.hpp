@@ -66,7 +66,10 @@ class Projectile : public QObject, public QGraphicsPixmapItem{
 
     public slots:
         void processMovement();
+};
 
+class Hittable{
+    virtual void onHit(int damage);
 };
 
 //for variable names, in the class I used whatever was logical, and for constructors I either took the first letter of the variable name, or the capital version

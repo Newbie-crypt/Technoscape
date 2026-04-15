@@ -86,7 +86,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void keyReleaseEvent(QKeyEvent* event) override;
 };
 
-class Enemy: public QGraphicsObject {
+class Enemy: public QGraphicsObject, public Hittable {
     Q_OBJECT
     private:
     void checkCollision(double dx, double dy);
@@ -100,6 +100,7 @@ class Enemy: public QGraphicsObject {
         Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
             sprite.load(asset);
         }
+        void onHit(int damage) override;
         QRectF boundingRect() const override {
             return QRectF(0, 0, sprite.width(), sprite.height());
         }

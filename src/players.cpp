@@ -493,6 +493,10 @@ void Player::showToBeContinued() {
     }
 }
 
+void Enemy::onHit(int damage){
+    health -= damage;
+}
+
 void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_U) {
         unlockDoor();
