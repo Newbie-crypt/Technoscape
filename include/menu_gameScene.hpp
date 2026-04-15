@@ -390,17 +390,20 @@ public:
     MenuWindow() {
         setWindowTitle("Technoscape");
 
+        //background = new QLabel(this);
+        //QPixmap bg("assets/menu_bg.png");
+       // if (bg.isNull()) {
+            //qDebug() << "ERROR: IMAGE NOT FOUND: assets/menu_bg.png";
+        //}
+        //background->setPixmap(bg);
+       // background->setScaledContents(true);
+        //background->setGeometry(0, 0, width(), height());
+        //background->lower();
+
         background = new QLabel(this);
-        QPixmap bg("assets/menu_bg.png");
-
-        if (bg.isNull()) {
-            qDebug() << "ERROR: IMAGE NOT FOUND: assets/menu_bg.png";
-        }
-
-        background->setPixmap(bg);
-        background->setScaledContents(true);
-        background->setGeometry(0, 0, width(), height());
-        background->lower();
+background->setGeometry(0, 0, width(), height());
+background->setStyleSheet("background-color: black;");
+background->lower();
 
         panel = new QFrame(this);
         panel->setGeometry(0, 0, 450, 430);

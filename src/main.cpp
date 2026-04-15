@@ -27,7 +27,7 @@
 #include "../include/trap.hpp"
 #include "../include/machine.hpp"
 #include "../include/classes.hpp"
-#include "../include/Menu_gameScene.hpp"
+#include "../include/menu_gameScene.hpp"
 
 
 // Alright, so now we have implemented the very basics of the game. Let's now make this a real game ;)
