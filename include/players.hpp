@@ -13,6 +13,7 @@
 #include <map>
 #include "../include/weapon.hpp"
 #include "../include/classes.hpp"
+#include "../include/leghitbox.hpp"
 
 
 enum class AnimationState : int {
@@ -58,6 +59,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         QTimer* movementTimer;          // Timer for everything.
         // Related Objects
         Weapon* gun;
+        LegHitbox* legs;
 
 
     public:

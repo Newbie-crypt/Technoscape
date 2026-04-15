@@ -161,8 +161,8 @@ QGraphicsView* createGameView() {
     addBox(183, 131, 101, 54);
     addBox(193, 116, 83, 16);
     addBox(206, 106, 54, 10);
-    addBox(226, 88, 8, 18);
-    addBox(234, 102, 10, 4);
+    //addBox(226, 88, 8, 18);
+    //addBox(234, 102, 10, 4);
     addBox(216, 102, 10, 4);
     addBox(187, 124, 6, 7);
     addBox(199, 112, 6, 4);

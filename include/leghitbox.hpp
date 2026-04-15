@@ -1,0 +1,28 @@
+#ifndef LEGHITBOX_HPP
+#define LEGHITBOX_HPP
+
+#include <QGraphicsRectItem>
+#include <QPen>
+#include <QBrush>
+#include <QColor>
+
+class LegHitbox : public QGraphicsRectItem
+{
+public:
+    LegHitbox(QGraphicsItem* parent = nullptr)
+        : QGraphicsRectItem(parent)
+    {
+        
+        setRect(0, 0, 7, 7);
+
+       
+        setPos(19, 33);
+
+        // visible for testing
+        setPen(QPen(Qt::red, 2));
+        setBrush(QBrush(QColor(255, 0, 0, 120)));
+        setZValue(1000);
+    }
+};
+
+#endif // LEGHITBOX_HPP

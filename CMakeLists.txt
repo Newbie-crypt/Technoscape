@@ -29,6 +29,8 @@ set(SOURCE_FILES
     include/trap.hpp
     include/weapon.hpp
     include/classes.hpp
+    include/leghitbox.hpp
+    include/menu_gameScene.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

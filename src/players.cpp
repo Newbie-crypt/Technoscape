@@ -63,6 +63,7 @@ Player::Player(double x, double y) {
 
 
     gun = new Weapon(this);
+    legs = new LegHitbox(this);
 
 
     walkSheet = QPixmap(":/assets/walk.png");   // Preload walk and idle sprite sheets
@@ -91,6 +92,9 @@ void Player::processMovement()
     applyPhysics(moveDirection, speedMultiplier); // Move character
     updateSprite(moveDirection, speedMultiplier);    // Animate character
     handleFootsteps(moveDirection);
+
+    checkTrapCollision();
+    checkDoorOpen();
 }
 
 int Player::getInputMask() // Get the direction in which the player is moving.
@@ -214,7 +218,7 @@ void Player::checkTrapCollision() {
         return;
     }
 
-    QList<QGraphicsItem*> colliding_items = collidingItems();
+    QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
     for (int i = 0; i < colliding_items.size(); i++) {
         Trap* trap = dynamic_cast<Trap*>(colliding_items[i]);
@@ -239,7 +243,7 @@ void Player::checkTrapCollision() {
 }
 
 void Player::checkCollision(double dx, double dy) {
-    QList<QGraphicsItem*> colliding_items = collidingItems();
+    QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
     for (int i = 0; i < colliding_items.size(); i++) {
         if (typeid(*(colliding_items[i])) == typeid(Wall)) {
@@ -266,7 +270,7 @@ void Player::checkCollision(double dx, double dy) {
 }
 
 void Player::checkDoorOpen() {
-    QList<QGraphicsItem*> colliding_items = collidingItems();
+    QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
     for (int i = 0; i < colliding_items.size(); i++) {
         Door* door = dynamic_cast<Door*>(colliding_items[i]);
