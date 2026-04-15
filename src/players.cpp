@@ -24,12 +24,9 @@
 #include <QPen>
 #include <QColor>
 #include <QTransform>
-<<<<<<< HEAD
 #include "../include/weapon.hpp"
-=======
 
 
->>>>>>> remotes/origin/feature/damageAnimation
 extern bool paused;
 
 Player::Player(double x, double y) {
