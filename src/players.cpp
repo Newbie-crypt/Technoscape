@@ -573,6 +573,27 @@ void Player::showToBeContinued() {
             }
         }
     }
+// Stop gameplay
+    paused = true;
+
+    if (movementTimer) {
+        movementTimer->stop();
+    }
+
+    for (int i = 0; i < 8; i++) {
+        if (footstepPool[i]) {
+            footstepPool[i]->stop();
+        }
+    }
+
+    if (trapPlayer) {
+        trapPlayer->stop();
+    }
+
+    if (doorPlayer) {
+        doorPlayer->stop();
+    }
+
 
     QGraphicsRectItem* blackScreen = new QGraphicsRectItem(0, 0, 800, 600);
     blackScreen->setBrush(QColor(8, 10, 20));

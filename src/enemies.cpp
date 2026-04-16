@@ -143,6 +143,10 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
     QTimer* timer3 = new QTimer(this);
     QObject::connect(timer3, &QTimer::timeout, [this] () {  
+         if (paused) {
+        return;
+    }
+
         if (target->getLegHitBox()->collidesWithItem(this)) {
             this->Attack();
             // if (target->isDead()) exit(0);
