@@ -338,7 +338,11 @@ void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet check
 
 void Player::handleFootsteps(int moveDirection) // Footsteps sound
 {
-    if (moveDirection != 0) { // Added isColliding to merge Kareem's collide logic with my walking
+    bool isConflicting =
+    (isMovingUp && isMovingDown) ||
+    (isMovingLeft && isMovingRight);
+
+if (moveDirection != 0 && !isConflicting) { // Added isColliding to merge Kareem's collide logic with my walking
         if ((currentFrameIndex == 1 || currentFrameIndex == 5) && currentFrameIndex != previousFrameIndex) {    //Footstep sound, 2 per second.
             footstepPool[currentFootSound] -> play();
             currentFootSound++;
