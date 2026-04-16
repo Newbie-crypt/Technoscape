@@ -30,6 +30,7 @@
 #include "../include/machine.hpp"
 #include "../include/classes.hpp"
 #include "../include/menu_gameScene.hpp"
+#include "../include/enemies.hpp"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
@@ -78,6 +79,15 @@ int main(int argc, char* argv[]) {
 
         for (int i = 0; i < number_of_robots; i++) {
             scene->addItem(robots[i]);
+            QObject::connect(robots[i], &Enemy::allEnemiesDead, [&, scene]() {
+                KeyItem* worldKey = new KeyItem(
+                    QCoreApplication::applicationDirPath() + "/assets/key.gif",
+                    60, 90
+                    );
+                worldKey->setPos(400, 100); // replace with actual position you want
+                worldKey->setZValue(300);
+                scene->addItem(worldKey);
+            });
         }
     });
 

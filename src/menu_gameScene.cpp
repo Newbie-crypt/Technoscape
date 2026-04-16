@@ -283,7 +283,7 @@ player->setHudKey(hudKey);
     player->setFocus();
 
     // TEMP TEST: spawn key in scene
-    spawnAccessKey(QPointF(500, 300));
+    // spawnAccessKey(QPointF(500, 300));
 
     // WALLS
     addWall(48, 0, 723, 46);
