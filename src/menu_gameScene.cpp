@@ -735,6 +735,7 @@ shakeTimer->start(30);
     deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
 
     QGraphicsView* newGameView = createGameView(scene);
+    scene->clear();
     newGameView->show();
     view->hide();
     view->close();
