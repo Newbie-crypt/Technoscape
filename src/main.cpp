@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
         // Adding in the robots..
         for (int i = 0; i < number_of_robots; i++) {
             robots[i] = new Robot(player);
+            
             // So that the robot appears over the background..
             robots[i]->setZValue(10);
         }
@@ -79,7 +80,7 @@ int main(int argc, char* argv[]) {
         robots[1]->setPos(336, 225);
         robots[2]->setPos(109, 219);
         robots[3]->setPos(246, 450);
-        robots[4]->setPos(453, 461);
+        robots[4]->setPos(453, 450);
 
         for (int i = 0; i < number_of_robots; i++) {
             scene->addItem(robots[i]);

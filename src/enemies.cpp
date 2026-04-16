@@ -124,12 +124,12 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     setTarget(t);
 
    QTimer* timer2 = new QTimer(this);
+
     // The "Chase & Attack" Algorithm
     // Every 50ms, we are checking whether the player is colliding with the robot
     // If they are colliding, the robot will attack.
     // Otherwise, the robot will chase the player!
 
-   // This is the evil timer. After every 50ms, the enemy will either attack or chase the player! 
    QObject::connect(timer2, &QTimer::timeout, [this, timer, timer2]() {
 
     // When the game is paused, we want the enemies to stop what they're doing!
@@ -145,7 +145,6 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
         delete this;
         return;
     }
-
 
     if (target->collidesWithItem(this)) {
         this->Attack();

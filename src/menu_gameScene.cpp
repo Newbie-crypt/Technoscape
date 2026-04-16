@@ -231,9 +231,9 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
         scene->addItem(new Wall(x, y, w, h));
     };
 
-    auto addBox = [&](int x, int y, int w, int h) {
-        scene->addItem(new Furniture(x, y, w, h));
-    };
+    // auto addBox = [&](int x, int y, int w, int h) {
+    //     scene->addItem(new Furniture(x, y, w, h));
+    // };
 
     auto addTrap = [&](int x, int y, int w, int h) {
         scene->addItem(new Trap(x, y, w, h));
@@ -299,50 +299,6 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
     addWall(0, 494, 800, 106);
     addWall(771, 0, 29, 199);
     addWall(766, 198, 34, 296);
-    addWall(301, 276, 34, 64);
-    addWall(335, 276, 292, 24);
-    addWall(304, 404, 31, 89);
-    addWall(45, 327, 32, 15);
-    addWall(505, 390, 26, 24);
-
-    // FURNITURE
-    addBox(48, 48, 126, 26);
-    addBox(303, 50, 462, 19);
-    addBox(579, 68, 59, 98);
-    addBox(403, 72, 175, 29);
-    addBox(615, 170, 27, 31);
-    addBox(51, 83, 27, 98);
-    addBox(91, 383, 96, 71);
-    addBox(307, 132, 24, 25);
-    addBox(403, 179, 61, 10);
-    addBox(339, 153, 57, 20);
-    addBox(418, 189, 40, 12);
-    addBox(353, 141, 23, 11);
-    addBox(397, 165, 56, 12);
-    addBox(504, 120, 28, 21);
-
-    // MACHINE
-    addBox(164, 186, 29, 22);
-    addBox(196, 200, 85, 7);
-    addBox(211, 208, 39, 7);
-    addBox(195, 185, 85, 15);
-    addBox(183, 131, 101, 54);
-    addBox(193, 116, 83, 16);
-    addBox(206, 106, 54, 10);
-    addBox(226, 88, 8, 18);
-    addBox(234, 102, 10, 4);
-    addBox(216, 102, 10, 4);
-    addBox(187, 124, 6, 7);
-    addBox(199, 112, 6, 4);
-    addBox(284, 134, 23, 20);
-    addBox(170, 121, 12, 32);
-    addBox(176, 111, 17, 8);
-    addBox(196, 101, 5, 10);
-    addBox(261, 101, 4, 9);
-    addBox(286, 117, 5, 17);
-    addBox(271, 110, 14, 6);
-    addBox(284, 166, 5, 21);
-    addBox(280, 186, 6, 9);
 
     // DOOR
     Door* door = new Door(658, 155, 100, 25);
