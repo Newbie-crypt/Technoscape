@@ -127,7 +127,15 @@ void Robot::Chase() {
     if (!target) return; 
 
     // Difference between the enemy and the player in the 2D coordinate system
-    QPointF direction = target->pos() - pos(); 
+
+
+
+
+    QPointF playerCenter = target->pos() + QPointF(target->boundingRect().width() / 2, target->boundingRect().height() / 2);
+
+    QPointF center = pos() + QPointF(boundingRect().width() / 2, boundingRect().height() / 2);
+
+    QPointF direction = playerCenter - center;
 
     double distance = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
 
@@ -140,12 +148,10 @@ void Robot::Chase() {
     // If it's moving to the left, flip the sprite horizontally
     // else, don't change it, but if the sprite was already flipped, flip it back to its original form.
     if (direction.x() < 0) {
-        setTransform(QTransform().scale(-1, 1));
+        setTransform(QTransform().translate(frame_width, 0).scale(-1, 1));
+    } else {
+        setTransform(QTransform());
     }
-    else {
-        setTransform(QTransform().scale(1, 1));
-    }
-
     moveBy(velocity.x(), velocity.y());
             
 }
