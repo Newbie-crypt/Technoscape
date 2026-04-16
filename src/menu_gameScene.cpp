@@ -53,7 +53,7 @@ void TitleWidget::paintEvent(QPaintEvent*) {
 
 }
 
-MenuWindow::MenuWindow(QGraphicsScene* scene) {
+MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
 
     // MAIN MENU DESIGN SECTION
     setWindowTitle("Technoscape");
@@ -94,12 +94,18 @@ MenuWindow::MenuWindow(QGraphicsScene* scene) {
     panelLayout->setSpacing(28);
     panelLayout->setContentsMargins(32, 32, 32, 32);
 
-        QMediaPlayer* clickPlayer = new QMediaPlayer(this);
+    QMediaPlayer* clickPlayer = new QMediaPlayer(this);
     QAudioOutput* clickAudio = new QAudioOutput(this);
+
+    QAudioDevice out = QMediaDevices::defaultAudioOutput();
+    qDebug() << "Menu audio output:" << out.description();
+    qDebug() << "Menu output is null?" << out.isNull();
+
+    clickAudio->setDevice(out);
     clickPlayer->setAudioOutput(clickAudio);
     clickPlayer->setSource(QUrl::fromLocalFile(
-    QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
-));
+        QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
+    ));
     clickAudio->setVolume(1.0);
 
     QSoundEffect* hoverPlayer = new QSoundEffect(this);
@@ -183,17 +189,17 @@ MenuWindow::MenuWindow(QGraphicsScene* scene) {
     // END OF MAIN MENU DESIGN SECTION
 
     // Events when the buttons are pressed
-    QObject::connect(startButton, &QPushButton::clicked, [this, scene]() {
-        QTimer::singleShot(120, [this, scene]() {
+    QObject::connect(startButton, &QPushButton::clicked, [this]() {
+        QTimer::singleShot(120, [this]() {
             paused = false;
             audio->setVolume(0.02);
-            QGraphicsView* gameView = createGameView(scene);
-            gameView->show();
-            this->close();
+            currentScene = new QGraphicsScene();
+            QGraphicsView* gameView = createGameView(currentScene);
+            gameView->showFullScreen();
+            this->hide();
             emit gameStarted();
         });
     });
-
     QObject::connect(exitButton, &QPushButton::clicked, []() {
         QTimer::singleShot(120, []() {
             QApplication::quit();
@@ -430,7 +436,7 @@ overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
     );
 
     QPushButton* continueButton = new QPushButton("CONTINUE");
-    QPushButton* leaveButton = new QPushButton("LEAVE b ");
+    QPushButton* leaveButton = new QPushButton("LEAVE");
 
     continueButton->setMinimumHeight(70);
     leaveButton->setMinimumHeight(70);
@@ -511,7 +517,7 @@ QObject::connect(continueButton, &QPushButton::clicked, [=]() {
 
 QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
     paused = false;
-    showMainMenu(view, scene);
+    showMainMenu(view, this);
 });
 // ===== DEATH FADE OVERLAY =====
     QWidget* deathFadeOverlay = new QWidget(view->viewport());
@@ -730,19 +736,22 @@ shakeTimer->start(30);
 });
 
     QObject::connect(tryAgainButton, &QPushButton::clicked, [=]() {
-    glitchTimer->stop();
-    paused = false;
+        glitchTimer->stop();
+        paused = false;
 
-    deathFadeOverlay->hide();
-    deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+        deathFadeOverlay->hide();
+        deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+        gameOverOverlay->hide();
 
-    QGraphicsView* newGameView = createGameView(scene);
-    scene->clear();
-    newGameView->show();
-    view->hide();
-    view->close();
-});
+        currentScene = new QGraphicsScene();
+        QGraphicsView* newGameView = createGameView(currentScene);
+        newGameView->showFullScreen();
 
+        emit gameStarted();
+
+        view->hide();
+    });
+    
     QObject::connect(gameOverMenuButton, &QPushButton::clicked, [=]() {
     glitchTimer->stop();
     paused = false;
@@ -750,7 +759,7 @@ shakeTimer->start(30);
     deathFadeOverlay->hide();
     deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
 
-    showMainMenu(view, scene);
+    showMainMenu(view, this);
 });  
 
     return view;
@@ -777,10 +786,11 @@ void MenuWindow::resizeEvent(QResizeEvent* event) {
     }
 }
 
-void showMainMenu(QGraphicsView* currentView, QGraphicsScene* scene) {
-    MenuWindow* menu = new MenuWindow(scene);
+void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
     menu->showFullScreen();
+    menu->raise();
+    menu->activateWindow();
     QApplication::processEvents();
+
     currentView->hide();
-    currentView->close();
 }

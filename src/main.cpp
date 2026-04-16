@@ -20,6 +20,8 @@
 #include <QCoreApplication>
 #include <QEnterEvent>
 #include <QUrl>
+#include <QMediaDevices>
+#include <QAudioDevice>
 #include "../include/players.hpp"
 #include "../include/wall.hpp"
 #include "../include/furniture.hpp"
@@ -36,6 +38,11 @@ int main(int argc, char* argv[]) {
     music = new QMediaPlayer;
     audio = new QAudioOutput;
 
+    QAudioDevice out = QMediaDevices::defaultAudioOutput();
+    qDebug() << "Default audio output:" << out.description();
+    qDebug() << "Is default output null?" << out.isNull();
+
+    audio->setDevice(out);
     music->setAudioOutput(audio);
     music->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/music.mp3"
@@ -62,6 +69,8 @@ int main(int argc, char* argv[]) {
         robot->setPos(200, 300);
     });
 
+
+    menu.showFullScreen();
     
     return app.exec();
 }

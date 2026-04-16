@@ -37,6 +37,8 @@
 #include <QEnterEvent>
 #include <QUrl>
 #include <QSoundEffect>
+#include <QMediaDevices>
+#include <QAudioDevice>
 #include "machine.hpp"
 #include "classes.hpp"
 #include "keyitem.hpp"
@@ -81,7 +83,9 @@ public:
     QFrame* panel;
 
 
-    MenuWindow(QGraphicsScene* scene);
+    MenuWindow(QGraphicsScene*& scene);
+    private:
+    QGraphicsScene*& currentScene;
     QGraphicsView* createGameView(QGraphicsScene* scene);
 
 protected:
@@ -90,6 +94,5 @@ signals:
     void gameStarted();
 };
 
-void showMainMenu(QGraphicsView* currentView, QGraphicsScene* scene);
-
+void showMainMenu(QGraphicsView* currentView, MenuWindow* menu);
 #endif // MENU_GAMESCENE_HPP

@@ -367,8 +367,7 @@ void Player::checkTrapCollision() {
             trapPlayer->setPosition(0);
             trapPlayer->play();
 
-            qDebug() << "Player damaged by trap";
-
+            decreaseHealth(30);
             QTimer::singleShot(4000, [this]() {
                 resetTrapCooldown();
             });
