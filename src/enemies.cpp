@@ -29,12 +29,10 @@ void Enemy::setTarget(Player* t) {target = t;}
 void Enemy::onHit(int damage)
 {
     health -= damage;
-    if (health < 0)
+    if (health <= 0)
     {
         isDead = true;
-        delete this;
     }
-    // Call the destructor after Abu Hamar is done with the code.
 }
 
 void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
@@ -129,10 +127,19 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     // Every 50ms, we are checking whether the player is colliding with the robot
     // If they are colliding, the robot will attack.
     // Otherwise, the robot will chase the player!
-   QObject::connect(timer2, &QTimer::timeout, [this]() {
+   QObject::connect(timer2, &QTimer::timeout, [this, timer, timer2]() {
     if (paused) {
         return;
     }
+    if(isDead)
+        {
+        timer->stop();
+        timer2->stop();
+        scene()->removeItem(this);
+        delete this;
+        return;
+    }
+
 
     if (target->collidesWithItem(this)) {
         this->Attack();
