@@ -72,8 +72,9 @@ Player::Player(double x, double y) {
     setPixmap(walkSheet.copy(0, 0, 48, 64));
     this->setScale(2.0);
 
-    setPos(x,y);    // Move player to provided (x, y) coordinates
-
+    setPos(x,y);   
+    setZValue(500);  
+    
     movementTimer = new QTimer(this);
     QObject::connect(movementTimer, &QTimer::timeout, this, &Player::processMovement);
     movementTimer->start(16);   //start processing player actions.
