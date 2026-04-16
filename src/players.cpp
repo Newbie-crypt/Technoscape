@@ -687,7 +687,7 @@ void Player::showToBeContinued() {
 // }
 
 void Player::keyPressEvent(QKeyEvent* event){
-
+    if(event->isAutoRepeat()) {return;} // To stop the weird little bug with key holding. a...aaaaaaaaaaaaa for example.
     if (event->key() == Qt::Key_C) {
         collectNearbyKey();
         return;
@@ -710,7 +710,7 @@ void Player::keyPressEvent(QKeyEvent* event){
         return;
     }
 
-    if(event->isAutoRepeat()) {return;}
+    // Setting the booleans true using key press.
     if (event->key() == Qt::Key_Shift) {isSprinting = true;}
     if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = true;}
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = true;}
@@ -721,6 +721,7 @@ void Player::keyPressEvent(QKeyEvent* event){
 }
 
 void Player::keyReleaseEvent(QKeyEvent* event) {
+    // Setting the booleans false using key release.
     if(event->isAutoRepeat()) {return;}
     if (event->key() == Qt::Key_Shift) {isSprinting = false;}
     if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = false;}

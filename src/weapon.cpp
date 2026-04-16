@@ -68,7 +68,7 @@ void Weapon::aimAt(int direction) {
     }
 
         currentAimDirection = direction;
-    // setRotation(angle* 180 / M_PI); // Set the gun's rotation to the angle
+    // setRotation(angle* 180 / M_PI); // Set the gun's rotation to the angle, Might bring back if I try to bring mouse aiming back.
 }
 
 void Weapon::shoot() {

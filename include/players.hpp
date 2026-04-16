@@ -51,8 +51,8 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void hideInteractionText();
         bool trapCooldown;
         void resetTrapCooldown();
-        QSoundEffect walkSound;
-        QTimer* footstepTimer;
+        // QSoundEffect walkSound; // I don't think this is used anymore, since we used my implementation of footsteps. -Sabagh
+        // QTimer* footstepTimer; // I don't think this is used anymore, since we used my implementation of footsteps. -Sabagh
         QMediaPlayer* trapPlayer;
         QAudioOutput* trapAudio;
         QMediaPlayer* doorPlayer;
@@ -70,12 +70,13 @@ class Player : public QObject, public QGraphicsPixmapItem {
         int currentFrameIndex = 0;      // Ticker / 10 (to decide on animation)
         int previousFrameIndex = -1;    // Tracker for last frame index
         int diagonalBuffer = 0;
-        
-        QSoundEffect** shotPool;        // Sound and footstep pools, for audio to run smoothly without crashes.
+        // Sound and footstep pools, for audio to run smoothly without crashes.
+        QSoundEffect** shotPool;
         QSoundEffect** footstepPool;
         QSoundEffect** gruntPool;
-        QTimer* movementTimer;          // Timer for everything.
-        // Related Objects
+        // Timer for everything.
+        QTimer* movementTimer;
+        // Related Objects.
         Weapon* gun;
         LegHitbox* legs;
 
