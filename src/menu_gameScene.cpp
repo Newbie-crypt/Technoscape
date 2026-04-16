@@ -205,6 +205,8 @@ MenuWindow::MenuWindow(QGraphicsScene* scene) {
 
 QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
 
+    scene->clear();
+
 
 
     QPixmap levelBg("assets/level1_closed.png");

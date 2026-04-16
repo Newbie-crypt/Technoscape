@@ -22,6 +22,7 @@ void Enemy::onHit(int damage)
     if (health < 0)
     {
         isDead = true;
+        delete this;
     }
     // Call the destructor after Abu Hamar is done with the code.
 }
