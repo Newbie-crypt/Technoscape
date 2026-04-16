@@ -34,6 +34,7 @@ void Trap::trigger() {
 
     ready = false;
 
+    // Some cool animation when the player touches the laser
     if (scene() != nullptr) {
         QGraphicsEllipseItem* outerBlast = new QGraphicsEllipseItem(-30, -30, rect().width() + 60, rect().height() + 60);
         outerBlast->setBrush(QColor(255, 80, 0, 140));

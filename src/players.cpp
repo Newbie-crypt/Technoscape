@@ -682,9 +682,6 @@ void Player::showToBeContinued() {
     }
 }
 
-// void Enemy::onHit(int damage){
-//     health -= damage;
-// }
 
 void Player::keyPressEvent(QKeyEvent* event){
     if(event->isAutoRepeat()) {return;} // To stop the weird little bug with key holding. a...aaaaaaaaaaaaa for example.
@@ -699,16 +696,17 @@ void Player::keyPressEvent(QKeyEvent* event){
     }
 
     // TEMP TEST: press K to kill player
-    if (event->key() == Qt::Key_K) {
-        decreaseHealth(999);
-        return;
-    }
+    // if (event->key() == Qt::Key_K) {
+    //     decreaseHealth(999);
+    //     return;
+    // }
+    // uncomment to test
 
     // TEMP TEST: press U to unlock door
-    if (event->key() == Qt::Key_U) {
-        unlockDoor();
-        return;
-    }
+    // if (event->key() == Qt::Key_U) {
+    //     unlockDoor();
+    //     return;
+    // }
 
     // Setting the booleans true using key press.
     if (event->key() == Qt::Key_Shift) {isSprinting = true;}
