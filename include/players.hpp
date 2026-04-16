@@ -17,6 +17,9 @@
 #include "../include/door.hpp"
 #include "../include/keyitem.hpp"
 #include "../include/leghitbox.hpp"
+#include <queue>
+#include <unordered_map>
+
 
 
 enum class AnimationState : int {
@@ -67,6 +70,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         int currentFrameIndex = 0;      // Ticker / 10 (to decide on animation)
         int previousFrameIndex = -1;    // Tracker for last frame index
         int diagonalBuffer = 0;
+        
         QSoundEffect** shotPool;        // Sound and footstep pools, for audio to run smoothly without crashes.
         QSoundEffect** footstepPool;
         QTimer* movementTimer;          // Timer for everything.
@@ -74,15 +78,12 @@ class Player : public QObject, public QGraphicsPixmapItem {
         Weapon* gun;
         LegHitbox* legs;
 
-
     public:
         void setHealthBar(HealthBar* h) {health = h;}
         void setHudKey(KeyItem* key) {hudKey = key;}
         bool hasKey() const { return hasAccessKey; }
         void decreaseHealth(int h);
-        bool isDead() {
-    return health && health->getHP() == 0;
-}
+        bool isDead() { return health && health->getHP() == 0; }
         // Functions
         int getInputMask(); // Get the direction in which the player is moving.
         void applyPhysics(int moveDirection, int speedMultiplier); // Moves the player.
@@ -90,6 +91,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void handleFootsteps(int moveDirection); // Footsteps sound
         Player(double x, double y);
         int getHealth() {return health ? health->getHP() : 0;}
+        LegHitbox* getLegHitBox() {return legs;}
         ~Player();  // Destructor.
     
     signals:

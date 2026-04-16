@@ -130,6 +130,16 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
         this->Chase();
     }
 });
+    QTimer* timer2 = new QTimer(this);
+    QObject::connect(timer2, &QTimer::timeout, [this] () {  
+        if (target->getLegHitBox()->collidesWithItem(this)) {
+            this->Attack();
+            // if (target->isDead()) exit(0);
+        }
+        else {
+            this->Chase();
+        }
+    });
 
     timer2->start(50);
 
@@ -137,6 +147,9 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     setTransformOriginPoint(boundingRect().center());
 
     setScale(2);
+    // Increasing the size of the object for aesthetics.
+    setScale(2);
+
 }
 
 void Robot::changeAnimationState(AnimationState state) {
@@ -157,39 +170,45 @@ void Robot::Move() {
 }
 
 void Robot::Chase() {
-    if (paused) {
-        return;
-    }
-
     changeAnimationState(AnimationState::Running);
+    if (!target) return;
 
-    if (!target) {
-        return;
+    // Use centers for both robot and player
+    QPointF playerCenter = target->pos() + QPointF(target->boundingRect().width() / 2, target->boundingRect().height() / 2);
+    QPointF robotCenter  = pos() + QPointF(boundingRect().width() / 2, boundingRect().height() / 2);
+
+    // Recalculate path every 30 frames
+    if (pathTimer++ % 30 == 0) {
+        currentPath = findPath(robotCenter.toPoint(), playerCenter.toPoint());
     }
 
-    // Difference between the enemy and the player's centers in the 2D coordinate system
+    QPointF direction;
 
-    QPointF playerCenter = target->pos() + QPointF(target->boundingRect().width() / 2, target->boundingRect().height() / 2);
+    if (!currentPath.isEmpty()) {
+        // steer toward next node
+        QPointF nextNode = currentPath.first();
+        direction = nextNode - robotCenter;
+        double dist = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
 
-    QPointF center = pos() + QPointF(boundingRect().width() / 2, boundingRect().height() / 2);
+        if (dist < speed) {
+            currentPath.removeFirst();
+        }
 
-    QPointF direction = playerCenter - center;
+        if (dist != 0) direction /= dist;
+    } else {
+        // fallback: direct chase if no path found
+        direction = playerCenter - robotCenter;
+        double dist = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
+        if (dist != 0) direction /= dist;
+    }
 
-    double distance = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
-
-    // This way, direction is the unit vector of the velocity.
-    if (distance != 0) direction /= distance;
-
-    // Since in this case speed = magnitude of the velocity, then we can use the unit vector "direction" to find the velocity.
     velocity = speed * direction;
 
-    // If it's moving to the left, flip the sprite horizontally
-    // else, don't change it, but if the sprite was already flipped, flip it back to its original form.
     if (direction.x() < 0) {
         setTransform(QTransform().translate(frame_width, 0).scale(-1, 1));
     } else {
         setTransform(QTransform());
     }
+
     moveBy(velocity.x(), velocity.y());
-            
 }

@@ -13,6 +13,7 @@
 #include "weapon.hpp"
 #include "classes.hpp"
 #include "players.hpp"
+#include <QGraphicsScene>
 #include "wall.hpp"
 #include "furniture.hpp"
 
@@ -23,7 +24,7 @@ class Enemy: public QGraphicsObject, public Hittable {
     protected:
         int health;
         bool isDead = false;
-        QPixmap sprite;
+        QPixmap sprite; 
         double speed;
         QPointF velocity;
         Player* target;
@@ -55,6 +56,9 @@ class Robot: public Enemy {
         int frame_width;
         int frame_height;
         const int number_of_states = 3; // Idle, attacking, running
+        QList<QPoint> currentPath;
+        QList<QPoint> findPath(QPoint start, QPoint goal);
+        int pathTimer = 0;
     public:
         Robot(Player* t);
         void Attack() override;
