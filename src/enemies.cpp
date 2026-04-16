@@ -25,6 +25,32 @@ void Enemy::onHit(int damage)
     // Call the destructor after Abu Hamar is done with the code.
 }
 
+void Enemy::checkCollision(double dx, double dy) {
+    QList<QGraphicsItem*> colliding_items = collidingItems();
+
+    for (int i = 0; i < colliding_items.size(); i++) {
+        if (typeid(*(colliding_items[i])) == typeid(Wall)) {
+            moveBy(-dx, -dy);
+            return;
+        }
+
+        if (typeid(*(colliding_items[i])) == typeid(Furniture)) {
+            moveBy(-dx, -dy);
+            return;
+        }
+
+        Door* door = dynamic_cast<Door*>(colliding_items[i]);
+
+        if (!door && colliding_items[i]->group()) {
+            door = dynamic_cast<Door*>(colliding_items[i]->group());
+        }
+
+        if (door && door->isLocked()) {
+            moveBy(-dx, -dy);
+            return;
+        }
+    }
+}
 
 
 Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
@@ -101,6 +127,8 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
+
+    setScale(2);
 }
 
 void Robot::changeAnimationState(AnimationState state) {
@@ -126,10 +154,7 @@ void Robot::Chase() {
     // If the player is not present, then there's nothing to chase!
     if (!target) return; 
 
-    // Difference between the enemy and the player in the 2D coordinate system
-
-
-
+    // Difference between the enemy and the player's centers in the 2D coordinate system
 
     QPointF playerCenter = target->pos() + QPointF(target->boundingRect().width() / 2, target->boundingRect().height() / 2);
 

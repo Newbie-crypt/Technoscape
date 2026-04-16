@@ -10,9 +10,11 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <map>
-#include "../include/weapon.hpp"
-#include "../include/classes.hpp"
+#include "weapon.hpp"
+#include "classes.hpp"
 #include "players.hpp"
+#include "wall.hpp"
+#include "furniture.hpp"
 
 class Enemy: public QGraphicsObject, public Hittable {
     Q_OBJECT

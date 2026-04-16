@@ -306,7 +306,7 @@ void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the p
     }
     else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
 
-    if(moveDirection != 3 && moveDirection != 12 && moveDirection != 15)
+    if(moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 || moveDirection == 6 || moveDirection == 8 || moveDirection == 10) //check for a valid direction. In cases like 3, 15, 12, the player shouldn't move, so neither should the gun.
         gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
 }
 
