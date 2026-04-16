@@ -141,27 +141,12 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     }
 });
 
-    QTimer* timer3 = new QTimer(this);
-    QObject::connect(timer3, &QTimer::timeout, [this] () {  
-         if (paused) {
-        return;
-    }
 
-        if (target->getLegHitBox()->collidesWithItem(this)) {
-            this->Attack();
-            // if (target->isDead()) exit(0);
-        }
-        else {
-            this->Chase();
-        }
-    });
-
-    timer3->start(50);
+    timer2->start(50);
 
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
 
-    setScale(2);
     // Increasing the size of the object for aesthetics.
     setScale(2);
 
@@ -194,49 +179,34 @@ void Robot::Chase() {
     QPointF playerCenter = target->pos() + QPointF(target->boundingRect().width() / 2, target->boundingRect().height() / 2);
     QPointF robotCenter  = pos() + QPointF(boundingRect().width() / 2, boundingRect().height() / 2);
 
-    // Recalculate path every 30 frames
-    if (pathTimer++ % 10 == 0) {
-        currentPath = findPath(robotCenter.toPoint(), playerCenter.toPoint());
-    }
 
-    QPointF direction;
+    QPointF direction = playerCenter - robotCenter;
 
-    if (!currentPath.isEmpty()) {
-        // steer toward next node
-        QPointF nextNode = currentPath.first();
-        direction = nextNode - robotCenter;
-        double dist = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
+    double distance = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
 
-        if (dist < speed) {
-            currentPath.removeFirst();
-        }
+    // This way, direction is the unit vector of the velocity.
+    if (distance != 0) direction /= distance;
 
-        if (dist != 0) direction /= dist;
-    } else {
-        // fallback: direct chase if no path found
-        direction = playerCenter - robotCenter;
-        double dist = std::sqrt(direction.x() * direction.x() + direction.y() * direction.y());
-        if (dist != 0) direction /= dist;
-    }
-
+    // Since in this case speed = magnitude of the velocity, then we can use the unit vector "direction" to find the velocity.
     velocity = speed * direction;
+
+    // If it's moving to the left, flip the sprite horizontally
+    // else, don't change it, but if the sprite was already flipped, flip it back to its original form.
 
     if (direction.x() < 0) {
         setTransform(QTransform().translate(frame_width, 0).scale(-1, 1));
     } else {
         setTransform(QTransform());
-    }
+        }
 
-    moveBy(velocity.x(), velocity.y());
-    // checkCollision(velocity.x(), velocity.y());
-    // QList<QGraphicsItem*> colliding = collidingItems(Qt::IntersectsItemBoundingRect);
-    // for (auto* item : colliding) {
-    //     if (dynamic_cast<Wall*>(item) || dynamic_cast<Furniture*>(item)) {
-    //         moveBy(-velocity.x(), -velocity.y());
-    //         break;
-    //     }
-    // }
+    auto posInitial = pos(); //saving initial position
+
+    moveBy(velocity.x(), 0);
+    checkCollision(velocity.x(), 0);
+    moveBy(0, velocity.y());
+    checkCollision(0, velocity.y());
 }
+
 
 QList<QPoint> Robot::findPath(QPoint start, QPoint goal) {
     int CELL = 8;

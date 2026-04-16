@@ -64,7 +64,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Bools
         int targetRow = 0;
         int lastSpriteRow = 0;
-        int currentShotSound = 0, currentFootSound = 0; // For the pool of sounds to cycle.
+        int currentShotSound = 0, currentFootSound = 0, currentGruntSound = 0; // For the pool of sounds to cycle.
         int lastAimDirection = 2;       // Defaults to 2 (down)
         int animationTicker = 0;        // Ticker that resets every 80 ticks
         int currentFrameIndex = 0;      // Ticker / 10 (to decide on animation)
@@ -73,6 +73,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         
         QSoundEffect** shotPool;        // Sound and footstep pools, for audio to run smoothly without crashes.
         QSoundEffect** footstepPool;
+        QSoundEffect** gruntPool;
         QTimer* movementTimer;          // Timer for everything.
         // Related Objects
         Weapon* gun;

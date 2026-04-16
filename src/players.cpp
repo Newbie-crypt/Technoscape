@@ -42,7 +42,7 @@ Player::Player(double x, double y) {
     trapPlayer->setAudioOutput(trapAudio);
     trapPlayer->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
-    ));
+        ));
     trapAudio->setVolume(0.25);
 
      doorPlayer = new QMediaPlayer();
@@ -51,18 +51,27 @@ Player::Player(double x, double y) {
     doorPlayer->setAudioOutput(doorAudio);
     doorPlayer->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/door.wav"
-    ));
+        ));
     doorAudio->setVolume(0.95);
 
     footstepPool = new QSoundEffect*[8];
 
+
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
         footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
-    footstepPool[i]->setVolume(1);
+        footstepPool[i]->setVolume(1);
     }
 
+    gruntPool = new QSoundEffect* [8];
 
+    for (int i = 0; i < 8; i++){
+        gruntPool[i] = new QSoundEffect(this);
+        gruntPool[i]->setSource(QUrl("qrc:/assets/grunt.wav"));  // Preload grunt sound for whole pool.
+        gruntPool[i]->setVolume(1);
+    }
+
+    // Related objects.
     gun = new Weapon(this);
     legs = new LegHitbox(this);
 
@@ -94,6 +103,22 @@ void Player::decreaseHealth(int h) {
     }
 
     health->decreaseHP(h);
+
+    // Reusing trap's flashing red to imitate damage animation.
+    QGraphicsRectItem* screenFlash = new QGraphicsRectItem(this);
+    // setRect->(boundingRect());
+    screenFlash->setBrush(QColor(255, 0, 0, 45));
+    screenFlash->setPen(Qt::NoPen);
+    screenFlash->setZValue(502);
+    QTimer::singleShot(120, [this, screenFlash]() {delete screenFlash;});
+    // Sound to go along with it
+    gruntPool[currentGruntSound] -> play();
+    currentGruntSound++;
+
+    if(currentGruntSound >= 8)
+    {
+        currentGruntSound = 0;
+    }
 
     if (health->getHP() <= 0) {
         emit died();
