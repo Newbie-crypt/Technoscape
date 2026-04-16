@@ -1,6 +1,16 @@
 #include "../include/enemies.hpp"
-
+#include <queue>
+#include <unordered_map>
+#include <cmath>
 extern bool paused;
+
+
+struct Node {
+    int x, y;
+    float cost;
+    bool operator>(const Node& o) const { return cost > o.cost; }
+};
+
 
 Enemy::Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
     sprite.load(asset);
@@ -130,8 +140,9 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
         this->Chase();
     }
 });
-    QTimer* timer2 = new QTimer(this);
-    QObject::connect(timer2, &QTimer::timeout, [this] () {  
+
+    QTimer* timer3 = new QTimer(this);
+    QObject::connect(timer3, &QTimer::timeout, [this] () {  
         if (target->getLegHitBox()->collidesWithItem(this)) {
             this->Attack();
             // if (target->isDead()) exit(0);
@@ -141,7 +152,7 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
         }
     });
 
-    timer2->start(50);
+    timer3->start(50);
 
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
@@ -211,4 +222,69 @@ void Robot::Chase() {
     }
 
     moveBy(velocity.x(), velocity.y());
+}
+
+QList<QPoint> Robot::findPath(QPoint start, QPoint goal) {
+    int CELL = 32;
+
+    auto toGrid = [&](QPoint p) {
+        return QPoint(p.x() / CELL, p.y() / CELL);
+    };
+
+    QPoint gStart = toGrid(start);
+    QPoint gGoal  = toGrid(goal);
+
+    auto encode = [&](QPoint p) { return p.y() * 1000 + p.x(); };
+
+    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open;
+    std::unordered_map<int, int> cameFrom;
+    std::unordered_map<int, float> costSoFar;
+
+    open.push({gStart.x(), gStart.y(), 0});
+    costSoFar[encode(gStart)] = 0;
+
+    int dx[] = {0, 0, 1, -1};
+    int dy[] = {1, -1, 0, 0};
+
+    while (!open.empty()) {
+        Node current = open.top(); open.pop();
+        QPoint cur(current.x, current.y);
+
+        if (cur == gGoal) break;
+
+        for (int i = 0; i < 4; i++) {
+            QPoint next(cur.x() + dx[i], cur.y() + dy[i]);
+
+            QPointF worldPos(next.x() * CELL, next.y() * CELL);
+            QList<QGraphicsItem*> items = scene()->items(QRectF(worldPos, QSizeF(CELL, CELL)));
+
+            bool blocked = false;
+            for (auto* item : items) {
+                if (dynamic_cast<Wall*>(item) || dynamic_cast<Furniture*>(item)) {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (blocked) continue;
+
+            float newCost = costSoFar[encode(cur)] + 1;
+            if (!costSoFar.count(encode(next)) || newCost < costSoFar[encode(next)]) {
+                costSoFar[encode(next)] = newCost;
+                float priority = newCost + std::abs(next.x() - gGoal.x()) + std::abs(next.y() - gGoal.y());
+                open.push({next.x(), next.y(), priority});
+                cameFrom[encode(next)] = encode(cur);
+            }
+        }
+    }
+
+    QList<QPoint> path;
+    QPoint current = gGoal;
+    while (current != gStart) {
+        path.prepend(current * CELL);
+        int enc = encode(current);
+        if (!cameFrom.count(enc)) break;
+        int parentEnc = cameFrom[enc];
+        current = QPoint(parentEnc % 1000, parentEnc / 1000);
+    }
+    return path;
 }
