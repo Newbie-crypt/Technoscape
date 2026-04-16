@@ -16,6 +16,11 @@
 #include <QGraphicsScene>
 #include "wall.hpp"
 #include "furniture.hpp"
+#include <queue>
+#include <unordered_map>
+#include <cmath>
+#include <QGraphicsRectItem>
+#include <cstdlib>
 
 class Enemy: public QGraphicsObject, public Hittable {
     Q_OBJECT

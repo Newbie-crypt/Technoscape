@@ -61,12 +61,24 @@ int main(int argc, char* argv[]) {
                 break;
             }
         }
+        const int number_of_robots = 5;
+        Robot** robots = new Robot*[number_of_robots];
+        for (int i = 0; i < number_of_robots; i++) {
+            robots[i] = new Robot(player);
 
-        Robot* robot = new Robot(player);
+            // So that the robot appears on top of the background..
+            robots[i]->setZValue(10);
+        }
+        robots[0]->setPos(151, 300);
+        robots[1]->setPos(336, 225);
+        robots[2]->setPos(109, 219);
+        robots[3]->setPos(246, 450);
+        robots[4]->setPos(453, 461);
+        // (151, 300) (336, 225) (109, 219) (246, 450) (453, 461)
 
-        robot->setZValue(10);
-        scene->addItem(robot);
-        robot->setPos(200, 300);
+        for (int i = 0; i < number_of_robots; i++) {
+            scene->addItem(robots[i]);
+        }
     });
 
 

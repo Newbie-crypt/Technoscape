@@ -1,7 +1,5 @@
 #include "../include/enemies.hpp"
-#include <queue>
-#include <unordered_map>
-#include <cmath>
+
 extern bool paused;
 
 
@@ -17,7 +15,7 @@ Enemy::Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
 }
 
 QRectF Robot::boundingRect() const {
-    return QRectF(5, 11, frame_width - 10, frame_height - 11);
+    return QRectF(5, 11, frame_width - 8, frame_height - 11);
 }
 
 void Robot::Attack() {
@@ -116,7 +114,7 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
         target->decreaseHealth(1);
     }
-});
+    });
 
     timer->start(100);
 
@@ -151,6 +149,7 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
     timer2->start(50);
 
+
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
 
@@ -170,7 +169,7 @@ void Robot::changeAnimationState(AnimationState state) {
 void Robot::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     painter->drawPixmap(0, 0, animations[currentAnimationState][currentFrame]);
     painter->setPen(QPen(Qt::red, 1));
-    painter->drawRect(boundingRect());
+    // painter->drawRect(boundingRect());
 }
 
 void Robot::Move() {
@@ -206,8 +205,6 @@ void Robot::Chase() {
         setTransform(QTransform());
         }
 
-    auto posInitial = pos(); //saving initial position
-
     moveBy(velocity.x(), 0);
     checkCollision(velocity.x(), 0);
     moveBy(0, velocity.y());
@@ -215,67 +212,73 @@ void Robot::Chase() {
 }
 
 
-QList<QPoint> Robot::findPath(QPoint start, QPoint goal) {
-    int CELL = 8;
 
-    auto toGrid = [&](QPoint p) {
-        return QPoint(p.x() / CELL, p.y() / CELL);
-    };
+// QList<QPoint> Robot::findPath(QPoint start, QPoint goal) {
+//     int CELL = 8;
 
-    QPoint gStart = toGrid(start);
-    QPoint gGoal  = toGrid(goal);
+//     auto toGrid = [&](QPoint p) {
+//         return QPoint(p.x() / CELL, p.y() / CELL);
+//     };
 
-    auto encode = [&](QPoint p) { return p.y() * 1000 + p.x(); };
+//     QPoint gStart = toGrid(start);
+//     QPoint gGoal  = toGrid(goal);
 
-    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open;
-    std::unordered_map<int, int> cameFrom;
-    std::unordered_map<int, float> costSoFar;
+//     auto encode = [&](QPoint p) { return p.y() * 1000 + p.x(); };
 
-    open.push({gStart.x(), gStart.y(), 0});
-    costSoFar[encode(gStart)] = 0;
+//     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open;
+//     std::unordered_map<int, int> cameFrom;
+//     std::unordered_map<int, float> costSoFar;
 
-    int dx[] = {0, 0, 1, -1};
-    int dy[] = {1, -1, 0, 0};
+//     open.push({gStart.x(), gStart.y(), 0});
+//     costSoFar[encode(gStart)] = 0;
 
-    while (!open.empty()) {
-        Node current = open.top(); open.pop();
-        QPoint cur(current.x, current.y);
+//     int dx[] = {0, 0, 1, -1};
+//     int dy[] = {1, -1, 0, 0};
+//     QRectF re(0, 0, CELL, CELL);
+//     QGraphicsRectItem* r = new QGraphicsRectItem;
+//     r->setRect(re);
+//     scene()->addItem(r);
+//     while (!open.empty()) {
+//         Node current = open.top(); open.pop();
+//         QPoint cur(current.x, current.y);
 
-        if (cur == gGoal) break;
+//         if (cur == gGoal) break;
 
-        for (int i = 0; i < 4; i++) {
-            QPoint next(cur.x() + dx[i], cur.y() + dy[i]);
+//         for (int i = 0; i < 4; i++) {
+//             QPoint next(cur.x() + dx[i], cur.y() + dy[i]);
 
-            QPointF worldPos(next.x() * CELL, next.y() * CELL);
-            QList<QGraphicsItem*> items = scene()->items(QRectF(worldPos, QSizeF(CELL, CELL)));
+//             QPointF worldPos(next.x() * CELL, next.y() * CELL);
+//             QList<QGraphicsItem*> items = scene()->items(QRectF(worldPos, QSizeF(CELL, CELL)));
+//             r->setPos(worldPos);
 
-            bool blocked = false;
-            for (auto* item : items) {
-                if (dynamic_cast<Wall*>(item) || dynamic_cast<Furniture*>(item)) {
-                    blocked = true;
-                    break;
-                }
-            }
-            if (blocked) continue;
+//             bool blocked = false;
+//             for (auto* item : items) {
+//                 if (dynamic_cast<Wall*>(item) || dynamic_cast<Furniture*>(item)) {
+//                     blocked = true;
+//                     break;
+//                 }
+//             }
+//             if (blocked) continue;
 
-            float newCost = costSoFar[encode(cur)] + 1;
-            if (!costSoFar.count(encode(next)) || newCost < costSoFar[encode(next)]) {
-                costSoFar[encode(next)] = newCost;
-                float priority = newCost + std::abs(next.x() - gGoal.x()) + std::abs(next.y() - gGoal.y());
-                open.push({next.x(), next.y(), priority});
-                cameFrom[encode(next)] = encode(cur);
-            }
-        }
-    }
+//             float newCost = costSoFar[encode(cur)] + 1;
+//             if (!costSoFar.count(encode(next)) || newCost < costSoFar[encode(next)]) {
+//                 costSoFar[encode(next)] = newCost;
+//                 float priority = newCost + std::abs(next.x() - gGoal.x()) + std::abs(next.y() - gGoal.y());
+//                 open.push({next.x(), next.y(), priority});
+//                 cameFrom[encode(next)] = encode(cur);
+//             }
+//             scene()->removeItem(r);
+//         }
+//     }
 
-    QList<QPoint> path;
-    QPoint current = gGoal;
-    while (current != gStart) {
-        path.prepend(current * CELL);
-        int enc = encode(current);
-        if (!cameFrom.count(enc)) break;
-        int parentEnc = cameFrom[enc];
-        current = QPoint(parentEnc % 1000, parentEnc / 1000);
-    }
-    return path;
-}
+//     QList<QPoint> path;
+//     QPoint current = gGoal;
+//     while (current != gStart) {
+//         path.prepend(current * CELL);
+//         int enc = encode(current);
+//         if (!cameFrom.count(enc)) break;
+//         int parentEnc = cameFrom[enc];
+//         current = QPoint(parentEnc % 1000, parentEnc / 1000);
+//     }
+//     return path;
+// }
