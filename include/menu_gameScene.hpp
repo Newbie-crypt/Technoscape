@@ -31,6 +31,8 @@
 #include "trap.hpp"
 #include "door.hpp"
 #include "enemies.hpp"
+#include <QShortcut>
+#include <QKeySequence>
 #include <QCoreApplication>
 #include <QEnterEvent>
 #include <QUrl>

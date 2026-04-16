@@ -74,7 +74,7 @@ Player::Player(double x, double y) {
 
     setPos(x,y);   
     setZValue(500);  
-    
+
     movementTimer = new QTimer(this);
     QObject::connect(movementTimer, &QTimer::timeout, this, &Player::processMovement);
     movementTimer->start(16);   //start processing player actions.
@@ -216,6 +216,9 @@ void Player::useKeyOnDoor() {
 
 void Player::processMovement()
 {
+   if (paused) {
+        return;
+    }
    if (health && health->getHP() <= 0) {
         movementTimer->stop();
         return;

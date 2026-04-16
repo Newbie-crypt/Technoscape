@@ -1,5 +1,6 @@
 #include "../include/enemies.hpp"
 
+extern bool paused;
 
 Enemy::Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
     sprite.load(asset);
@@ -70,32 +71,38 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     QTimer* timer = new QTimer(this);
 
     connect(timer, &QTimer::timeout, [this]() {
-        currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
-        update(); // reconstruct the design.
+    if (paused) {
+        return;
+    }
 
-        // If the robot completes one whole swing of the sword it has, then the health bar of the player gets reduced.
-        if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) target->decreaseHealth(1);
-    });
+    currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
+    update();
+
+    if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
+        target->decreaseHealth(1);
+    }
+});
 
     timer->start(100);
 
     setTarget(t);
 
-
+   QTimer* timer2 = new QTimer(this);
     // The "Chase & Attack" Algorithm
     // Every 50ms, we are checking whether the player is colliding with the robot
     // If they are colliding, the robot will attack.
     // Otherwise, the robot will chase the player!
-    QTimer* timer2 = new QTimer(this);
-    QObject::connect(timer2, &QTimer::timeout, [this] () {  
-        if (target->collidesWithItem(this)) {
-            this->Attack();
-            // if (target->isDead()) exit(0);
-        }
-        else {
-            this->Chase();
-        }
-    });
+   QObject::connect(timer2, &QTimer::timeout, [this]() {
+    if (paused) {
+        return;
+    }
+
+    if (target->collidesWithItem(this)) {
+        this->Attack();
+    } else {
+        this->Chase();
+    }
+});
 
     timer2->start(50);
 
@@ -121,10 +128,15 @@ void Robot::Move() {
 }
 
 void Robot::Chase() {
+    if (paused) {
+        return;
+    }
+
     changeAnimationState(AnimationState::Running);
 
-    // If the player is not present, then there's nothing to chase!
-    if (!target) return; 
+    if (!target) {
+        return;
+    }
 
     // Difference between the enemy and the player in the 2D coordinate system
     QPointF direction = target->pos() - pos(); 

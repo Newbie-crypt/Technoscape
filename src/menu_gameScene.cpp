@@ -454,29 +454,63 @@ overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
     pauseLayout->addWidget(continueButton);
     pauseLayout->addWidget(leaveButton);
 
-QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
+auto openPauseMenu = [=]() {
     if (player->isDead()) {
         return;
     }
 
+    if (paused) {
+        return;
+    }
+
     paused = true;
+
+    // remove control from player
+    scene->setFocusItem(nullptr);
+    player->clearFocus();
+    view->clearFocus();
+
     pauseOverlay->setGeometry(view->viewport()->rect());
     pauseOverlay->show();
     pauseOverlay->raise();
+    pauseOverlay->setFocus();
+};
+
+auto closePauseMenu = [=]() {
+    paused = false;
+    pauseOverlay->hide();
+
+    // give control back to player
+    view->setFocus();
+    scene->setFocusItem(player);
+    player->setFocus();
+};
+
+auto togglePauseMenu = [=]() {
+    if (!paused) {
+        openPauseMenu();
+    } else {
+        closePauseMenu();
+    }
+};
+
+QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
+    openPauseMenu();
 });
 
-    QObject::connect(continueButton, &QPushButton::clicked, [=]() {
-        paused = false;
-        pauseOverlay->hide();
-        view->setFocus();
-        scene->setFocusItem(player);
-        player->setFocus();
-    });
+QShortcut* escShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), view);
+QObject::connect(escShortcut, &QShortcut::activated, [=]() {
+    togglePauseMenu();
+});
 
-    QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
-        paused = false;
-        showMainMenu(view, scene);
-    });
+QObject::connect(continueButton, &QPushButton::clicked, [=]() {
+    closePauseMenu();
+});
+
+QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
+    paused = false;
+    showMainMenu(view, scene);
+});
 // ===== DEATH FADE OVERLAY =====
     QWidget* deathFadeOverlay = new QWidget(view->viewport());
     deathFadeOverlay->setGeometry(view->viewport()->rect());
