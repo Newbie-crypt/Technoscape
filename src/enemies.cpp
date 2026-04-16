@@ -37,32 +37,32 @@ void Enemy::onHit(int damage)
     // Call the destructor after Abu Hamar is done with the code.
 }
 
-void Enemy::checkCollision(double dx, double dy) {
-    QList<QGraphicsItem*> colliding_items = collidingItems();
+// void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
+//     QList<QGraphicsItem*> colliding_items = collidingItems();
 
-    for (int i = 0; i < colliding_items.size(); i++) {
-        if (typeid(*(colliding_items[i])) == typeid(Wall)) {
-            moveBy(-dx, -dy);
-            return;
-        }
+//     for (int i = 0; i < colliding_items.size(); i++) {
+//         if (typeid(*(colliding_items[i])) == typeid(Wall)) {
+//             moveBy(-dx, -dy);
+//             return;
+//         }
 
-        if (typeid(*(colliding_items[i])) == typeid(Furniture)) {
-            moveBy(-dx, -dy);
-            return;
-        }
+//         if (typeid(*(colliding_items[i])) == typeid(Furniture)) {
+//             moveBy(-dx, -dy);
+//             return;
+//         }
 
-        Door* door = dynamic_cast<Door*>(colliding_items[i]);
+//         Door* door = dynamic_cast<Door*>(colliding_items[i]);
 
-        if (!door && colliding_items[i]->group()) {
-            door = dynamic_cast<Door*>(colliding_items[i]->group());
-        }
+//         if (!door && colliding_items[i]->group()) {
+//             door = dynamic_cast<Door*>(colliding_items[i]->group());
+//         }
 
-        if (door && door->isLocked()) {
-            moveBy(-dx, -dy);
-            return;
-        }
-    }
-}
+//         if (door && door->isLocked()) {
+//             moveBy(-dx, -dy);
+//             return;
+//         }
+//     }
+// }
 
 
 Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
@@ -222,6 +222,7 @@ void Robot::Chase() {
     }
 
     moveBy(velocity.x(), velocity.y());
+    checkCollision(velocity.x(), velocity.y());
 }
 
 QList<QPoint> Robot::findPath(QPoint start, QPoint goal) {

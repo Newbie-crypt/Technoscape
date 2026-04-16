@@ -20,8 +20,8 @@
 class Enemy: public QGraphicsObject, public Hittable {
     Q_OBJECT
     private:
-    void checkCollision(double dx, double dy);
     protected:
+        // void checkCollision(double dx, double dy);
         int health;
         bool isDead = false;
         QPixmap sprite; 
