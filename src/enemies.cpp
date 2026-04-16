@@ -16,8 +16,8 @@ Enemy::Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
     sprite.load(asset);
 }
 
-QRectF Enemy::boundingRect() const {
-    return QRectF(0, 0, sprite.width(), sprite.height());
+QRectF Robot::boundingRect() const {
+    return QRectF(5, 11, frame_width - 10, frame_height - 11);
 }
 
 void Robot::Attack() {
@@ -173,6 +173,8 @@ void Robot::changeAnimationState(AnimationState state) {
 
 void Robot::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     painter->drawPixmap(0, 0, animations[currentAnimationState][currentFrame]);
+    painter->setPen(QPen(Qt::red, 1));
+    painter->drawRect(boundingRect());
 }
 
 void Robot::Move() {
@@ -189,7 +191,7 @@ void Robot::Chase() {
     QPointF robotCenter  = pos() + QPointF(boundingRect().width() / 2, boundingRect().height() / 2);
 
     // Recalculate path every 30 frames
-    if (pathTimer++ % 30 == 0) {
+    if (pathTimer++ % 10 == 0) {
         currentPath = findPath(robotCenter.toPoint(), playerCenter.toPoint());
     }
 
@@ -223,10 +225,17 @@ void Robot::Chase() {
 
     moveBy(velocity.x(), velocity.y());
     // checkCollision(velocity.x(), velocity.y());
+    // QList<QGraphicsItem*> colliding = collidingItems(Qt::IntersectsItemBoundingRect);
+    // for (auto* item : colliding) {
+    //     if (dynamic_cast<Wall*>(item) || dynamic_cast<Furniture*>(item)) {
+    //         moveBy(-velocity.x(), -velocity.y());
+    //         break;
+    //     }
+    // }
 }
 
 QList<QPoint> Robot::findPath(QPoint start, QPoint goal) {
-    int CELL = 32;
+    int CELL = 8;
 
     auto toGrid = [&](QPoint p) {
         return QPoint(p.x() / CELL, p.y() / CELL);

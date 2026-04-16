@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
         robot->setZValue(10);
         scene->addItem(robot);
-        robot->setPos(200, 100);
+        robot->setPos(200, 300);
     });
 
     

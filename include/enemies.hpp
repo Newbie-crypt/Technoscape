@@ -32,7 +32,6 @@ class Enemy: public QGraphicsObject, public Hittable {
     public:
         Enemy(int h, const QString& asset, double s);
         void onHit(int damage) override;
-        QRectF boundingRect() const override;
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) = 0;
         void setTarget(Player* t);
         virtual void Attack() = 0;
@@ -64,7 +63,7 @@ class Robot: public Enemy {
         void Attack() override;
     protected:
         void changeAnimationState(AnimationState state) override;
-
+        QRectF boundingRect() const override;
         // Called whenever update() is called. It draws the current frame of the object.
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override;
 
