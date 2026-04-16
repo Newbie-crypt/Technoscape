@@ -2,14 +2,6 @@
 
 extern bool paused;
 
-
-struct Node {
-    int x, y;
-    float cost;
-    bool operator>(const Node& o) const { return cost > o.cost; }
-};
-
-
 Enemy::Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
     sprite.load(asset);
 }
@@ -30,7 +22,7 @@ void Enemy::onHit(int damage)
     if (health <= 0)
     {
         isDead = true;
-        if (--numEnemiesAlive == 0) emit allEnemiesDead();
+        if (--numEnemiesAlive == 0) emit ThreeEnemiesDead();
     }
 }
 
@@ -39,6 +31,8 @@ int Enemy::numEnemiesAlive = 0;
 void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
     QList<QGraphicsItem*> colliding_items = collidingItems();
 
+    // This helps prevent the player from "bypassing" wall.
+    // The dx and dy values are pretty much the x and y components of the velocity.
     for (int i = 0; i < colliding_items.size(); i++) {
         if (typeid(*(colliding_items[i])) == typeid(Wall)) {
             moveBy(-dx, -dy);
@@ -56,6 +50,8 @@ void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
             door = dynamic_cast<Door*>(colliding_items[i]->group());
         }
 
+
+        // Obviously, the scenario will change if the door is unlocked. That's why we need the isLocked() method
         if (door && door->isLocked()) {
             moveBy(-dx, -dy);
             return;
@@ -106,17 +102,20 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
 
     QTimer* timer = new QTimer(this);
-
+    
+    // Every 100ms, we are changing the frame, depending on the currentAnimationState which changes via the other functions in this class
     connect(timer, &QTimer::timeout, [this]() {
     if (paused) {
         return;
     }
 
     currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
+
+    // Calls the boundingRect() and paint() methods
     update();
 
     if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
-        target->decreaseHealth(1);
+        target->decreaseHealth(10);
     }
     });
 
@@ -129,7 +128,11 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     // Every 50ms, we are checking whether the player is colliding with the robot
     // If they are colliding, the robot will attack.
     // Otherwise, the robot will chase the player!
+
+   // This is the evil timer. After every 50ms, the enemy will either attack or chase the player! 
    QObject::connect(timer2, &QTimer::timeout, [this, timer, timer2]() {
+
+    // When the game is paused, we want the enemies to stop what they're doing!
     if (paused) {
         return;
     }
@@ -174,10 +177,13 @@ void Robot::changeAnimationState(AnimationState state) {
 void Robot::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     painter->drawPixmap(0, 0, animations[currentAnimationState][currentFrame]);
     painter->setPen(QPen(Qt::red, 1));
+
+    // Uncomment this if you want to see the boundaries of the object
     // painter->drawRect(boundingRect());
 }
 
 void Robot::Move() {
+    // Here's an application of the changeAnimationState
     changeAnimationState(AnimationState::Running);
     moveBy(10, 0);
 }
@@ -203,87 +209,14 @@ void Robot::Chase() {
 
     // If it's moving to the left, flip the sprite horizontally
     // else, don't change it, but if the sprite was already flipped, flip it back to its original form.
-
     if (direction.x() < 0) {
         setTransform(QTransform().translate(frame_width, 0).scale(-1, 1));
     } else {
         setTransform(QTransform());
-        }
+    }
 
     moveBy(velocity.x(), 0);
     checkCollision(velocity.x(), 0);
     moveBy(0, velocity.y());
     checkCollision(0, velocity.y());
 }
-
-
-
-// QList<QPoint> Robot::findPath(QPoint start, QPoint goal) {
-//     int CELL = 8;
-
-//     auto toGrid = [&](QPoint p) {
-//         return QPoint(p.x() / CELL, p.y() / CELL);
-//     };
-
-//     QPoint gStart = toGrid(start);
-//     QPoint gGoal  = toGrid(goal);
-
-//     auto encode = [&](QPoint p) { return p.y() * 1000 + p.x(); };
-
-//     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open;
-//     std::unordered_map<int, int> cameFrom;
-//     std::unordered_map<int, float> costSoFar;
-
-//     open.push({gStart.x(), gStart.y(), 0});
-//     costSoFar[encode(gStart)] = 0;
-
-//     int dx[] = {0, 0, 1, -1};
-//     int dy[] = {1, -1, 0, 0};
-//     QRectF re(0, 0, CELL, CELL);
-//     QGraphicsRectItem* r = new QGraphicsRectItem;
-//     r->setRect(re);
-//     scene()->addItem(r);
-//     while (!open.empty()) {
-//         Node current = open.top(); open.pop();
-//         QPoint cur(current.x, current.y);
-
-//         if (cur == gGoal) break;
-
-//         for (int i = 0; i < 4; i++) {
-//             QPoint next(cur.x() + dx[i], cur.y() + dy[i]);
-
-//             QPointF worldPos(next.x() * CELL, next.y() * CELL);
-//             QList<QGraphicsItem*> items = scene()->items(QRectF(worldPos, QSizeF(CELL, CELL)));
-//             r->setPos(worldPos);
-
-//             bool blocked = false;
-//             for (auto* item : items) {
-//                 if (dynamic_cast<Wall*>(item) || dynamic_cast<Furniture*>(item)) {
-//                     blocked = true;
-//                     break;
-//                 }
-//             }
-//             if (blocked) continue;
-
-//             float newCost = costSoFar[encode(cur)] + 1;
-//             if (!costSoFar.count(encode(next)) || newCost < costSoFar[encode(next)]) {
-//                 costSoFar[encode(next)] = newCost;
-//                 float priority = newCost + std::abs(next.x() - gGoal.x()) + std::abs(next.y() - gGoal.y());
-//                 open.push({next.x(), next.y(), priority});
-//                 cameFrom[encode(next)] = encode(cur);
-//             }
-//             scene()->removeItem(r);
-//         }
-//     }
-
-//     QList<QPoint> path;
-//     QPoint current = gGoal;
-//     while (current != gStart) {
-//         path.prepend(current * CELL);
-//         int enc = encode(current);
-//         if (!cameFrom.count(enc)) break;
-//         int parentEnc = cameFrom[enc];
-//         current = QPoint(parentEnc % 1000, parentEnc / 1000);
-//     }
-//     return path;
-// }

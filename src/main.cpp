@@ -56,6 +56,10 @@ int main(int argc, char* argv[]) {
 
     QObject::connect(&menu, &MenuWindow::gameStarted, [&]() {
         Player* player;
+
+        // The purpose of this for loop is to make a pointer pointing to the player
+        // The player is constructed using createGameView which is in the MenuWindow.
+        // So, we are trying to gain access to this player in case we need it.
         for (QGraphicsItem* item : scene->items()) {
             if (dynamic_cast<Player*>(item)) {
                 player = dynamic_cast<Player*>(item);
@@ -64,10 +68,11 @@ int main(int argc, char* argv[]) {
         }
         const int number_of_robots = 5;
         Robot** robots = new Robot*[number_of_robots];
+
+        // Adding in the robots..
         for (int i = 0; i < number_of_robots; i++) {
             robots[i] = new Robot(player);
-
-            // So that the robot appears on top of the background..
+            // So that the robot appears over the background..
             robots[i]->setZValue(10);
         }
         robots[0]->setPos(151, 300);
@@ -75,11 +80,12 @@ int main(int argc, char* argv[]) {
         robots[2]->setPos(109, 219);
         robots[3]->setPos(246, 450);
         robots[4]->setPos(453, 461);
-        // (151, 300) (336, 225) (109, 219) (246, 450) (453, 461)
 
         for (int i = 0; i < number_of_robots; i++) {
             scene->addItem(robots[i]);
-            QObject::connect(robots[i], &Enemy::allEnemiesDead, [&, scene]() {
+            
+            QObject::connect(robots[i], &Enemy::ThreeEnemiesDead, [&, scene]() {
+                // May the key appear!
                 KeyItem* worldKey = new KeyItem(
                     QCoreApplication::applicationDirPath() + "/assets/key.gif",
                     60, 90

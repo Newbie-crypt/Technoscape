@@ -4,7 +4,7 @@ bool paused = false;
 QMediaPlayer* music;
 QAudioOutput* audio;
 
-
+// This event is responsible for drawing the Technoscape logo in the main menu.
 void TitleWidget::paintEvent(QPaintEvent*) {
      QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -114,6 +114,7 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     ));
     hoverPlayer->setVolume(1.0);
 
+    // Adding the buttons..
     QPushButton* startButton = new QPushButton("START GAME");
     QPushButton* settingsButton = new QPushButton("SETTINGS");
     QPushButton* exitButton = new QPushButton("EXIT");
@@ -197,6 +198,8 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
             QGraphicsView* gameView = createGameView(currentScene);
             gameView->showFullScreen();
             this->hide();
+
+            // This is necessary for us to dynamically allocate the robots in the main program (main.cpp)
             emit gameStarted();
         });
     });
@@ -209,11 +212,10 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     showFullScreen();
 }
 
+// The function's purpose is to set up the scene
 QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
 
     scene->clear();
-
-
 
     QPixmap levelBg("assets/level1_closed.png");
     if (levelBg.isNull()) {
@@ -254,11 +256,16 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
     // x 76, y = 542 (bar)
     QPixmap health_symbol_image (":/assets/health_symbol.png");
     health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    
     QGraphicsPixmapItem* health_symbol = scene->addPixmap(health_symbol_image);
     health_symbol->setPos(15, 540);
+
+
     HealthBar* health_bar = new HealthBar;
     health_bar->setPos(76, 542);
     health_bar->setZValue(1000);
+
+
     // May the main character spawn!
     Player* player = new Player(0, 0);
     player->setHealthBar(health_bar);
@@ -276,7 +283,7 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
     hudKey->hide();
     scene->addItem(hudKey);
 
-player->setHudKey(hudKey);
+    player->setHudKey(hudKey);
 
 
     scene->setFocusItem(player);
@@ -526,7 +533,7 @@ QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
     deathFadeOverlay->hide();
     deathFadeOverlay->raise();
        
-    // ===== GAME OVER UI =====
+    // UI of the Game over screen.
     QWidget* gameOverOverlay = new QWidget(view->viewport());
     gameOverOverlay->setGeometry(view->viewport()->rect());
     gameOverOverlay->setStyleSheet("background-color: rgba(0,0,0,255);");
@@ -545,7 +552,7 @@ QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
     gameOverContainerLayout->setSpacing(20);
     gameOverContainerLayout->setContentsMargins(0, 0, 0, 0);
 
-    // ===== GLITCH TITLE =====
+    // Game over Text
     QWidget* titleWrap = new QWidget;
     titleWrap->setFixedSize(720, 230);
     titleWrap->setStyleSheet("background: transparent;");
@@ -588,7 +595,7 @@ QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
         "letter-spacing: 4px;"
     );
 
-    // ===== SMALL GLITCH LINES =====
+    // Small Glitch Lines
     QFrame* glitch1 = new QFrame(gameOverOverlay);
     glitch1->setGeometry(130, 120, 180, 4);
     glitch1->setStyleSheet("background-color: rgba(0,255,255,180); border: none;");
@@ -605,7 +612,7 @@ QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
     glitch4->setGeometry(760, 330, 170, 3);
     glitch4->setStyleSheet("background-color: rgba(0,255,255,150); border: none;");
 
-    // ===== BUTTONS =====
+    // Buttons
     QPushButton* tryAgainButton = new QPushButton("TRY AGAIN");
     QPushButton* gameOverMenuButton = new QPushButton("MAIN MENU");
 
@@ -672,7 +679,7 @@ QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
     deathFadeOverlay->setGeometry(view->viewport()->rect());
     gameOverOverlay->setGeometry(view->viewport()->rect());
 
-    // ===== SCREEN SHAKE =====
+    // Screen shake
     QTransform baseTransform = view->transform();
 
 QTimer* shakeTimer = new QTimer(view);
@@ -706,7 +713,7 @@ QObject::connect(shakeTimer, &QTimer::timeout, [=]() mutable {
 
 shakeTimer->start(30);
 
-    // ===== FADE TO BLACK =====
+    // Fade to black
     deathFadeOverlay->show();
     deathFadeOverlay->raise();
 

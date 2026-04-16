@@ -46,7 +46,7 @@ class Enemy: public QGraphicsObject, public Hittable {
         virtual void Move() = 0;
         virtual void Chase() = 0;
     signals:
-        void allEnemiesDead();
+        void ThreeEnemiesDead();
 };
 
 class Robot: public Enemy {
@@ -63,9 +63,6 @@ class Robot: public Enemy {
         int frame_width;
         int frame_height;
         const int number_of_states = 3; // Idle, attacking, running
-        QList<QPoint> currentPath;
-        QList<QPoint> findPath(QPoint start, QPoint goal);
-        int pathTimer = 0;
     public:
         Robot(Player* t);
         void Attack() override;

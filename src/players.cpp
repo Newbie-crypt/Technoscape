@@ -159,7 +159,7 @@ void Player::updateInteractionPrompt() {
 
     QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
-    // -------- KEY DETECTION --------
+    // Key Detection
     for (int i = 0; i < colliding_items.size(); i++) {
         KeyItem* key = dynamic_cast<KeyItem*>(colliding_items[i]);
         if (key && key != hudKey) {
@@ -167,7 +167,7 @@ void Player::updateInteractionPrompt() {
         }
     }
 
-    // -------- DOOR DETECTION (SCENE-BASED, MORE RELIABLE) --------
+    // Door Detection
     if (scene()) {
         QRectF playerRect = legs->sceneBoundingRect().adjusted(-8, -8, 8, 8);
         QList<QGraphicsItem*> sceneItems = scene()->items();
@@ -479,7 +479,7 @@ void Player::unlockDoor() {
     // Unlock logically first
     targetDoor->unlock();
 
-    // Door coordinates you gave (shelha ya kareem.)
+    // Door coordinates
     int doorX = 672;
     int doorY = 116;
     int doorW = 67;
