@@ -345,9 +345,6 @@ void Player::handleFootsteps(int moveDirection) // Footsteps sound
     previousFrameIndex = currentFrameIndex;
 }
 
-
-
-
 void Player::checkTrapCollision() {
     if (trapCooldown) {
         return;

@@ -18,10 +18,14 @@ public:
        
         setPos(19, 33);
 
+
+        setPen(Qt::NoPen);
+        setBrush(Qt::NoBrush);
+
         // visible for testing
-        setPen(QPen(Qt::red, 2));
-        setBrush(QBrush(QColor(255, 0, 0, 120)));
-        setZValue(1000);
+        //setPen(QPen(Qt::red, 2));
+        //setBrush(QBrush(QColor(255, 0, 0, 120)));
+        //setZValue(1000);
     }
 };
 

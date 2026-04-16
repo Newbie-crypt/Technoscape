@@ -14,8 +14,8 @@ if (debug) {
     body->setBrush(QColor(255,0,0,90));
     body->setPen(QPen(Qt::red,2));
 } else {
-    body->setBrush(QColor(255,0,0,90));
-    body->setPen(QPen(Qt::red,2));
+    body->setBrush(Qt::NoBrush);
+    body->setPen(Qt::NoPen);
 }
     addToGroup(body);
 
