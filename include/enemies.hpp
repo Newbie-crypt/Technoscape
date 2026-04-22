@@ -46,7 +46,7 @@ class Enemy: public QGraphicsObject, public Hittable {
         virtual void Move() = 0;
         virtual void Chase() = 0;
     signals:
-        void ThreeEnemiesDead();
+        void AllEnemiesDead();
 };
 
 class Robot: public Enemy {

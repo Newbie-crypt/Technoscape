@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < number_of_robots; i++) {
             scene->addItem(robots[i]);
             
-            QObject::connect(robots[i], &Enemy::ThreeEnemiesDead, [&, scene]() {
+            QObject::connect(robots[i], &Enemy::AllEnemiesDead, [&, scene]() {
                 // May the key appear!
                 KeyItem* worldKey = new KeyItem(
                     QCoreApplication::applicationDirPath() + "/assets/key.gif",
