@@ -21,11 +21,15 @@
 #include <QUrl>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QPropertyAnimation>
+#include <QWidget>
+#include <QGraphicsOpacityEffect>
 #include <QPen>
 #include <QColor>
 #include <QTransform>
 #include "../include/weapon.hpp"
 #include "../include/keyitem.hpp"
+
 
 
 extern bool paused;
@@ -444,9 +448,15 @@ void Player::checkDoorOpen() {
         }
 
         if (door && !door->isLocked()) {
-            showToBeContinued();
-            return;
-        }
+    paused = true;
+
+    if (movementTimer) {
+        movementTimer->stop();
+    }
+
+    emit level2Requested();
+    return;
+}
     }
 }
 

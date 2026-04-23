@@ -289,6 +289,8 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
     scene->setFocusItem(player);
     player->setFocus();
 
+
+
     // TEMP TEST: spawn key in scene
     // spawnAccessKey(QPointF(500, 300));
 
@@ -299,6 +301,9 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
     addWall(0, 494, 800, 106);
     addWall(771, 0, 29, 199);
     addWall(766, 198, 34, 296);
+    addWall(582, 66, 67, 100);
+    addWall(412, 66, 166, 25);
+    addWall(45, 88, 22, 83);
 
     // DOOR
     Door* door = new Door(658, 155, 100, 25);
@@ -320,6 +325,162 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
     view->setFocus();
     scene->setFocusItem(player);
     player->setFocus();
+
+        QObject::connect(player, &Player::level2Requested, [=]() {
+    paused = true;
+
+    scene->setFocusItem(nullptr);
+    player->clearFocus();
+    view->clearFocus();
+
+    QWidget* transitionOverlay = new QWidget(view->viewport());
+    transitionOverlay->setGeometry(view->viewport()->rect());
+    transitionOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+    transitionOverlay->show();
+    transitionOverlay->raise();
+
+    // Title container
+    QWidget* introContainer = new QWidget(transitionOverlay);
+    introContainer->setGeometry(0, 0, transitionOverlay->width(), transitionOverlay->height());
+    introContainer->hide();
+
+    QLabel* cyanText = new QLabel("LEVEL 2", introContainer);
+    cyanText->setAlignment(Qt::AlignCenter);
+    cyanText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    cyanText->move(-4, 0);
+    cyanText->setStyleSheet(
+        "color: rgb(0,255,255);"
+        "background: transparent;"
+        "font-size: 54px;"
+        "font-weight: 900;"
+        "font-family: Impact, Arial Black, sans-serif;"
+        "letter-spacing: 4px;"
+    );
+
+    QLabel* magentaText = new QLabel("LEVEL 2", introContainer);
+    magentaText->setAlignment(Qt::AlignCenter);
+    magentaText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    magentaText->move(4, 0);
+    magentaText->setStyleSheet(
+        "color: rgb(255,0,200);"
+        "background: transparent;"
+        "font-size: 54px;"
+        "font-weight: 900;"
+        "font-family: Impact, Arial Black, sans-serif;"
+        "letter-spacing: 4px;"
+    );
+
+    QLabel* mainText = new QLabel("LEVEL 2", introContainer);
+    mainText->setAlignment(Qt::AlignCenter);
+    mainText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    mainText->setStyleSheet(
+        "color: white;"
+        "background: transparent;"
+        "font-size: 54px;"
+        "font-weight: 900;"
+        "font-family: Impact, Arial Black, sans-serif;"
+        "letter-spacing: 4px;"
+    );
+
+
+    // Decorative glitch lines
+    QVector<QFrame*> glitchLines;
+    for (int i = 0; i < 18; i++) {
+        QFrame* line = new QFrame(introContainer);
+        int x = rand() % 700;
+        int y = 80 + rand() % 420;
+        int w = 30 + rand() % 120;
+        int h = 2 + rand() % 2;
+        line->setGeometry(x, y, w, h);
+
+        if (i % 3 == 0) {
+            line->setStyleSheet("background-color: rgba(0,255,255,120); border: none;");
+        } else if (i % 3 == 1) {
+            line->setStyleSheet("background-color: rgba(255,0,200,120); border: none;");
+        } else {
+            line->setStyleSheet("background-color: rgba(255,255,255,60); border: none;");
+        }
+
+        line->hide();
+        glitchLines.push_back(line);
+    }
+
+    // Fade to black
+    QTimer* fadeTimer = new QTimer(transitionOverlay);
+    int* alpha = new int(0);
+
+    QObject::connect(fadeTimer, &QTimer::timeout, [=]() mutable {
+        *alpha += 20;
+        if (*alpha > 255) *alpha = 255;
+
+        transitionOverlay->setStyleSheet(
+            QString("background-color: rgba(0,0,0,%1);").arg(*alpha)
+        );
+
+        if (*alpha >= 255) {
+            fadeTimer->stop();
+            delete alpha;
+            fadeTimer->deleteLater();
+
+            introContainer->show();
+            introContainer->raise();
+
+            for (QFrame* line : glitchLines) {
+                line->show();
+            }
+
+            QTimer* glitchTimer = new QTimer(introContainer);
+            QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
+                static bool flip = false;
+                flip = !flip;
+
+                if (flip) {
+                    cyanText->move(-7, 0);
+                    magentaText->move(7, 0);
+                } else {
+                    cyanText->move(-4, 0);
+                    magentaText->move(4, 0);
+                }
+            });
+            glitchTimer->start(120);
+
+            QTimer::singleShot(2500, [=]() {
+                glitchTimer->stop();
+                glitchTimer->deleteLater();
+
+                QGraphicsScene* level2Scene = new QGraphicsScene();
+                level2Scene->setSceneRect(0, 0, 800, 600);
+
+                QPixmap level2Bg("assets/closedlevel2.png");
+                if (level2Bg.isNull()) {
+                    qDebug() << "ERROR: IMAGE NOT FOUND: assets/closedlevel2.png";
+                }
+
+                QGraphicsPixmapItem* background = level2Scene->addPixmap(level2Bg);
+                background->setZValue(-100);
+                background->setPos(0, 0);
+
+                view->setScene(level2Scene);
+                currentScene = level2Scene;
+
+                auto fitScene = [view, level2Scene]() {
+                    view->fitInView(level2Scene->sceneRect(), Qt::IgnoreAspectRatio);
+                };
+
+                fitScene();
+                QTimer::singleShot(0, [fitScene]() { fitScene(); });
+                QTimer::singleShot(50, [fitScene]() { fitScene(); });
+
+                transitionOverlay->hide();
+                transitionOverlay->deleteLater();
+            });
+        }
+    });
+
+    fadeTimer->start(35);
+});
+
+
 
     auto fitScene = [view, scene]() {
         view->fitInView(scene->sceneRect(), Qt::IgnoreAspectRatio);

@@ -22,6 +22,7 @@
 
 
 
+
 enum class AnimationState : int {
     Idle,
     Running,
@@ -51,6 +52,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void hideInteractionText();
         bool trapCooldown;
         void resetTrapCooldown();
+        
         // QSoundEffect walkSound; // I don't think this is used anymore, since we used my implementation of footsteps. -Sabagh
         // QTimer* footstepTimer; // I don't think this is used anymore, since we used my implementation of footsteps. -Sabagh
         QMediaPlayer* trapPlayer;
@@ -98,6 +100,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
     
     signals:
     void died();
+    void level2Requested();
     
     public slots:
         void processMovement();
