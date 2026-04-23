@@ -466,7 +466,7 @@ QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
                 auto fitScene = [view, level2Scene]() {
                     view->fitInView(level2Scene->sceneRect(), Qt::IgnoreAspectRatio);
                 };
-
+//test
                 fitScene();
                 QTimer::singleShot(0, [fitScene]() { fitScene(); });
                 QTimer::singleShot(50, [fitScene]() { fitScene(); });
