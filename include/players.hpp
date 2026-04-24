@@ -99,10 +99,8 @@ class Player : public QObject, public QGraphicsPixmapItem {
         ~Player();  // Destructor.
     
     signals:
-    void died();
-    void level2Requested();
-    void level3Requested();
-    
+        void died();
+
     public slots:
         void processMovement();
 

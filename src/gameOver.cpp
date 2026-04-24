@@ -143,6 +143,7 @@ gameOver::gameOver(QGraphicsView* inputView, gameLevel* inputLevel) {
             glitch4->setGeometry(760, 330, 170, 3);
         }
     });
+    
     QObject::connect(inputLevel->getPlayer(), &Player::died, [=]() {
             paused = true;
 

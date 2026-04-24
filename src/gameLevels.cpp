@@ -130,7 +130,6 @@ void levelOne::spawnEnemies() {
 
 }
 
-
 void levelOne::setupSpawnKeyEvent() {
     QObject::connect(this, &levelOne::allEnemiesDead, [this]() {
         // May the key appear!

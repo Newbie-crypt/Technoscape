@@ -371,7 +371,7 @@ void Player::handleFootsteps(int moveDirection) // Footsteps sound
     (isMovingUp && isMovingDown) ||
     (isMovingLeft && isMovingRight);
 
-if (moveDirection != 0 && !isConflicting) { // Added isColliding to merge Kareem's collide logic with my walking
+    if (moveDirection != 0 && !isConflicting) { // Added isColliding to merge Kareem's collide logic with my walking
         if ((currentFrameIndex == 1 || currentFrameIndex == 5) && currentFrameIndex != previousFrameIndex) {    //Footstep sound, 2 per second.
             footstepPool[currentFootSound] -> play();
             currentFootSound++;
@@ -448,15 +448,14 @@ void Player::checkDoorOpen() {
         }
 
         if (door && !door->isLocked()) {
-    paused = true;
+            paused = true;
 
-    if (movementTimer) {
-        movementTimer->stop();
-    }
+            if (movementTimer) {
+                movementTimer->stop();
+            }
 
-    emit level3Requested();
-    return;
-}
+            return;
+        }
     }
 }
 
@@ -594,102 +593,6 @@ void Player::unlockDoor() {
         delete leftEnergy;
         delete rightEnergy;
     });
-}
-
-void Player::showToBeContinued() {
-    if (scene() == nullptr) {
-        return;
-    }
-
-    QList<QGraphicsItem*> scene_items = scene()->items();
-
-    for (int i = 0; i < scene_items.size(); i++) {
-        QGraphicsTextItem* textItem = dynamic_cast<QGraphicsTextItem*>(scene_items[i]);
-
-        if (textItem) {
-            if (textItem->toPlainText() == "To Be Continued") {
-                return;
-            }
-        }
-    }
-// Stop gameplay
-    paused = true;
-
-    if (movementTimer) {
-        movementTimer->stop();
-    }
-
-    for (int i = 0; i < 8; i++) {
-        if (footstepPool[i]) {
-            footstepPool[i]->stop();
-        }
-    }
-
-    if (trapPlayer) {
-        trapPlayer->stop();
-    }
-
-    if (doorPlayer) {
-        doorPlayer->stop();
-    }
-
-
-    QGraphicsRectItem* blackScreen = new QGraphicsRectItem(0, 0, 800, 600);
-    blackScreen->setBrush(QColor(8, 10, 20));
-    blackScreen->setPen(Qt::NoPen);
-    blackScreen->setZValue(1000);
-    scene()->addItem(blackScreen);
-
-    for (int i = 0; i < 35; i++) {
-        int x = rand() % 760;
-        int y = rand() % 600;
-        int w = 20 + rand() % 120;
-        int h = 1 + rand() % 3;
-
-        QGraphicsRectItem* line = new QGraphicsRectItem(x, y, w, h);
-
-        if (i % 3 == 0) {
-            line->setBrush(QColor(0, 180, 255, 120));
-        }
-        else if (i % 3 == 1) {
-            line->setBrush(QColor(255, 0, 180, 120));
-        }
-        else {
-            line->setBrush(QColor(255, 255, 255, 50));
-        }
-
-        line->setPen(Qt::NoPen);
-        line->setZValue(1001);
-        scene()->addItem(line);
-    }
-
-    QGraphicsTextItem* cyanText = scene()->addText("To Be Continued");
-    cyanText->setDefaultTextColor(QColor(0, 255, 255));
-    cyanText->setFont(QFont("Arial", 30, QFont::Bold));
-    cyanText->setZValue(1002);
-
-    QGraphicsTextItem* pinkText = scene()->addText("To Be Continued");
-    pinkText->setDefaultTextColor(QColor(255, 0, 180));
-    pinkText->setFont(QFont("Arial", 30, QFont::Bold));
-    pinkText->setZValue(1003);
-
-    QGraphicsTextItem* mainText = scene()->addText("To Be Continued");
-    mainText->setDefaultTextColor(Qt::white);
-    mainText->setFont(QFont("Arial", 30, QFont::Bold));
-    mainText->setZValue(1004);
-
-    QRectF rect = mainText->boundingRect();
-    double textX = (800 - rect.width()) / 2;
-    double textY = 240;
-
-    cyanText->setPos(textX - 3, textY);
-    pinkText->setPos(textX + 3, textY + 1);
-    mainText->setPos(textX, textY);
-
-    hide();
-        if (paused) {
-        return;
-    }
 }
 
 

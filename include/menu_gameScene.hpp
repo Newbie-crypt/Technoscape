@@ -86,11 +86,10 @@ class MenuWindow : public QWidget {
         QFrame* panel;
 
 
-        MenuWindow(QGraphicsScene*& scene);
+        MenuWindow();
         
     private:
-        QGraphicsScene*& currentScene;
-        QGraphicsView* createGameView();
+        QGraphicsView* createGameView(gameLevel*);
         QGraphicsView* view;
         gameLevel* currentLevel;
 

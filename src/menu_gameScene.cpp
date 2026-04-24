@@ -6,7 +6,7 @@ QAudioOutput* audio;
 
 // This event is responsible for drawing the Technoscape logo in the main menu.
 void TitleWidget::paintEvent(QPaintEvent*) {
-     QPainter painter(this);
+    QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::TextAntialiasing);
 
@@ -53,7 +53,7 @@ void TitleWidget::paintEvent(QPaintEvent*) {
 
 }
 
-MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
+MenuWindow::MenuWindow() {
 
     // MAIN MENU DESIGN SECTION
     setWindowTitle("Technoscape");
@@ -194,12 +194,8 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
         QTimer::singleShot(120, [this]() {
             paused = false;
             audio->setVolume(0.02);
-            view = createGameView();
-            view->showFullScreen();
+            createGameView(new levelOne);
             this->hide();
-
-            // This is necessary for us to dynamically allocate the robots in the main program (main.cpp)
-            // emit gameStarted();
         });
     });
 
@@ -213,15 +209,19 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
 }
 
 // The function's purpose is to set up the scene
-QGraphicsView* MenuWindow::createGameView() {
+QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
-    levelOne* L1 = new levelOne;
-    currentLevel = L1;
-    currentLevel->setupScene();
-    L1->spawnEnemies();
-    currentLevel->setupSpawnKeyEvent();
+    // if the level is level one, perform these level-specific functions..
+    if (levelOne* L1 = dynamic_cast<levelOne*> (inputLevel)) {
+        currentLevel = L1;
+        currentLevel->setupScene();
+        L1->spawnEnemies();
+        currentLevel->setupSpawnKeyEvent();
+    }
+    // else if level 2..... and so on.
 
-    QGraphicsView* view = new QGraphicsView(L1->getScene());
+
+    QGraphicsView* view = new QGraphicsView(currentLevel->getScene());
     view->setRenderHint(QPainter::Antialiasing);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -234,15 +234,15 @@ QGraphicsView* MenuWindow::createGameView() {
     // wait until fullscreen window activation events have finished processing before the 
     // player item ends up with the scene focus
     // Without this, you wouldn't be able to move the player in the first place :)
-    QTimer::singleShot(0, [L1, view]() {
+    QTimer::singleShot(0, [this, view]() {
         view->setFocus();
-        L1->getScene()->setFocusItem(L1->getPlayer());
-        L1->getPlayer()->setFocus();
+        currentLevel->getScene()->setFocusItem(currentLevel->getPlayer());
+        currentLevel->getPlayer()->setFocus();
     });
 
 
-    auto fitScene = [view, L1] () {
-        view->fitInView(L1->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
+    auto fitScene = [view, this] () {
+        view->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
     };
 
     fitScene();
@@ -257,7 +257,7 @@ QGraphicsView* MenuWindow::createGameView() {
     gameOver* death_screen = new gameOver(view, currentLevel);
 
     QObject::connect(death_screen, &gameOver::tryAgainRequested, [this] {
-        createGameView();
+        createGameView(currentLevel);
     });
     
     QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, view] {

@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     audio->setVolume(0.12);
     music->play();
 
-    MenuWindow menu(scene);
+    MenuWindow menu;
     menu.showFullScreen();
     
     return app.exec();

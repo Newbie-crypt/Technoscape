@@ -10,7 +10,8 @@
 #include "players.hpp"
 #include "enemies.hpp"
 
-class gameLevel {
+class gameLevel : public QObject {
+    Q_OBJECT
     public:
         gameLevel();
         virtual ~gameLevel() {}
@@ -21,9 +22,11 @@ class gameLevel {
     protected:
         QGraphicsScene* scene;
         Player* player;
+    signals:
+        void levelComplete();
 };
 
-class levelOne : public QObject, public gameLevel  {
+class levelOne : public gameLevel  {
     Q_OBJECT   
     public:
         levelOne();
@@ -36,5 +39,4 @@ class levelOne : public QObject, public gameLevel  {
         Robot** robots;
     signals:
         void allEnemiesDead();
-
 };
