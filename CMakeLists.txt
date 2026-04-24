@@ -26,6 +26,7 @@ set(SOURCE_FILES
     src/keyitem.cpp
     src/gameLevels.cpp
     src/pauseMenu.cpp
+    src/gameOver.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -40,6 +41,7 @@ set(SOURCE_FILES
     include/keyitem.hpp
     include/gameLevels.hpp
     include/pauseMenu.hpp
+    include/gameOver.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

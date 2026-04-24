@@ -27,9 +27,8 @@ class Enemy: public QGraphicsObject, public Hittable {
     private:
     protected:
         void checkCollision(double dx, double dy);
-        static int numEnemiesAlive;
         int health;
-        bool isDead = false;
+        bool died = false;
         QPixmap sprite; 
         double speed;
         QPointF velocity;
@@ -46,7 +45,7 @@ class Enemy: public QGraphicsObject, public Hittable {
         virtual void Move() = 0;
         virtual void Chase() = 0;
     signals:
-        void AllEnemiesDead();
+        void isDead();
 };
 
 class Robot: public Enemy {
@@ -79,5 +78,6 @@ class Robot: public Enemy {
         
         // Slot used to chase the player.
         void Chase() override;
+    
 
 };

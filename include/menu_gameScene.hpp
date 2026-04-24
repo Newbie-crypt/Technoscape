@@ -44,6 +44,7 @@
 #include "keyitem.hpp"
 #include "gameLevels.hpp"
 #include "pauseMenu.hpp"
+#include "gameOver.hpp"
 
 extern bool paused;
 extern QMediaPlayer* music;

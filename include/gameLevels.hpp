@@ -23,7 +23,8 @@ class gameLevel {
         Player* player;
 };
 
-class levelOne : public gameLevel {
+class levelOne : public QObject, public gameLevel  {
+    Q_OBJECT   
     public:
         levelOne();
         ~levelOne();
@@ -31,6 +32,9 @@ class levelOne : public gameLevel {
         void spawnEnemies();
         void setupSpawnKeyEvent() override;
     private:   
-        const int number_of_robots = 5;
+        int number_of_robots;
         Robot** robots;
+    signals:
+        void allEnemiesDead();
+
 };

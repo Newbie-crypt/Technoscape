@@ -103,6 +103,7 @@ void levelOne::setupScene() {
 }
 
 void levelOne::spawnEnemies() {
+    number_of_robots = 5;
     robots = new Robot*[number_of_robots];
 
     // Adding in the robots...
@@ -119,20 +120,26 @@ void levelOne::spawnEnemies() {
     robots[2]->setPos(109, 219);
     robots[3]->setPos(246, 450);
     robots[4]->setPos(453, 450);
+
+    for (int i = 0; i < number_of_robots; i++) {
+        QObject::connect(robots[i], &Enemy::isDead, [this]() {
+            number_of_robots--;
+            if (number_of_robots == 0) emit allEnemiesDead();
+        });
+    }
+
 }
 
 
 void levelOne::setupSpawnKeyEvent() {
-    for (int i = 0; i < number_of_robots; i++) {
-        QObject::connect(robots[i], &Enemy::AllEnemiesDead, [this]() {
-            // May the key appear!
-            KeyItem* worldKey = new KeyItem(
-                QCoreApplication::applicationDirPath() + "/assets/key.gif",
-                60, 90
-                );
-            worldKey->setPos(400, 100); // replace with actual position you want
-            worldKey->setZValue(300);
-            scene->addItem(worldKey);
-        });
-    }
+    QObject::connect(this, &levelOne::allEnemiesDead, [this]() {
+        // May the key appear!
+        KeyItem* worldKey = new KeyItem(
+            QCoreApplication::applicationDirPath() + "/assets/key.gif",
+            60, 90
+            );
+        worldKey->setPos(400, 100); // replace with actual position you want
+        worldKey->setZValue(300);
+        scene->addItem(worldKey);
+    });
 }   

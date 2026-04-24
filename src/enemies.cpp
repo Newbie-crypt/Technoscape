@@ -4,7 +4,6 @@ extern bool paused;
 
 Enemy::Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
     sprite.load(asset);
-    numEnemiesAlive++;
 }
 
 QRectF Robot::boundingRect() const {
@@ -22,12 +21,10 @@ void Enemy::onHit(int damage)
     health -= damage;
     if (health <= 0)
     {
-        isDead = true;
-        if (--numEnemiesAlive == 0) emit AllEnemiesDead();
+        died = true;
+        emit isDead();
     }
 }
-
-int Enemy::numEnemiesAlive = 0;
 
 void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
     QList<QGraphicsItem*> colliding_items = collidingItems();
@@ -136,7 +133,7 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     if (paused) {
         return;
     }
-    if(isDead)
+    if (died)
         {
         timer->stop();
         timer2->stop();
