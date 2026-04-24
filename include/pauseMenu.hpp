@@ -14,8 +14,25 @@
 class pauseMenu : public QObject {
     Q_OBJECT   
     public:
-        pauseMenu(QGraphicsView* view, gameLevel* currentLevel);
+        pauseMenu(QGraphicsView*, gameLevel*);
         void openPauseMenu();
+        void togglePauseMenu();
+        void closePauseMenu();
+
     signals:
         void leaveRequested();
+    private:
+        gameLevel* level;
+        QGraphicsView* view;
+        QWidget* pauseOverlay;
+        QPushButton* pauseButton;
+        QFrame* leftBar;
+        QFrame* rightBar;
+        QVBoxLayout* overlayLayout;
+        QFrame* pausePanel;
+        QVBoxLayout* pauseLayout;
+        QLabel* pauseTitle;
+        QPushButton* continueButton;
+        QPushButton* leaveButton;
+        QShortcut* escShortcut;
 };

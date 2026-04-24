@@ -2,9 +2,14 @@
 
 extern bool paused;
 
-pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
+pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
+
+    level = currentLevel;
+    view = inputView;
+    
     // ===== WORKING PAUSE UI ON TOP OF GAME =====
-    QPushButton* pauseButton = new QPushButton(view->viewport());
+
+    pauseButton = new QPushButton(view->viewport());
     pauseButton->setGeometry(20, 20, 56, 56);
     pauseButton->setText("");
     pauseButton->setStyleSheet(
@@ -21,7 +26,7 @@ pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
     pauseButton->raise();
     pauseButton->show();
 
-    QFrame* leftBar = new QFrame(pauseButton);
+    leftBar = new QFrame(pauseButton);
     leftBar->setGeometry(16, 12, 8, 32);
     leftBar->setStyleSheet(
         "background-color: white;"
@@ -29,7 +34,7 @@ pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
     );
     leftBar->show();
 
-    QFrame* rightBar = new QFrame(pauseButton);
+    rightBar = new QFrame(pauseButton);
     rightBar->setGeometry(32, 12, 8, 32);
     rightBar->setStyleSheet(
         "background-color: white;"
@@ -37,17 +42,17 @@ pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
     );
     rightBar->show();
 
-   QWidget* pauseOverlay = new QWidget(view->viewport());
+    pauseOverlay = new QWidget(view->viewport());
     pauseOverlay->setGeometry(view->viewport()->rect());
     pauseOverlay->setStyleSheet("background-color: rgba(0,0,0,140);");
     pauseOverlay->hide();
     pauseOverlay->raise();
 
-    QVBoxLayout* overlayLayout = new QVBoxLayout(pauseOverlay);
+    overlayLayout = new QVBoxLayout(pauseOverlay);
     overlayLayout->setContentsMargins(0, 0, 0, 0);
     overlayLayout->setAlignment(Qt::AlignCenter);
 
-    QFrame* pausePanel = new QFrame;
+    pausePanel = new QFrame;
     pausePanel->setFixedSize(420, 260);
     overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
 
@@ -60,11 +65,11 @@ pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
     );
 
 
-    QVBoxLayout* pauseLayout = new QVBoxLayout(pausePanel);
+    pauseLayout = new QVBoxLayout(pausePanel);
     pauseLayout->setSpacing(18);
     pauseLayout->setContentsMargins(35, 30, 35, 30);
 
-    QLabel* pauseTitle = new QLabel("PAUSED");
+    pauseTitle = new QLabel("PAUSED");
     pauseTitle->setAlignment(Qt::AlignCenter);
     pauseTitle->setStyleSheet(
         "color: white;"
@@ -72,8 +77,8 @@ pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
         "font-weight: bold;"
     );
 
-    QPushButton* continueButton = new QPushButton("CONTINUE");
-    QPushButton* leaveButton = new QPushButton("LEAVE");
+    continueButton = new QPushButton("CONTINUE");
+    leaveButton = new QPushButton("LEAVE");
 
     continueButton->setMinimumHeight(70);
     leaveButton->setMinimumHeight(70);
@@ -99,51 +104,11 @@ pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
     pauseLayout->addWidget(continueButton);
     pauseLayout->addWidget(leaveButton);
 
-    auto openPauseMenu = [=]() {
-        if (currentLevel->getPlayer()->isDead()) {
-            return;
-        }
-
-        if (paused) {
-            return;
-        }
-
-        paused = true;
-
-        // remove control from player
-        currentLevel->getScene()->setFocusItem(nullptr);
-        currentLevel->getPlayer()->clearFocus();
-        view->clearFocus();
-
-        pauseOverlay->setGeometry(view->viewport()->rect());
-        pauseOverlay->show();
-        pauseOverlay->raise();
-        pauseOverlay->setFocus();
-    };
-
-    auto closePauseMenu = [=]() {
-        paused = false;
-        pauseOverlay->hide();
-
-        // give control back to player
-        view->setFocus();
-        currentLevel->getScene()->setFocusItem(currentLevel->getPlayer());
-        currentLevel->getPlayer()->setFocus();
-    };
-
-    auto togglePauseMenu = [=]() {
-        if (!paused) {
-            openPauseMenu();
-        } else {
-            closePauseMenu();
-        }
-    };
-
     QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
         openPauseMenu();
     });
 
-    QShortcut* escShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), view);
+    escShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), view);
     QObject::connect(escShortcut, &QShortcut::activated, [=]() {
         togglePauseMenu();
     });
@@ -156,4 +121,44 @@ pauseMenu::pauseMenu(QGraphicsView* view, gameLevel* currentLevel) {
         paused = false;
         emit leaveRequested();
     });
+}
+
+void pauseMenu::openPauseMenu() {
+    if (level->getPlayer()->isDead()) {
+        return;
+    }
+
+    if (paused) {
+        return;
+    }
+
+    paused = true;
+
+    // remove control from player
+    level->getScene()->setFocusItem(nullptr);
+    level->getPlayer()->clearFocus();
+    view->clearFocus();
+
+    pauseOverlay->setGeometry(view->viewport()->rect());
+    pauseOverlay->show();
+    pauseOverlay->raise();
+    pauseOverlay->setFocus();
+}
+
+void pauseMenu::closePauseMenu() {
+    paused = false;
+    pauseOverlay->hide();
+
+    // give control back to player
+    view->setFocus();
+    level->getScene()->setFocusItem(level->getPlayer());
+    level->getPlayer()->setFocus();
+}
+
+void pauseMenu::togglePauseMenu() {
+    if (!paused) {
+        openPauseMenu();
+    } else {
+        closePauseMenu();
+    }
 }
