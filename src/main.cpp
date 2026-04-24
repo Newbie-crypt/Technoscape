@@ -55,6 +55,8 @@ int main(int argc, char* argv[]) {
     MenuWindow menu(scene);
 
     QObject::connect(&menu, &MenuWindow::gameStarted, [&]() {
+        Enemy::resetEnemyCount();
+
         Player* player;
 
         // The purpose of this for loop is to make a pointer pointing to the player

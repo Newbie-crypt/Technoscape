@@ -25,12 +25,14 @@
 #include <QGraphicsView>
 #include <QApplication>
 #include <QGraphicsPixmapItem>
+#include <functional>
 #include "wall.hpp"
 #include "furniture.hpp"
 #include "players.hpp"
 #include "trap.hpp"
 #include "door.hpp"
 #include "enemies.hpp"
+#include "test_side_player.hpp"
 #include <QShortcut>
 #include <QKeySequence>
 #include <QCoreApplication>
@@ -39,9 +41,12 @@
 #include <QSoundEffect>
 #include <QMediaDevices>
 #include <QAudioDevice>
+#include <QSettings>
+#include <QtGlobal>
 #include "machine.hpp"
 #include "classes.hpp"
 #include "keyitem.hpp"
+
 
 extern bool paused;
 extern QMediaPlayer* music;
@@ -87,6 +92,15 @@ public:
     private:
     QGraphicsScene*& currentScene;
     QGraphicsView* createGameView(QGraphicsScene* scene);
+    void setupLevel2Scene(QGraphicsScene* scene, QGraphicsView* view, std::function<void()> showGameOverScreen);
+    int currentLevel = 1;
+    int highestUnlockedLevel = 1;
+    QPushButton* continueButton = nullptr;
+    std::function<void()> activeGameOverScreen;
+    void loadProgress();
+    void saveProgress();
+    void unlockLevel(int level);
+    void startLevel(int level);
 
 protected:
     void resizeEvent(QResizeEvent* event) override;

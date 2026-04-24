@@ -14,7 +14,6 @@ if (debug) {
 } else {
     body->setBrush(Qt::NoBrush);
     body->setPen(Qt::NoPen);
-     
 }
 
     addToGroup(body);

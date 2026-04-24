@@ -41,6 +41,7 @@ class Enemy: public QGraphicsObject, public Hittable {
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) = 0;
         void setTarget(Player* t);
         virtual void Attack() = 0;
+        static void resetEnemyCount();
         void Motion();
     public slots:
         virtual void Move() = 0;

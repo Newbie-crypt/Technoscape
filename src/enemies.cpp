@@ -29,6 +29,10 @@ void Enemy::onHit(int damage)
 
 int Enemy::numEnemiesAlive = 0;
 
+void Enemy::resetEnemyCount() {
+    numEnemiesAlive = 0;
+}
+
 void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
     QList<QGraphicsItem*> colliding_items = collidingItems();
 
