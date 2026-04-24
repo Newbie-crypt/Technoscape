@@ -36,9 +36,12 @@ set(SOURCE_FILES
     include/menu_gameScene.hpp
     include/leghitbox.hpp
     include/keyitem.hpp
+    include/sideplayer.hpp
     )
 
-qt_add_executable(main ${SOURCE_FILES} resources.qrc)
+qt_add_executable(main ${SOURCE_FILES} resources.qrc
+    include/sideplayer.hpp
+    src/sideplayer.cpp)
 
 target_link_libraries(main PRIVATE Qt6::Widgets Qt6::Multimedia)
 target_include_directories(main PRIVATE include)
