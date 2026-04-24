@@ -101,6 +101,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
     signals:
     void died();
     void level2Requested();
+    void level3Requested();
     
     public slots:
         void processMovement();

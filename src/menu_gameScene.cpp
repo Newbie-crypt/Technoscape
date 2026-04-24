@@ -194,15 +194,15 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
         QTimer::singleShot(120, [this]() {
             paused = false;
             audio->setVolume(0.02);
-            currentScene = new QGraphicsScene();
-            QGraphicsView* gameView = createGameView(currentScene);
-            gameView->showFullScreen();
+            view = createGameView();
+            view->showFullScreen();
             this->hide();
 
             // This is necessary for us to dynamically allocate the robots in the main program (main.cpp)
-            emit gameStarted();
+            // emit gameStarted();
         });
     });
+
     QObject::connect(exitButton, &QPushButton::clicked, []() {
         QTimer::singleShot(120, []() {
             QApplication::quit();
@@ -213,436 +213,198 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
 }
 
 // The function's purpose is to set up the scene
-QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
+QGraphicsView* MenuWindow::createGameView() {
 
-    scene->clear();
+    levelOne* L1 = new levelOne;
+    currentLevel = L1;
+    currentLevel->setupScene();
+    L1->spawnEnemies();
+    currentLevel->setupSpawnKeyEvent();
 
-    QPixmap levelBg("assets/level1_closed.png");
-    if (levelBg.isNull()) {
-        qDebug() << "ERROR: IMAGE NOT FOUND: assets/level1_closed.png";
-    }
-
-    QGraphicsPixmapItem* background = scene->addPixmap(levelBg);
-    background->setZValue(-100);
-
-    scene->setSceneRect(0, 0, 800, 600);
-
-    auto addWall = [&](int x, int y, int w, int h) {
-        scene->addItem(new Wall(x, y, w, h));
-    };
-
-    // auto addBox = [&](int x, int y, int w, int h) {
-    //     scene->addItem(new Furniture(x, y, w, h));
-    // };
-
-    auto addTrap = [&](int x, int y, int w, int h) {
-        scene->addItem(new Trap(x, y, w, h));
-    };
-
-
-    auto spawnAccessKey = [&](QPointF pos) {
-        KeyItem* worldKey = new KeyItem(
-            QCoreApplication::applicationDirPath() + "/assets/key.gif",
-            60, 90
-        );
-
-        worldKey->setPos(pos.x(), pos.y());
-        worldKey->setZValue(300);
-        scene->addItem(worldKey);
-    };
-
-
-    // w = h = 60, y= 517, x=15 (heart)
-    // x 76, y = 542 (bar)
-    QPixmap health_symbol_image (":/assets/health_symbol.png");
-    health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    
-    QGraphicsPixmapItem* health_symbol = scene->addPixmap(health_symbol_image);
-    health_symbol->setPos(15, 540);
-
-
-    HealthBar* health_bar = new HealthBar;
-    health_bar->setPos(76, 542);
-    health_bar->setZValue(1000);
-
-
-    // May the main character spawn!
-    Player* player = new Player(0, 0);
-    player->setHealthBar(health_bar);
-    player->setPos(568, 300);
-    scene->addItem(player);
-    scene->addItem(health_bar);
-
-    // HUD KEY (hidden until collected)
-    KeyItem* hudKey = new KeyItem(
-        QCoreApplication::applicationDirPath() + "/assets/key.gif",
-        90,140
-    );
-    hudKey->setPos(729, 488);
-    hudKey->setZValue(1500);
-    hudKey->hide();
-    scene->addItem(hudKey);
-
-    player->setHudKey(hudKey);
-
-
-    scene->setFocusItem(player);
-    player->setFocus();
-
-
-
-    // TEMP TEST: spawn key in scene
-    // spawnAccessKey(QPointF(500, 300));
-
-    // WALLS
-    addWall(48, 0, 723, 46);
-    addWall(0, 0, 46, 346);
-    addWall(0, 344, 74, 149);
-    addWall(0, 494, 800, 106);
-    addWall(771, 0, 29, 199);
-    addWall(766, 198, 34, 296);
-    addWall(582, 66, 67, 100);
-    addWall(412, 66, 166, 25);
-    addWall(45, 88, 22, 83);
-
-    // DOOR
-    Door* door = new Door(658, 155, 100, 25);
-    scene->addItem(door);
-
-    // TRAP
-    addTrap(176, 47, 124, 14);
-
-    QGraphicsView* view = new QGraphicsView(scene);
+    QGraphicsView* view = new QGraphicsView(L1->getScene());
     view->setRenderHint(QPainter::Antialiasing);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setFrameStyle(0);
     view->setBackgroundBrush(Qt::black);
     view->setAlignment(Qt::AlignCenter);
-
     view->showFullScreen();
-    QApplication::processEvents();
-    view->setFocus();
-    scene->setFocusItem(player);
-    player->setFocus();
-
-        QObject::connect(player, &Player::level2Requested, [=]() {
-    paused = true;
-
-    scene->setFocusItem(nullptr);
-    player->clearFocus();
-    view->clearFocus();
-
-    QWidget* transitionOverlay = new QWidget(view->viewport());
-    transitionOverlay->setGeometry(view->viewport()->rect());
-    transitionOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
-    transitionOverlay->show();
-    transitionOverlay->raise();
-
-    // Title container
-    QWidget* introContainer = new QWidget(transitionOverlay);
-    introContainer->setGeometry(0, 0, transitionOverlay->width(), transitionOverlay->height());
-    introContainer->hide();
-
-    QLabel* cyanText = new QLabel("LEVEL 2", introContainer);
-    cyanText->setAlignment(Qt::AlignCenter);
-    cyanText->setGeometry(0, 0, introContainer->width(), introContainer->height());
-    cyanText->move(-4, 0);
-    cyanText->setStyleSheet(
-        "color: rgb(0,255,255);"
-        "background: transparent;"
-        "font-size: 54px;"
-        "font-weight: 900;"
-        "font-family: Impact, Arial Black, sans-serif;"
-        "letter-spacing: 4px;"
-    );
-
-    QLabel* magentaText = new QLabel("LEVEL 2", introContainer);
-    magentaText->setAlignment(Qt::AlignCenter);
-    magentaText->setGeometry(0, 0, introContainer->width(), introContainer->height());
-    magentaText->move(4, 0);
-    magentaText->setStyleSheet(
-        "color: rgb(255,0,200);"
-        "background: transparent;"
-        "font-size: 54px;"
-        "font-weight: 900;"
-        "font-family: Impact, Arial Black, sans-serif;"
-        "letter-spacing: 4px;"
-    );
-
-    QLabel* mainText = new QLabel("LEVEL 2", introContainer);
-    mainText->setAlignment(Qt::AlignCenter);
-    mainText->setGeometry(0, 0, introContainer->width(), introContainer->height());
-    mainText->setStyleSheet(
-        "color: white;"
-        "background: transparent;"
-        "font-size: 54px;"
-        "font-weight: 900;"
-        "font-family: Impact, Arial Black, sans-serif;"
-        "letter-spacing: 4px;"
-    );
-
-
-    // Decorative glitch lines
-    QVector<QFrame*> glitchLines;
-    for (int i = 0; i < 18; i++) {
-        QFrame* line = new QFrame(introContainer);
-        int x = rand() % 700;
-        int y = 80 + rand() % 420;
-        int w = 30 + rand() % 120;
-        int h = 2 + rand() % 2;
-        line->setGeometry(x, y, w, h);
-
-        if (i % 3 == 0) {
-            line->setStyleSheet("background-color: rgba(0,255,255,120); border: none;");
-        } else if (i % 3 == 1) {
-            line->setStyleSheet("background-color: rgba(255,0,200,120); border: none;");
-        } else {
-            line->setStyleSheet("background-color: rgba(255,255,255,60); border: none;");
-        }
-
-        line->hide();
-        glitchLines.push_back(line);
-    }
-
-    // Fade to black
-    QTimer* fadeTimer = new QTimer(transitionOverlay);
-    int* alpha = new int(0);
-
-    QObject::connect(fadeTimer, &QTimer::timeout, [=]() mutable {
-        *alpha += 20;
-        if (*alpha > 255) *alpha = 255;
-
-        transitionOverlay->setStyleSheet(
-            QString("background-color: rgba(0,0,0,%1);").arg(*alpha)
-        );
-
-        if (*alpha >= 255) {
-            fadeTimer->stop();
-            delete alpha;
-            fadeTimer->deleteLater();
-
-            introContainer->show();
-            introContainer->raise();
-
-            for (QFrame* line : glitchLines) {
-                line->show();
-            }
-
-            QTimer* glitchTimer = new QTimer(introContainer);
-            QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
-                static bool flip = false;
-                flip = !flip;
-
-                if (flip) {
-                    cyanText->move(-7, 0);
-                    magentaText->move(7, 0);
-                } else {
-                    cyanText->move(-4, 0);
-                    magentaText->move(4, 0);
-                }
-            });
-            glitchTimer->start(120);
-
-            QTimer::singleShot(2500, [=]() {
-                glitchTimer->stop();
-                glitchTimer->deleteLater();
-
-                QGraphicsScene* level2Scene = new QGraphicsScene();
-                level2Scene->setSceneRect(0, 0, 800, 600);
-
-                QPixmap level2Bg("assets/closedlevel2.png");
-                if (level2Bg.isNull()) {
-                    qDebug() << "ERROR: IMAGE NOT FOUND: assets/closedlevel2.png";
-                }
-
-                QGraphicsPixmapItem* background = level2Scene->addPixmap(level2Bg);
-                background->setZValue(-100);
-                background->setPos(0, 0);
-
-                view->setScene(level2Scene);
-                currentScene = level2Scene;
-
-                auto fitScene = [view, level2Scene]() {
-                    view->fitInView(level2Scene->sceneRect(), Qt::IgnoreAspectRatio);
-                };
-//test
-                fitScene();
-                QTimer::singleShot(0, [fitScene]() { fitScene(); });
-                QTimer::singleShot(50, [fitScene]() { fitScene(); });
-
-                transitionOverlay->hide();
-                transitionOverlay->deleteLater();
-            });
-        }
+    QTimer::singleShot(0, [L1, view]() {
+        view->setFocus();
+        L1->getScene()->setFocusItem(L1->getPlayer());
+        L1->getPlayer()->setFocus();
     });
 
-    fadeTimer->start(35);
-});
+    // Preparing level 2 once the player is done with level 1.
+    // QObject::connect(player, &Player::level2Requested, [=]() {
+    //     paused = true;
+
+    //     scene->setFocusItem(nullptr);
+    //     player->clearFocus();
+    //     view->clearFocus();
+
+    //     QWidget* transitionOverlay = new QWidget(view->viewport());
+    //     transitionOverlay->setGeometry(view->viewport()->rect());
+    //     transitionOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+    //     transitionOverlay->show();
+    //     transitionOverlay->raise();
+
+    //     // Title container
+    //     QWidget* introContainer = new QWidget(transitionOverlay);
+    //     introContainer->setGeometry(0, 0, transitionOverlay->width(), transitionOverlay->height());
+    //     introContainer->hide();
+
+    //     QLabel* cyanText = new QLabel("LEVEL 2", introContainer);
+    //     cyanText->setAlignment(Qt::AlignCenter);
+    //     cyanText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    //     cyanText->move(-4, 0);
+    //     cyanText->setStyleSheet(
+    //         "color: rgb(0,255,255);"
+    //         "background: transparent;"
+    //         "font-size: 54px;"
+    //         "font-weight: 900;"
+    //         "font-family: Impact, Arial Black, sans-serif;"
+    //         "letter-spacing: 4px;"
+    //     );
+
+    //     QLabel* magentaText = new QLabel("LEVEL 2", introContainer);
+    //     magentaText->setAlignment(Qt::AlignCenter);
+    //     magentaText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    //     magentaText->move(4, 0);
+    //     magentaText->setStyleSheet(
+    //         "color: rgb(255,0,200);"
+    //         "background: transparent;"
+    //         "font-size: 54px;"
+    //         "font-weight: 900;"
+    //         "font-family: Impact, Arial Black, sans-serif;"
+    //         "letter-spacing: 4px;"
+    //     );
+
+    //     QLabel* mainText = new QLabel("LEVEL 2", introContainer);
+    //     mainText->setAlignment(Qt::AlignCenter);
+    //     mainText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    //     mainText->setStyleSheet(
+    //         "color: white;"
+    //         "background: transparent;"
+    //         "font-size: 54px;"
+    //         "font-weight: 900;"
+    //         "font-family: Impact, Arial Black, sans-serif;"
+    //         "letter-spacing: 4px;"
+    //     );
 
 
+    //     // Decorative glitch lines
+    //     QVector<QFrame*> glitchLines;
+    //     for (int i = 0; i < 18; i++) {
+    //         QFrame* line = new QFrame(introContainer);
+    //         int x = rand() % 700;
+    //         int y = 80 + rand() % 420;
+    //         int w = 30 + rand() % 120;
+    //         int h = 2 + rand() % 2;
+    //         line->setGeometry(x, y, w, h);
 
-    auto fitScene = [view, scene]() {
-        view->fitInView(scene->sceneRect(), Qt::IgnoreAspectRatio);
+    //         if (i % 3 == 0) {
+    //             line->setStyleSheet("background-color: rgba(0,255,255,120); border: none;");
+    //         } else if (i % 3 == 1) {
+    //             line->setStyleSheet("background-color: rgba(255,0,200,120); border: none;");
+    //         } else {
+    //             line->setStyleSheet("background-color: rgba(255,255,255,60); border: none;");
+    //         }
+
+    //         line->hide();
+    //         glitchLines.push_back(line);
+    //     }
+
+    //     // Fade to black
+    //     QTimer* fadeTimer = new QTimer(transitionOverlay);
+    //     int* alpha = new int(0);
+
+    //     QObject::connect(fadeTimer, &QTimer::timeout, [=]() mutable {
+    //         *alpha += 20;
+    //         if (*alpha > 255) *alpha = 255;
+
+    //         transitionOverlay->setStyleSheet(
+    //             QString("background-color: rgba(0,0,0,%1);").arg(*alpha)
+    //         );
+
+    //         if (*alpha >= 255) {
+    //             fadeTimer->stop();
+    //             delete alpha;
+    //             fadeTimer->deleteLater();
+
+    //             introContainer->show();
+    //             introContainer->raise();
+
+    //             for (QFrame* line : glitchLines) {
+    //                 line->show();
+    //             }
+
+    //             QTimer* glitchTimer = new QTimer(introContainer);
+    //             QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
+    //                 static bool flip = false;
+    //                 flip = !flip;
+
+    //                 if (flip) {
+    //                     cyanText->move(-7, 0);
+    //                     magentaText->move(7, 0);
+    //                 } else {
+    //                     cyanText->move(-4, 0);
+    //                     magentaText->move(4, 0);
+    //                 }
+    //             });
+    //             glitchTimer->start(120);
+
+    //             QTimer::singleShot(2500, [=]() {
+    //                 glitchTimer->stop();
+    //                 glitchTimer->deleteLater();
+
+    //                 QGraphicsScene* level2Scene = new QGraphicsScene();
+    //                 level2Scene->setSceneRect(0, 0, 800, 600);
+
+    //                 QPixmap level2Bg("assets/closedlevel2.png");
+    //                 if (level2Bg.isNull()) {
+    //                     qDebug() << "ERROR: IMAGE NOT FOUND: assets/closedlevel2.png";
+    //                 }
+
+    //                 QGraphicsPixmapItem* background = level2Scene->addPixmap(level2Bg);
+    //                 background->setZValue(-100);
+    //                 background->setPos(0, 0);
+
+    //                 view->setScene(level2Scene);
+    //                 currentScene = level2Scene;
+
+    //                 auto fitScene = [view, level2Scene]() {
+    //                     view->fitInView(level2Scene->sceneRect(), Qt::IgnoreAspectRatio);
+    //                 };
+    //                 fitScene();
+    //                 QTimer::singleShot(0, [fitScene]() { fitScene(); });
+    //                 QTimer::singleShot(50, [fitScene]() { fitScene(); });
+
+    //                 transitionOverlay->hide();
+    //                 transitionOverlay->deleteLater();
+    //             });
+    //         }
+    //     });
+
+        // fadeTimer->start(35);
+// });
+
+
+    
+    auto fitScene = [view, L1] () {
+        view->fitInView(L1->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
     };
 
     fitScene();
     QTimer::singleShot(0, [fitScene]() { fitScene(); });
     QTimer::singleShot(50, [fitScene]() { fitScene(); });
 
-    // ===== WORKING PAUSE UI ON TOP OF GAME =====
-    QPushButton* pauseButton = new QPushButton(view->viewport());
-    pauseButton->setGeometry(20, 20, 56, 56);
-    pauseButton->setText("");
-    pauseButton->setStyleSheet(
-        "QPushButton {"
-        "   background-color: rgba(0,0,0,120);"
-        "   border: 2px solid rgba(255,255,255,180);"
-        "   border-radius: 14px;"
-        "}"
-        "QPushButton:hover {"
-        "   background-color: rgba(255,255,255,40);"
-        "   border: 2px solid white;"
-        "}"
-    );
-    pauseButton->raise();
-    pauseButton->show();
-
-    QFrame* leftBar = new QFrame(pauseButton);
-    leftBar->setGeometry(16, 12, 8, 32);
-    leftBar->setStyleSheet(
-        "background-color: white;"
-        "border-radius: 3px;"
-    );
-    leftBar->show();
-
-    QFrame* rightBar = new QFrame(pauseButton);
-    rightBar->setGeometry(32, 12, 8, 32);
-    rightBar->setStyleSheet(
-        "background-color: white;"
-        "border-radius: 3px;"
-    );
-    rightBar->show();
-
-   QWidget* pauseOverlay = new QWidget(view->viewport());
-pauseOverlay->setGeometry(view->viewport()->rect());
-pauseOverlay->setStyleSheet("background-color: rgba(0,0,0,140);");
-pauseOverlay->hide();
-pauseOverlay->raise();
-
-QVBoxLayout* overlayLayout = new QVBoxLayout(pauseOverlay);
-overlayLayout->setContentsMargins(0, 0, 0, 0);
-overlayLayout->setAlignment(Qt::AlignCenter);
-
-QFrame* pausePanel = new QFrame;
-pausePanel->setFixedSize(420, 260);
-overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
-
-    pausePanel->setStyleSheet(
-        "QFrame {"
-        "   background-color: rgba(10, 20, 45, 230);"
-        "   border: 3px solid #36e0ff;"
-        "   border-radius: 18px;"
-        "}"
-    );
+    pauseMenu* pause = new pauseMenu(view, currentLevel);
+    QObject::connect(pause, &pauseMenu::leaveRequested, [view, this] () {
+        showMainMenu(view, this);
+    });
 
 
-    QVBoxLayout* pauseLayout = new QVBoxLayout(pausePanel);
-    pauseLayout->setSpacing(18);
-    pauseLayout->setContentsMargins(35, 30, 35, 30);
-
-    QLabel* pauseTitle = new QLabel("PAUSED");
-    pauseTitle->setAlignment(Qt::AlignCenter);
-    pauseTitle->setStyleSheet(
-        "color: white;"
-        "font-size: 30px;"
-        "font-weight: bold;"
-    );
-
-    QPushButton* continueButton = new QPushButton("CONTINUE");
-    QPushButton* leaveButton = new QPushButton("LEAVE");
-
-    continueButton->setMinimumHeight(70);
-    leaveButton->setMinimumHeight(70);
-    QString pauseBtnStyle =
-        "QPushButton {"
-        "   background-color: rgba(0,0,0,155);"
-        "   color: white;"
-        "   border: 3px solid #36e0ff;"
-        "   border-radius: 12px;"
-        "   font-size: 22px;"
-        "   font-weight: bold;"
-        "   padding: 16px;"
-        "}"
-        "QPushButton:hover {"
-        "   color: #7ef9ff;"
-        "   background-color: rgba(20,40,90,210);"
-        "}";
-
-    continueButton->setStyleSheet(pauseBtnStyle);
-    leaveButton->setStyleSheet(pauseBtnStyle);
-
-    pauseLayout->addWidget(pauseTitle);
-    pauseLayout->addWidget(continueButton);
-    pauseLayout->addWidget(leaveButton);
-
-auto openPauseMenu = [=]() {
-    if (player->isDead()) {
-        return;
-    }
-
-    if (paused) {
-        return;
-    }
-
-    paused = true;
-
-    // remove control from player
-    scene->setFocusItem(nullptr);
-    player->clearFocus();
-    view->clearFocus();
-
-    pauseOverlay->setGeometry(view->viewport()->rect());
-    pauseOverlay->show();
-    pauseOverlay->raise();
-    pauseOverlay->setFocus();
-};
-
-auto closePauseMenu = [=]() {
-    paused = false;
-    pauseOverlay->hide();
-
-    // give control back to player
-    view->setFocus();
-    scene->setFocusItem(player);
-    player->setFocus();
-};
-
-auto togglePauseMenu = [=]() {
-    if (!paused) {
-        openPauseMenu();
-    } else {
-        closePauseMenu();
-    }
-};
-
-QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
-    openPauseMenu();
-});
-
-QShortcut* escShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), view);
-QObject::connect(escShortcut, &QShortcut::activated, [=]() {
-    togglePauseMenu();
-});
-
-QObject::connect(continueButton, &QPushButton::clicked, [=]() {
-    closePauseMenu();
-});
-
-QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
-    paused = false;
-    showMainMenu(view, this);
-});
 // ===== DEATH FADE OVERLAY =====
     QWidget* deathFadeOverlay = new QWidget(view->viewport());
     deathFadeOverlay->setGeometry(view->viewport()->rect());
@@ -786,7 +548,7 @@ QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
         }
     });
 
-    QObject::connect(player, &Player::died, [=]() {
+    QObject::connect(currentLevel->getPlayer(), &Player::died, [=]() {
     paused = true;
 
     // stop player focus
@@ -799,8 +561,8 @@ QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
     // Screen shake
     QTransform baseTransform = view->transform();
 
-QTimer* shakeTimer = new QTimer(view);
-int* shakeStep = new int(0);
+    QTimer* shakeTimer = new QTimer(view);
+    int* shakeStep = new int(0);
 
 QObject::connect(shakeTimer, &QTimer::timeout, [=]() mutable {
     (*shakeStep)++;
@@ -868,7 +630,7 @@ shakeTimer->start(30);
         gameOverOverlay->hide();
 
         currentScene = new QGraphicsScene();
-        QGraphicsView* newGameView = createGameView(currentScene);
+        QGraphicsView* newGameView = createGameView();
         newGameView->showFullScreen();
 
         emit gameStarted();

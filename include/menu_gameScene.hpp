@@ -42,6 +42,8 @@
 #include "machine.hpp"
 #include "classes.hpp"
 #include "keyitem.hpp"
+#include "gameLevels.hpp"
+#include "pauseMenu.hpp"
 
 extern bool paused;
 extern QMediaPlayer* music;
@@ -76,22 +78,26 @@ private:
 };
 
 class MenuWindow : public QWidget {
-    Q_OBJECT
-public:
-    QLabel* background;
-    TitleWidget* title;
-    QFrame* panel;
+        Q_OBJECT
+    public:
+        QLabel* background;
+        TitleWidget* title;
+        QFrame* panel;
 
 
-    MenuWindow(QGraphicsScene*& scene);
+        MenuWindow(QGraphicsScene*& scene);
+        
     private:
-    QGraphicsScene*& currentScene;
-    QGraphicsView* createGameView(QGraphicsScene* scene);
+        QGraphicsScene*& currentScene;
+        QGraphicsView* createGameView();
+        QGraphicsView* view;
+        gameLevel* currentLevel;
 
-protected:
-    void resizeEvent(QResizeEvent* event) override;
-signals:
-    void gameStarted();
+    protected:
+        void resizeEvent(QResizeEvent* event) override;
+    signals:
+        void gameStarted();
+        void startLevel2();
 };
 
 void showMainMenu(QGraphicsView* currentView, MenuWindow* menu);

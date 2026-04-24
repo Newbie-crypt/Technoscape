@@ -2,3 +2,4 @@ build/
 .qtcreator/
 CollectionAssets
 test
+CMakePresets.json

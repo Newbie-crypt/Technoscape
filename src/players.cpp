@@ -454,7 +454,7 @@ void Player::checkDoorOpen() {
         movementTimer->stop();
     }
 
-    emit level2Requested();
+    emit level3Requested();
     return;
 }
     }
@@ -725,7 +725,7 @@ void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
 
-    QGraphicsPixmapItem::keyPressEvent(event);
+    event->accept();
 }
 
 void Player::keyReleaseEvent(QKeyEvent* event) {

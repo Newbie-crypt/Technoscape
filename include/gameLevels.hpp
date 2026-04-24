@@ -1,0 +1,36 @@
+#pragma once
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QObject>
+#include <QGraphicsObject>
+#include <QApplication>
+#include "wall.hpp"
+#include "trap.hpp"
+#include "keyitem.hpp"
+#include "players.hpp"
+#include "enemies.hpp"
+
+class gameLevel {
+    public:
+        gameLevel();
+        virtual ~gameLevel() {}
+        virtual void setupScene() = 0;
+        QGraphicsScene* getScene() {return scene;}
+        Player* getPlayer() {return player;}
+        virtual void setupSpawnKeyEvent() = 0;
+    protected:
+        QGraphicsScene* scene;
+        Player* player;
+};
+
+class levelOne : public gameLevel {
+    public:
+        levelOne();
+        ~levelOne();
+        void setupScene() override;
+        void spawnEnemies();
+        void setupSpawnKeyEvent() override;
+    private:   
+        const int number_of_robots = 5;
+        Robot** robots;
+};
