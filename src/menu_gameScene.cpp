@@ -3,6 +3,8 @@
 bool paused = false;
 QMediaPlayer* music;
 QAudioOutput* audio;
+double musicVolume = 0.12;
+double sfxVolume = 1.0;
 
 // This event is responsible for drawing the Technoscape logo in the main menu.
 void TitleWidget::paintEvent(QPaintEvent*) {
@@ -79,7 +81,7 @@ void MenuWindow::unlockLevel(int level)
 void MenuWindow::startLevel(int level)
 {
     paused = false;
-    audio->setVolume(0.02);
+    audio->setVolume(musicVolume);
 
     currentLevel = level;
     currentScene = new QGraphicsScene();
@@ -122,8 +124,9 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     background->setGeometry(0, 0, width(), height());
     background->lower();
 
+
     panel = new QFrame(this);
-    panel->setGeometry(0, 0, 450, 430);
+    panel->setGeometry(0, 0, 450, 540);
     panel->setStyleSheet(
         "QFrame {"
         "   background-color: rgba(10, 20, 45, 145);"
@@ -156,24 +159,26 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     clickAudio->setDevice(out);
     clickPlayer->setAudioOutput(clickAudio);
     clickPlayer->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
+    QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
     ));
-    clickAudio->setVolume(1.0);
+    clickAudio->setVolume(sfxVolume);
 
     QSoundEffect* hoverPlayer = new QSoundEffect(this);
     hoverPlayer->setSource(QUrl::fromLocalFile(
     QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
     ));
-    hoverPlayer->setVolume(1.0);
+    hoverPlayer->setVolume(sfxVolume);
 
     // Adding the buttons..
     QPushButton* startButton = new QPushButton("START GAME");
     QPushButton* continueButton = new QPushButton("CONTINUE GAME");
     QPushButton* settingsButton = new QPushButton("SETTINGS");
+    QPushButton* howToPlayButton = new QPushButton("HOW TO PLAY");
     QPushButton* exitButton = new QPushButton("EXIT");
     HoverSoundFilter* hoverFilter = new HoverSoundFilter(hoverPlayer, this);
     startButton->installEventFilter(hoverFilter);
     settingsButton->installEventFilter(hoverFilter);
+    howToPlayButton->installEventFilter(hoverFilter);
     exitButton->installEventFilter(hoverFilter);
     continueButton->installEventFilter(hoverFilter);
 
@@ -194,6 +199,12 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
         clickPlayer->setPosition(0);
         clickPlayer->play();
     });
+
+    QObject::connect(howToPlayButton, &QPushButton::clicked, [=]() {
+    clickPlayer->stop();
+    clickPlayer->setPosition(0);
+    clickPlayer->play();
+});
 
     QObject::connect(exitButton, &QPushButton::clicked, [=]() {
         clickPlayer->stop();
@@ -220,11 +231,13 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     startButton->setStyleSheet(btnStyle);
     continueButton->setStyleSheet(btnStyle);
     settingsButton->setStyleSheet(btnStyle);
+    howToPlayButton->setStyleSheet(btnStyle);
     exitButton->setStyleSheet(btnStyle);
 
     startButton->setMinimumHeight(90);
     continueButton->setMinimumHeight(90);
     settingsButton->setMinimumHeight(90);
+    howToPlayButton->setMinimumHeight(90);
     exitButton->setMinimumHeight(90);
 
     QGraphicsDropShadowEffect* startGlow = new QGraphicsDropShadowEffect;
@@ -245,6 +258,12 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     settingsGlow->setOffset(0, 0);
     settingsButton->setGraphicsEffect(settingsGlow);
 
+    QGraphicsDropShadowEffect* howGlow = new QGraphicsDropShadowEffect;
+    howGlow->setBlurRadius(40);
+    howGlow->setColor(QColor(0, 255, 255));
+    howGlow->setOffset(0, 0);
+    howToPlayButton->setGraphicsEffect(howGlow);
+
     QGraphicsDropShadowEffect* exitGlow = new QGraphicsDropShadowEffect;
     exitGlow->setBlurRadius(40);
     exitGlow->setColor(QColor(0, 255, 255));
@@ -254,6 +273,7 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     panelLayout->addWidget(startButton);
     panelLayout->addWidget(continueButton);
     panelLayout->addWidget(settingsButton);
+    panelLayout->addWidget(howToPlayButton);
     panelLayout->addWidget(exitButton);
 
     // END OF MAIN MENU DESIGN SECTION
@@ -262,7 +282,7 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     QObject::connect(startButton, &QPushButton::clicked, [this]() {
         QTimer::singleShot(120, [this]() {
             paused = false;
-            audio->setVolume(0.02);
+            audio->setVolume(musicVolume);
             currentScene = new QGraphicsScene();
             QGraphicsView* gameView = createGameView(currentScene);
             gameView->showFullScreen();
@@ -277,6 +297,181 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     QTimer::singleShot(120, [this]() {
         startLevel(highestUnlockedLevel);
     });
+});
+
+QObject::connect(settingsButton, &QPushButton::clicked, [=]() {
+    QWidget* settingsOverlay = new QWidget(this);
+    settingsOverlay->setGeometry(this->rect());
+    settingsOverlay->setStyleSheet("background-color: rgba(0,0,0,210);");
+    settingsOverlay->show();
+    settingsOverlay->raise();
+
+    QVBoxLayout* overlayLayout = new QVBoxLayout(settingsOverlay);
+    overlayLayout->setAlignment(Qt::AlignCenter);
+
+    QFrame* box = new QFrame(settingsOverlay);
+    box->setFixedSize(560, 520);
+    box->setStyleSheet(
+        "QFrame { background-color: rgba(10,20,45,245);"
+        "border: 3px solid #36e0ff;"
+        "border-radius: 18px; }"
+    );
+
+    overlayLayout->addWidget(box);
+
+    QVBoxLayout* layout = new QVBoxLayout(box);
+    layout->setSpacing(16);
+    layout->setContentsMargins(35, 30, 35, 30);
+
+    QLabel* title = new QLabel("SETTINGS");
+    title->setAlignment(Qt::AlignCenter);
+    title->setStyleSheet("color:white; font-size:32px; font-weight:bold; background: transparent;");
+
+    QLabel* musicLabel = new QLabel("Music Volume");
+    QLabel* sfxLabel = new QLabel("Sound Effects");
+    
+
+    QString labelStyle = "color:white; font-size:20px; font-weight:bold; background: transparent;";
+    musicLabel->setStyleSheet(labelStyle);
+    sfxLabel->setStyleSheet(labelStyle);
+    
+
+    QSlider* musicSlider = new QSlider(Qt::Horizontal);
+    musicSlider->setRange(0, 100);
+    musicSlider->setValue(audio->volume() * 100);
+
+    QSlider* sfxSlider = new QSlider(Qt::Horizontal);
+    sfxSlider->setRange(0, 100);
+    sfxSlider->setValue(sfxVolume * 100);
+
+    
+
+    QObject::connect(musicSlider, &QSlider::valueChanged, [=](int value) {
+        musicVolume = value / 100.0;
+        audio->setVolume(musicVolume);
+    });
+
+    QObject::connect(sfxSlider, &QSlider::valueChanged, [=](int value) {
+    sfxVolume = value / 100.0;
+
+    hoverPlayer->setVolume(sfxVolume);
+    clickAudio->setVolume(sfxVolume);
+    });
+    QPushButton* policyButton = new QPushButton("TERMS & POLICY");
+
+    QPushButton* resetButton = new QPushButton("RESET PROGRESS");
+    QPushButton* closeButton = new QPushButton("CLOSE");
+
+    policyButton->setStyleSheet(btnStyle);
+    resetButton->setStyleSheet(btnStyle);
+    closeButton->setStyleSheet(btnStyle);
+
+
+    QObject::connect(policyButton, &QPushButton::clicked, [=]() {
+    QWidget* policyOverlay = new QWidget(settingsOverlay);
+    policyOverlay->setGeometry(settingsOverlay->rect());
+    policyOverlay->setStyleSheet("background-color: rgba(0,0,0,220);");
+    policyOverlay->show();
+    policyOverlay->raise();
+
+    QVBoxLayout* policyLayout = new QVBoxLayout(policyOverlay);
+    policyLayout->setAlignment(Qt::AlignCenter);
+
+    QLabel* image = new QLabel(policyOverlay);
+    QPixmap policyImg("assets/terms_policy.png");
+
+    if (policyImg.isNull()) {
+        qDebug() << "ERROR: IMAGE NOT FOUND: assets/terms_policy.png";
+        image->setText("ERROR: terms_policy.png not found");
+        image->setStyleSheet("color:white; font-size:28px; background: transparent;");
+    } else {
+        image->setPixmap(policyImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+
+    image->setAlignment(Qt::AlignCenter);
+    image->setStyleSheet("background: transparent;");
+
+    QPushButton* backButton = new QPushButton("BACK", policyOverlay);
+    backButton->setFixedSize(220, 60);
+    backButton->setStyleSheet(btnStyle);
+
+    policyLayout->addWidget(image, 0, Qt::AlignCenter);
+    policyLayout->addWidget(backButton, 0, Qt::AlignCenter);
+
+    QObject::connect(backButton, &QPushButton::clicked, [=]() {
+        policyOverlay->deleteLater();
+    });
+});
+
+
+    QObject::connect(resetButton, &QPushButton::clicked, [=]() {
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            settingsOverlay,
+            "Reset Progress",
+            "Are you sure you want to reset your progress?",
+            QMessageBox::Yes | QMessageBox::No
+        );
+
+        if (reply == QMessageBox::Yes) {
+            QSettings settings("Technoscape", "Game");
+            settings.clear();
+            highestUnlockedLevel = 1;
+            saveProgress();
+        }
+    });
+
+    QObject::connect(closeButton, &QPushButton::clicked, [=]() {
+        settingsOverlay->deleteLater();
+    });
+
+    layout->addWidget(title);
+    layout->addWidget(musicLabel);
+    layout->addWidget(musicSlider);
+    layout->addWidget(sfxLabel);
+    layout->addWidget(sfxSlider);
+    layout->addWidget(policyButton);
+    layout->addWidget(resetButton);
+    layout->addWidget(closeButton);
+
+    settingsOverlay->raise();
+});
+
+QObject::connect(howToPlayButton, &QPushButton::clicked, [=]() {
+    QWidget* overlay = new QWidget(this);
+    overlay->setGeometry(this->rect());
+    overlay->setStyleSheet("background-color: rgba(0,0,0,220);");
+    overlay->show();
+    overlay->raise();
+
+    QVBoxLayout* layout = new QVBoxLayout(overlay);
+    layout->setAlignment(Qt::AlignCenter);
+
+    QLabel* image = new QLabel(overlay);
+    QPixmap howImg("assets/how_to_play.png");
+
+    if (howImg.isNull()) {
+        qDebug() << "ERROR: IMAGE NOT FOUND: assets/how_to_play.png";
+        image->setText("ERROR: how_to_play.png not found");
+        image->setStyleSheet("color:white; font-size:28px;");
+    } else {
+        image->setPixmap(howImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+
+    image->setAlignment(Qt::AlignCenter);
+    image->setStyleSheet("background: transparent;");
+
+    QPushButton* closeButton = new QPushButton("CLOSE", overlay);
+    closeButton->setFixedSize(220, 60);
+    closeButton->setStyleSheet(btnStyle);
+
+    layout->addWidget(image, 0, Qt::AlignCenter);
+    layout->addWidget(closeButton, 0, Qt::AlignCenter);
+
+    QObject::connect(closeButton, &QPushButton::clicked, [=]() {
+        overlay->deleteLater();
+    });
+
+    overlay->raise();
 });
 
 
@@ -1023,7 +1218,7 @@ Wall** fakeFloorCollision = new Wall*(nullptr);
 *fakeFloorCollision = new Wall(167, 417, 93, 20);
 scene->addItem(*fakeFloorCollision);
 
-QGraphicsRectItem* triggerZone = new QGraphicsRectItem(170, 405, 93, 35);
+QGraphicsRectItem* triggerZone = new QGraphicsRectItem(169, 414, 93, 35);
 triggerZone->setPen(Qt::NoPen);
 triggerZone->setBrush(Qt::NoBrush);
 triggerZone->setZValue(10);
@@ -1065,14 +1260,14 @@ hoverTrapSound->setAudioOutput(hoverTrapAudio);
 hoverTrapSound->setSource(QUrl::fromLocalFile(
     QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
 ));
-hoverTrapAudio->setVolume(1.0);
+hoverTrapAudio->setVolume(sfxVolume);
 QMediaPlayer* laserSound = new QMediaPlayer(scene);
 QAudioOutput* laserAudio = new QAudioOutput(scene);
 laserSound->setAudioOutput(laserAudio);
 laserSound->setSource(QUrl::fromLocalFile(
     QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
 ));
-laserAudio->setVolume(0.9);
+laserAudio->setVolume(sfxVolume);
 
 QTimer* trap1LogicTimer = new QTimer(scene);
 
@@ -1126,7 +1321,7 @@ QObject::connect(trap1LogicTimer, &QTimer::timeout, [=]() {
             fallAnim->start(16);
 
             // keep trap open for 5 sec, then reset
-            QTimer::singleShot(5000, [=]() {
+            QTimer::singleShot(2500, [=]() {
                 *trap1CoolingDown = true;
                 
                 fakeFloorSprite->show();
@@ -1250,7 +1445,7 @@ void MenuWindow::resizeEvent(QResizeEvent* event) {
     }
     if (panel) {
         int panelW = 450;
-        int panelH = 430;
+        int panelH = 540;
 
         int panelX = (width() - panelW) / 2;
         int panelY = (height() - panelH) / 2 + 80;

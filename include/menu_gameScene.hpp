@@ -25,6 +25,8 @@
 #include <QGraphicsView>
 #include <QApplication>
 #include <QGraphicsPixmapItem>
+#include <QSlider>
+#include <QMessageBox>
 #include <functional>
 #include "wall.hpp"
 #include "furniture.hpp"
@@ -51,6 +53,8 @@
 extern bool paused;
 extern QMediaPlayer* music;
 extern QAudioOutput* audio;
+extern double sfxVolume;
+extern double musicVolume;
 
 class TitleWidget : public QWidget {
     public:
@@ -101,6 +105,7 @@ public:
     void saveProgress();
     void unlockLevel(int level);
     void startLevel(int level);
+
 
 protected:
     void resizeEvent(QResizeEvent* event) override;

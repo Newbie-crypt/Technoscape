@@ -29,6 +29,7 @@
 #include <QTransform>
 #include "../include/weapon.hpp"
 #include "../include/keyitem.hpp"
+#include "menu_gameScene.hpp"
 
 
 
@@ -47,7 +48,7 @@ Player::Player(double x, double y) {
     trapPlayer->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
         ));
-    trapAudio->setVolume(0.25);
+    trapAudio->setVolume(sfxVolume);
 
      doorPlayer = new QMediaPlayer();
     doorAudio = new QAudioOutput();
@@ -56,7 +57,7 @@ Player::Player(double x, double y) {
     doorPlayer->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/door.wav"
         ));
-    doorAudio->setVolume(0.95);
+    doorAudio->setVolume(sfxVolume);
 
     footstepPool = new QSoundEffect*[8];
 
@@ -64,7 +65,7 @@ Player::Player(double x, double y) {
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
         footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
-        footstepPool[i]->setVolume(1);
+        footstepPool[i]->setVolume(sfxVolume);
     }
 
     gruntPool = new QSoundEffect* [8];
@@ -72,7 +73,7 @@ Player::Player(double x, double y) {
     for (int i = 0; i < 8; i++){
         gruntPool[i] = new QSoundEffect(this);
         gruntPool[i]->setSource(QUrl("qrc:/assets/grunt.wav"));  // Preload grunt sound for whole pool.
-        gruntPool[i]->setVolume(1);
+        gruntPool[i]->setVolume(sfxVolume);
     }
 
     // Related objects.

@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
         QCoreApplication::applicationDirPath() + "/assets/sounds/music.mp3"
     ));
     music->setLoops(QMediaPlayer::Infinite);
-    audio->setVolume(0.12);
+    audio->setVolume(musicVolume);
     music->play();
 
     MenuWindow menu(scene);
