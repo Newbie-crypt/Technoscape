@@ -5,6 +5,7 @@
 #include "../include/trap.hpp"
 #include "../include/classes.hpp"
 #include "../include/weapon.hpp"
+#include "../include/keyitem.hpp"
 #include <QBrush>
 #include <QTimer>
 #include <QGraphicsScene>
@@ -27,8 +28,6 @@
 #include <QPen>
 #include <QColor>
 #include <QTransform>
-#include "../include/weapon.hpp"
-#include "../include/keyitem.hpp"
 #include "menu_gameScene.hpp"
 
 

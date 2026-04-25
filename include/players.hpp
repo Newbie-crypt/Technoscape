@@ -10,15 +10,12 @@
 #include <QSoundEffect>
 #include <QMediaPlayer>
 #include <QAudioOutput>
-#include <map>
 #include "weapon.hpp"
 #include "classes.hpp"
 #include <QGraphicsTextItem>
 #include "../include/door.hpp"
 #include "../include/keyitem.hpp"
 #include "../include/leghitbox.hpp"
-#include <queue>
-#include <unordered_map>
 
 
 

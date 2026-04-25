@@ -15,5 +15,11 @@
         <file>assets/fire.wav</file>
         <file>assets/footstep.wav</file>
         <file>assets/grunt.wav</file>
+        <file>assets/Level2/Side_walk.png</file>
+        <file>assets/Level2/Side_run.png</file>
+        <file>assets/Level2/Side_idle.png</file>
+        <file>assets/Level2/Side_jump.png</file>
+        <file>assets/Level2/Side_backjump.png</file>
+        <file>assets/Level2/Side_hurt.png</file>
     </qresource>
 </RCC>
