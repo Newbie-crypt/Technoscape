@@ -57,6 +57,8 @@ void TitleWidget::paintEvent(QPaintEvent*) {
 void MenuWindow::loadProgress()
 {
     QSettings settings("Technoscape", "Game");
+    hasStartedGame = settings.value("hasStartedGame", false).toBool();
+
     highestUnlockedLevel = settings.value("highestUnlockedLevel", 1).toInt();
 
     if (highestUnlockedLevel < 1) {
@@ -68,6 +70,7 @@ void MenuWindow::saveProgress()
 {
     QSettings settings("Technoscape", "Game");
     settings.setValue("highestUnlockedLevel", highestUnlockedLevel);
+    settings.setValue("hasStartedGame", hasStartedGame);
 }
 
 void MenuWindow::unlockLevel(int level)
@@ -172,6 +175,7 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     // Adding the buttons..
     QPushButton* startButton = new QPushButton("START GAME");
     QPushButton* continueButton = new QPushButton("CONTINUE GAME");
+    continueButton->setVisible(hasStartedGame);
     QPushButton* settingsButton = new QPushButton("SETTINGS");
     QPushButton* howToPlayButton = new QPushButton("HOW TO PLAY");
     QPushButton* exitButton = new QPushButton("EXIT");
@@ -183,6 +187,11 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     continueButton->installEventFilter(hoverFilter);
 
     QObject::connect(startButton, &QPushButton::clicked, [=]() {
+        hasStartedGame = true;
+
+        QSettings settings("Technoscape", "Game");
+        settings.setValue("hasStartedGame", true);
+        continueButton->setVisible(true);
         clickPlayer->stop();
         clickPlayer->setPosition(0);
         clickPlayer->play();
@@ -415,7 +424,9 @@ QObject::connect(settingsButton, &QPushButton::clicked, [=]() {
         if (reply == QMessageBox::Yes) {
             QSettings settings("Technoscape", "Game");
             settings.clear();
+            hasStartedGame = false;
             highestUnlockedLevel = 1;
+            continueButton->setVisible(false);
             saveProgress();
         }
     });

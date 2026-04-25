@@ -105,6 +105,7 @@ public:
     void saveProgress();
     void unlockLevel(int level);
     void startLevel(int level);
+    bool hasStartedGame = false;
 
 
 protected:
