@@ -1,12 +1,14 @@
-#include "../include/menu_gameScene.hpp"
+#include "menu_gameScene.hpp"
 
 bool paused = false;
 QMediaPlayer* music;
 QAudioOutput* audio;
+double musicVolume = 0.12;
+double sfxVolume = 1.0;
 
 // This event is responsible for drawing the Technoscape logo in the main menu.
 void TitleWidget::paintEvent(QPaintEvent*) {
-     QPainter painter(this);
+    QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::TextAntialiasing);
 
@@ -50,13 +52,54 @@ void TitleWidget::paintEvent(QPaintEvent*) {
     painter.setPen(QPen(QColor(230, 255, 255), 2));
     painter.setBrush(gradient);
     painter.drawPath(path);
-
 }
 
-MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
+void MenuWindow::loadProgress() {
+    QSettings settings("Technoscape", "Game");
+    hasStartedGame = settings.value("hasStartedGame", false).toBool();
+    highestUnlockedLevel = settings.value("highestUnlockedLevel", 1).toInt();
+    if (highestUnlockedLevel < 1) highestUnlockedLevel = 1;
+}
+
+void MenuWindow::saveProgress() {
+    QSettings settings("Technoscape", "Game");
+    settings.setValue("highestUnlockedLevel", highestUnlockedLevel);
+    settings.setValue("hasStartedGame", hasStartedGame);
+}
+
+void MenuWindow::unlockLevel(int level) {
+    if (level > highestUnlockedLevel) {
+        highestUnlockedLevel = level;
+        saveProgress();
+    }
+}
+
+void MenuWindow::startLevel(int level) {
+    paused = false;
+    audio->setVolume(musicVolume);
+
+    currentLevelNumber = level;
+
+    if (level == 1) {
+        createGameView(new levelOne);
+        this->hide();
+        emit gameStarted();
+        return;
+    }
+
+    if (level == 2) {
+        createGameView(new levelTwo);
+        this->hide();
+        emit gameStarted();
+        return;
+    }
+}
+
+MenuWindow::MenuWindow() {
 
     // MAIN MENU DESIGN SECTION
     setWindowTitle("Technoscape");
+    loadProgress();
 
     background = new QLabel(this);
     QPixmap bg("assets/menu_bg.png");
@@ -71,7 +114,7 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     background->lower();
 
     panel = new QFrame(this);
-    panel->setGeometry(0, 0, 450, 430);
+    panel->setGeometry(0, 0, 450, 540);
     panel->setStyleSheet(
         "QFrame {"
         "   background-color: rgba(10, 20, 45, 145);"
@@ -106,40 +149,47 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     clickPlayer->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
     ));
-    clickAudio->setVolume(1.0);
+    clickAudio->setVolume(sfxVolume);
 
     QSoundEffect* hoverPlayer = new QSoundEffect(this);
     hoverPlayer->setSource(QUrl::fromLocalFile(
     QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
     ));
-    hoverPlayer->setVolume(1.0);
+    hoverPlayer->setVolume(sfxVolume);
 
     // Adding the buttons..
     QPushButton* startButton = new QPushButton("START GAME");
+    continueButton = new QPushButton("CONTINUE GAME");
+    continueButton->setVisible(hasStartedGame);
     QPushButton* settingsButton = new QPushButton("SETTINGS");
+    QPushButton* howToPlayButton = new QPushButton("HOW TO PLAY");
     QPushButton* exitButton = new QPushButton("EXIT");
     HoverSoundFilter* hoverFilter = new HoverSoundFilter(hoverPlayer, this);
     startButton->installEventFilter(hoverFilter);
+    continueButton->installEventFilter(hoverFilter);
     settingsButton->installEventFilter(hoverFilter);
+    howToPlayButton->installEventFilter(hoverFilter);
     exitButton->installEventFilter(hoverFilter);
 
+    auto playClick = [=]() {
+        clickAudio->setVolume(sfxVolume);
+        clickPlayer->stop();
+        clickPlayer->setPosition(0);
+        clickPlayer->play();
+    };
+
     QObject::connect(startButton, &QPushButton::clicked, [=]() {
-        clickPlayer->stop();
-        clickPlayer->setPosition(0);
-        clickPlayer->play();
+        hasStartedGame = true;
+        QSettings settings("Technoscape", "Game");
+        settings.setValue("hasStartedGame", true);
+        continueButton->setVisible(true);
+        playClick();
     });
 
-    QObject::connect(settingsButton, &QPushButton::clicked, [=]() {
-        clickPlayer->stop();
-        clickPlayer->setPosition(0);
-        clickPlayer->play();
-    });
-
-    QObject::connect(exitButton, &QPushButton::clicked, [=]() {
-        clickPlayer->stop();
-        clickPlayer->setPosition(0);
-        clickPlayer->play();
-    });
+    QObject::connect(continueButton, &QPushButton::clicked, playClick);
+    QObject::connect(settingsButton, &QPushButton::clicked, playClick);
+    QObject::connect(howToPlayButton, &QPushButton::clicked, playClick);
+    QObject::connect(exitButton, &QPushButton::clicked, playClick);
 
     QString btnStyle =
         "QPushButton {"
@@ -158,33 +208,34 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
         "}";
 
     startButton->setStyleSheet(btnStyle);
+    continueButton->setStyleSheet(btnStyle);
     settingsButton->setStyleSheet(btnStyle);
+    howToPlayButton->setStyleSheet(btnStyle);
     exitButton->setStyleSheet(btnStyle);
 
     startButton->setMinimumHeight(90);
+    continueButton->setMinimumHeight(90);
     settingsButton->setMinimumHeight(90);
+    howToPlayButton->setMinimumHeight(90);
     exitButton->setMinimumHeight(90);
 
-    QGraphicsDropShadowEffect* startGlow = new QGraphicsDropShadowEffect;
-    startGlow->setBlurRadius(40);
-    startGlow->setColor(QColor(0, 255, 255));
-    startGlow->setOffset(0, 0);
-    startButton->setGraphicsEffect(startGlow);
-
-    QGraphicsDropShadowEffect* settingsGlow = new QGraphicsDropShadowEffect;
-    settingsGlow->setBlurRadius(40);
-    settingsGlow->setColor(QColor(0, 255, 255));
-    settingsGlow->setOffset(0, 0);
-    settingsButton->setGraphicsEffect(settingsGlow);
-
-    QGraphicsDropShadowEffect* exitGlow = new QGraphicsDropShadowEffect;
-    exitGlow->setBlurRadius(40);
-    exitGlow->setColor(QColor(0, 255, 255));
-    exitGlow->setOffset(0, 0);
-    exitButton->setGraphicsEffect(exitGlow);
+    auto applyGlow = [](QPushButton* button) {
+        QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect;
+        glow->setBlurRadius(40);
+        glow->setColor(QColor(0, 255, 255));
+        glow->setOffset(0, 0);
+        button->setGraphicsEffect(glow);
+    };
+    applyGlow(startButton);
+    applyGlow(continueButton);
+    applyGlow(settingsButton);
+    applyGlow(howToPlayButton);
+    applyGlow(exitButton);
 
     panelLayout->addWidget(startButton);
+    panelLayout->addWidget(continueButton);
     panelLayout->addWidget(settingsButton);
+    panelLayout->addWidget(howToPlayButton);
     panelLayout->addWidget(exitButton);
 
     // END OF MAIN MENU DESIGN SECTION
@@ -192,17 +243,188 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     // Events when the buttons are pressed
     QObject::connect(startButton, &QPushButton::clicked, [this]() {
         QTimer::singleShot(120, [this]() {
-            paused = false;
-            audio->setVolume(0.02);
-            currentScene = new QGraphicsScene();
-            QGraphicsView* gameView = createGameView(currentScene);
-            gameView->showFullScreen();
-            this->hide();
-
-            // This is necessary for us to dynamically allocate the robots in the main program (main.cpp)
-            emit gameStarted();
+            startLevel(1);
         });
     });
+
+    // Continue saved progress: jumps to the highest level the player unlocked.
+    QObject::connect(continueButton, &QPushButton::clicked, [this]() {
+        QTimer::singleShot(120, [this]() {
+            startLevel(highestUnlockedLevel);
+        });
+    });
+
+    QObject::connect(settingsButton, &QPushButton::clicked, [=]() {
+        QWidget* settingsOverlay = new QWidget(this);
+        settingsOverlay->setGeometry(this->rect());
+        settingsOverlay->setStyleSheet("background-color: rgba(0,0,0,210);");
+        settingsOverlay->show();
+        settingsOverlay->raise();
+
+        QVBoxLayout* overlayLayout = new QVBoxLayout(settingsOverlay);
+        overlayLayout->setAlignment(Qt::AlignCenter);
+
+        QFrame* box = new QFrame(settingsOverlay);
+        box->setFixedSize(560, 520);
+        box->setStyleSheet(
+            "QFrame { background-color: rgba(10,20,45,245);"
+            "border: 3px solid #36e0ff;"
+            "border-radius: 18px; }"
+        );
+
+        overlayLayout->addWidget(box);
+
+        QVBoxLayout* layout = new QVBoxLayout(box);
+        layout->setSpacing(16);
+        layout->setContentsMargins(35, 30, 35, 30);
+
+        QLabel* settingsTitle = new QLabel("SETTINGS");
+        settingsTitle->setAlignment(Qt::AlignCenter);
+        settingsTitle->setStyleSheet("color:white; font-size:32px; font-weight:bold; background: transparent;");
+
+        QLabel* musicLabel = new QLabel("Music Volume");
+        QLabel* sfxLabel = new QLabel("Sound Effects");
+
+        QString labelStyle = "color:white; font-size:20px; font-weight:bold; background: transparent;";
+        musicLabel->setStyleSheet(labelStyle);
+        sfxLabel->setStyleSheet(labelStyle);
+
+        QSlider* musicSlider = new QSlider(Qt::Horizontal);
+        musicSlider->setRange(0, 100);
+        musicSlider->setValue(audio->volume() * 100);
+
+        QSlider* sfxSlider = new QSlider(Qt::Horizontal);
+        sfxSlider->setRange(0, 100);
+        sfxSlider->setValue(sfxVolume * 100);
+
+        QObject::connect(musicSlider, &QSlider::valueChanged, [](int value) {
+            musicVolume = value / 100.0;
+            audio->setVolume(musicVolume);
+        });
+
+        // Just update the global; play sites apply sfxVolume each time, so
+        // we don't hammer setVolume on every drag tick (which crashed the
+        // QSoundEffect backend on first game start).
+        QObject::connect(sfxSlider, &QSlider::valueChanged, [](int value) {
+            sfxVolume = value / 100.0;
+        });
+
+        QPushButton* policyButton = new QPushButton("TERMS & POLICY");
+        QPushButton* resetButton = new QPushButton("RESET PROGRESS");
+        QPushButton* closeButton = new QPushButton("CLOSE");
+
+        policyButton->setStyleSheet(btnStyle);
+        resetButton->setStyleSheet(btnStyle);
+        closeButton->setStyleSheet(btnStyle);
+
+        QObject::connect(policyButton, &QPushButton::clicked, [=]() {
+            QWidget* policyOverlay = new QWidget(settingsOverlay);
+            policyOverlay->setGeometry(settingsOverlay->rect());
+            policyOverlay->setStyleSheet("background-color: rgba(0,0,0,220);");
+            policyOverlay->show();
+            policyOverlay->raise();
+
+            QVBoxLayout* policyLayout = new QVBoxLayout(policyOverlay);
+            policyLayout->setAlignment(Qt::AlignCenter);
+
+            QLabel* image = new QLabel(policyOverlay);
+            QPixmap policyImg("assets/terms_policy.png");
+
+            if (policyImg.isNull()) {
+                qDebug() << "ERROR: IMAGE NOT FOUND: assets/terms_policy.png";
+                image->setText("ERROR: terms_policy.png not found");
+                image->setStyleSheet("color:white; font-size:28px; background: transparent;");
+            } else {
+                image->setPixmap(policyImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            }
+
+            image->setAlignment(Qt::AlignCenter);
+            image->setStyleSheet("background: transparent;");
+
+            QPushButton* backButton = new QPushButton("BACK", policyOverlay);
+            backButton->setFixedSize(220, 60);
+            backButton->setStyleSheet(btnStyle);
+
+            policyLayout->addWidget(image, 0, Qt::AlignCenter);
+            policyLayout->addWidget(backButton, 0, Qt::AlignCenter);
+
+            QObject::connect(backButton, &QPushButton::clicked, [=]() {
+                policyOverlay->deleteLater();
+            });
+        });
+
+        QObject::connect(resetButton, &QPushButton::clicked, [=]() {
+            QMessageBox::StandardButton reply = QMessageBox::question(
+                settingsOverlay,
+                "Reset Progress",
+                "Are you sure you want to reset your progress?",
+                QMessageBox::Yes | QMessageBox::No
+            );
+
+            if (reply == QMessageBox::Yes) {
+                QSettings settings("Technoscape", "Game");
+                settings.clear();
+                hasStartedGame = false;
+                highestUnlockedLevel = 1;
+                continueButton->setVisible(false);
+                saveProgress();
+            }
+        });
+
+        QObject::connect(closeButton, &QPushButton::clicked, [=]() {
+            settingsOverlay->deleteLater();
+        });
+
+        layout->addWidget(settingsTitle);
+        layout->addWidget(musicLabel);
+        layout->addWidget(musicSlider);
+        layout->addWidget(sfxLabel);
+        layout->addWidget(sfxSlider);
+        layout->addWidget(policyButton);
+        layout->addWidget(resetButton);
+        layout->addWidget(closeButton);
+
+        settingsOverlay->raise();
+    });
+
+    QObject::connect(howToPlayButton, &QPushButton::clicked, [=]() {
+        QWidget* overlay = new QWidget(this);
+        overlay->setGeometry(this->rect());
+        overlay->setStyleSheet("background-color: rgba(0,0,0,220);");
+        overlay->show();
+        overlay->raise();
+
+        QVBoxLayout* layout = new QVBoxLayout(overlay);
+        layout->setAlignment(Qt::AlignCenter);
+
+        QLabel* image = new QLabel(overlay);
+        QPixmap howImg("assets/how_to_play.png");
+
+        if (howImg.isNull()) {
+            qDebug() << "ERROR: IMAGE NOT FOUND: assets/how_to_play.png";
+            image->setText("ERROR: how_to_play.png not found");
+            image->setStyleSheet("color:white; font-size:28px;");
+        } else {
+            image->setPixmap(howImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        }
+
+        image->setAlignment(Qt::AlignCenter);
+        image->setStyleSheet("background: transparent;");
+
+        QPushButton* closeButton = new QPushButton("CLOSE", overlay);
+        closeButton->setFixedSize(220, 60);
+        closeButton->setStyleSheet(btnStyle);
+
+        layout->addWidget(image, 0, Qt::AlignCenter);
+        layout->addWidget(closeButton, 0, Qt::AlignCenter);
+
+        QObject::connect(closeButton, &QPushButton::clicked, [=]() {
+            overlay->deleteLater();
+        });
+
+        overlay->raise();
+    });
+
     QObject::connect(exitButton, &QPushButton::clicked, []() {
         QTimer::singleShot(120, []() {
             QApplication::quit();
@@ -212,475 +434,86 @@ MenuWindow::MenuWindow(QGraphicsScene*& scene) : currentScene(scene) {
     showFullScreen();
 }
 
-// The function's purpose is to set up the scene
-QGraphicsView* MenuWindow::createGameView(QGraphicsScene* scene) {
-
-    scene->clear();
-
-    QPixmap levelBg("assets/level1_closed.png");
-    if (levelBg.isNull()) {
-        qDebug() << "ERROR: IMAGE NOT FOUND: assets/level1_closed.png";
-    }
-
-    QGraphicsPixmapItem* background = scene->addPixmap(levelBg);
-    background->setZValue(-100);
-
-    scene->setSceneRect(0, 0, 800, 600);
-
-    auto addWall = [&](int x, int y, int w, int h) {
-        scene->addItem(new Wall(x, y, w, h));
-    };
-
-    // auto addBox = [&](int x, int y, int w, int h) {
-    //     scene->addItem(new Furniture(x, y, w, h));
-    // };
-
-    auto addTrap = [&](int x, int y, int w, int h) {
-        scene->addItem(new Trap(x, y, w, h));
-    };
-
-
-    auto spawnAccessKey = [&](QPointF pos) {
-        KeyItem* worldKey = new KeyItem(
-            QCoreApplication::applicationDirPath() + "/assets/key.gif",
-            60, 90
-        );
-
-        worldKey->setPos(pos.x(), pos.y());
-        worldKey->setZValue(300);
-        scene->addItem(worldKey);
-    };
-
-
-    // w = h = 60, y= 517, x=15 (heart)
-    // x 76, y = 542 (bar)
-    QPixmap health_symbol_image (":/assets/health_symbol.png");
-    health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    
-    QGraphicsPixmapItem* health_symbol = scene->addPixmap(health_symbol_image);
-    health_symbol->setPos(15, 540);
-
-
-    HealthBar* health_bar = new HealthBar;
-    health_bar->setPos(76, 542);
-    health_bar->setZValue(1000);
-
-
-    // May the main character spawn!
-    Player* player = new Player(0, 0);
-    player->setHealthBar(health_bar);
-    player->setPos(568, 300);
-    scene->addItem(player);
-    scene->addItem(health_bar);
-
-    // HUD KEY (hidden until collected)
-    KeyItem* hudKey = new KeyItem(
-        QCoreApplication::applicationDirPath() + "/assets/key.gif",
-        90,140
-    );
-    hudKey->setPos(729, 488);
-    hudKey->setZValue(1500);
-    hudKey->hide();
-    scene->addItem(hudKey);
-
-    player->setHudKey(hudKey);
-
-
-    scene->setFocusItem(player);
-    player->setFocus();
-
-    // TEMP TEST: spawn key in scene
-    // spawnAccessKey(QPointF(500, 300));
-
-    // WALLS
-    addWall(48, 0, 723, 46);
-    addWall(0, 0, 46, 346);
-    addWall(0, 344, 74, 149);
-    addWall(0, 494, 800, 106);
-    addWall(771, 0, 29, 199);
-    addWall(766, 198, 34, 296);
-
-    // DOOR
-    Door* door = new Door(658, 155, 100, 25);
-    scene->addItem(door);
-
-    // TRAP
-    addTrap(176, 47, 124, 14);
-
-    QGraphicsView* view = new QGraphicsView(scene);
-    view->setRenderHint(QPainter::Antialiasing);
-    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view->setFrameStyle(0);
-    view->setBackgroundBrush(Qt::black);
-    view->setAlignment(Qt::AlignCenter);
-
-    view->showFullScreen();
-    QApplication::processEvents();
-    view->setFocus();
-    scene->setFocusItem(player);
-    player->setFocus();
-
-    auto fitScene = [view, scene]() {
-        view->fitInView(scene->sceneRect(), Qt::IgnoreAspectRatio);
-    };
-
-    fitScene();
-    QTimer::singleShot(0, [fitScene]() { fitScene(); });
-    QTimer::singleShot(50, [fitScene]() { fitScene(); });
-
-    // ===== WORKING PAUSE UI ON TOP OF GAME =====
-    QPushButton* pauseButton = new QPushButton(view->viewport());
-    pauseButton->setGeometry(20, 20, 56, 56);
-    pauseButton->setText("");
-    pauseButton->setStyleSheet(
-        "QPushButton {"
-        "   background-color: rgba(0,0,0,120);"
-        "   border: 2px solid rgba(255,255,255,180);"
-        "   border-radius: 14px;"
-        "}"
-        "QPushButton:hover {"
-        "   background-color: rgba(255,255,255,40);"
-        "   border: 2px solid white;"
-        "}"
-    );
-    pauseButton->raise();
-    pauseButton->show();
-
-    QFrame* leftBar = new QFrame(pauseButton);
-    leftBar->setGeometry(16, 12, 8, 32);
-    leftBar->setStyleSheet(
-        "background-color: white;"
-        "border-radius: 3px;"
-    );
-    leftBar->show();
-
-    QFrame* rightBar = new QFrame(pauseButton);
-    rightBar->setGeometry(32, 12, 8, 32);
-    rightBar->setStyleSheet(
-        "background-color: white;"
-        "border-radius: 3px;"
-    );
-    rightBar->show();
-
-   QWidget* pauseOverlay = new QWidget(view->viewport());
-pauseOverlay->setGeometry(view->viewport()->rect());
-pauseOverlay->setStyleSheet("background-color: rgba(0,0,0,140);");
-pauseOverlay->hide();
-pauseOverlay->raise();
-
-QVBoxLayout* overlayLayout = new QVBoxLayout(pauseOverlay);
-overlayLayout->setContentsMargins(0, 0, 0, 0);
-overlayLayout->setAlignment(Qt::AlignCenter);
-
-QFrame* pausePanel = new QFrame;
-pausePanel->setFixedSize(420, 260);
-overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
-
-    pausePanel->setStyleSheet(
-        "QFrame {"
-        "   background-color: rgba(10, 20, 45, 230);"
-        "   border: 3px solid #36e0ff;"
-        "   border-radius: 18px;"
-        "}"
-    );
-
-
-    QVBoxLayout* pauseLayout = new QVBoxLayout(pausePanel);
-    pauseLayout->setSpacing(18);
-    pauseLayout->setContentsMargins(35, 30, 35, 30);
-
-    QLabel* pauseTitle = new QLabel("PAUSED");
-    pauseTitle->setAlignment(Qt::AlignCenter);
-    pauseTitle->setStyleSheet(
-        "color: white;"
-        "font-size: 30px;"
-        "font-weight: bold;"
-    );
-
-    QPushButton* continueButton = new QPushButton("CONTINUE");
-    QPushButton* leaveButton = new QPushButton("LEAVE");
-
-    continueButton->setMinimumHeight(70);
-    leaveButton->setMinimumHeight(70);
-    QString pauseBtnStyle =
-        "QPushButton {"
-        "   background-color: rgba(0,0,0,155);"
-        "   color: white;"
-        "   border: 3px solid #36e0ff;"
-        "   border-radius: 12px;"
-        "   font-size: 22px;"
-        "   font-weight: bold;"
-        "   padding: 16px;"
-        "}"
-        "QPushButton:hover {"
-        "   color: #7ef9ff;"
-        "   background-color: rgba(20,40,90,210);"
-        "}";
-
-    continueButton->setStyleSheet(pauseBtnStyle);
-    leaveButton->setStyleSheet(pauseBtnStyle);
-
-    pauseLayout->addWidget(pauseTitle);
-    pauseLayout->addWidget(continueButton);
-    pauseLayout->addWidget(leaveButton);
-
-auto openPauseMenu = [=]() {
-    if (player->isDead()) {
-        return;
-    }
-
-    if (paused) {
-        return;
-    }
-
+void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
     paused = true;
 
-    // remove control from player
-    scene->setFocusItem(nullptr);
-    player->clearFocus();
-    view->clearFocus();
+    QWidget* transitionOverlay = new QWidget(gameView->viewport());
+    transitionOverlay->setGeometry(gameView->viewport()->rect());
+    transitionOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+    transitionOverlay->show();
+    transitionOverlay->raise();
 
-    pauseOverlay->setGeometry(view->viewport()->rect());
-    pauseOverlay->show();
-    pauseOverlay->raise();
-    pauseOverlay->setFocus();
-};
+    QWidget* introContainer = new QWidget(transitionOverlay);
+    introContainer->setGeometry(0, 0, transitionOverlay->width(), transitionOverlay->height());
+    introContainer->hide();
 
-auto closePauseMenu = [=]() {
-    paused = false;
-    pauseOverlay->hide();
-
-    // give control back to player
-    view->setFocus();
-    scene->setFocusItem(player);
-    player->setFocus();
-};
-
-auto togglePauseMenu = [=]() {
-    if (!paused) {
-        openPauseMenu();
-    } else {
-        closePauseMenu();
-    }
-};
-
-QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
-    openPauseMenu();
-});
-
-QShortcut* escShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), view);
-QObject::connect(escShortcut, &QShortcut::activated, [=]() {
-    togglePauseMenu();
-});
-
-QObject::connect(continueButton, &QPushButton::clicked, [=]() {
-    closePauseMenu();
-});
-
-QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
-    paused = false;
-    showMainMenu(view, this);
-});
-// ===== DEATH FADE OVERLAY =====
-    QWidget* deathFadeOverlay = new QWidget(view->viewport());
-    deathFadeOverlay->setGeometry(view->viewport()->rect());
-    deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
-    deathFadeOverlay->hide();
-    deathFadeOverlay->raise();
-       
-    // UI of the Game over screen.
-    QWidget* gameOverOverlay = new QWidget(view->viewport());
-    gameOverOverlay->setGeometry(view->viewport()->rect());
-    gameOverOverlay->setStyleSheet("background-color: rgba(0,0,0,255);");
-    gameOverOverlay->hide();
-    gameOverOverlay->raise();
-
-    QVBoxLayout* gameOverLayout = new QVBoxLayout(gameOverOverlay);
-    gameOverLayout->setContentsMargins(0, 0, 0, 0);
-    gameOverLayout->setAlignment(Qt::AlignCenter);
-
-    // Main container
-    QWidget* gameOverContainer = new QWidget(gameOverOverlay);
-    gameOverContainer->setStyleSheet("background: transparent;");
-    QVBoxLayout* gameOverContainerLayout = new QVBoxLayout(gameOverContainer);
-    gameOverContainerLayout->setAlignment(Qt::AlignCenter);
-    gameOverContainerLayout->setSpacing(20);
-    gameOverContainerLayout->setContentsMargins(0, 0, 0, 0);
-
-    // Game over Text
-    QWidget* titleWrap = new QWidget;
-    titleWrap->setFixedSize(720, 230);
-    titleWrap->setStyleSheet("background: transparent;");
-
-    QLabel* cyanText = new QLabel("GAME\nOVER", titleWrap);
+    QLabel* cyanText = new QLabel("LEVEL 2", introContainer);
     cyanText->setAlignment(Qt::AlignCenter);
-    cyanText->setGeometry(0, 0, 720, 230);
-    cyanText->move(6, 0);
+    cyanText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    cyanText->move(-4, 0);
     cyanText->setStyleSheet(
         "color: rgb(0,255,255);"
         "background: transparent;"
-        "font-size: 78px;"
+        "font-size: 54px;"
         "font-weight: 900;"
         "font-family: Impact, Arial Black, sans-serif;"
         "letter-spacing: 4px;"
     );
 
-    QLabel* magentaText = new QLabel("GAME\nOVER", titleWrap);
+    QLabel* magentaText = new QLabel("LEVEL 2", introContainer);
     magentaText->setAlignment(Qt::AlignCenter);
-    magentaText->setGeometry(0, 0, 720, 230);
-    magentaText->move(-6, 0);
+    magentaText->setGeometry(0, 0, introContainer->width(), introContainer->height());
+    magentaText->move(4, 0);
     magentaText->setStyleSheet(
         "color: rgb(255,0,200);"
         "background: transparent;"
-        "font-size: 78px;"
+        "font-size: 54px;"
         "font-weight: 900;"
         "font-family: Impact, Arial Black, sans-serif;"
         "letter-spacing: 4px;"
     );
 
-    QLabel* mainText = new QLabel("GAME\nOVER", titleWrap);
+    QLabel* mainText = new QLabel("LEVEL 2", introContainer);
     mainText->setAlignment(Qt::AlignCenter);
-    mainText->setGeometry(0, 0, 720, 230);
+    mainText->setGeometry(0, 0, introContainer->width(), introContainer->height());
     mainText->setStyleSheet(
         "color: white;"
         "background: transparent;"
-        "font-size: 78px;"
+        "font-size: 54px;"
         "font-weight: 900;"
         "font-family: Impact, Arial Black, sans-serif;"
         "letter-spacing: 4px;"
     );
 
-    // Small Glitch Lines
-    QFrame* glitch1 = new QFrame(gameOverOverlay);
-    glitch1->setGeometry(130, 120, 180, 4);
-    glitch1->setStyleSheet("background-color: rgba(0,255,255,180); border: none;");
+    QVector<QFrame*> glitchLines;
+    for (int i = 0; i < 18; i++) {
+        QFrame* line = new QFrame(introContainer);
+        int x = rand() % 700;
+        int y = 80 + rand() % 420;
+        int w = 30 + rand() % 120;
+        int h = 2 + rand() % 2;
+        line->setGeometry(x, y, w, h);
 
-    QFrame* glitch2 = new QFrame(gameOverOverlay);
-    glitch2->setGeometry(900, 180, 140, 4);
-    glitch2->setStyleSheet("background-color: rgba(255,0,200,180); border: none;");
-
-    QFrame* glitch3 = new QFrame(gameOverOverlay);
-    glitch3->setGeometry(260, 300, 220, 3);
-    glitch3->setStyleSheet("background-color: rgba(255,255,255,120); border: none;");
-
-    QFrame* glitch4 = new QFrame(gameOverOverlay);
-    glitch4->setGeometry(760, 330, 170, 3);
-    glitch4->setStyleSheet("background-color: rgba(0,255,255,150); border: none;");
-
-    // Buttons
-    QPushButton* tryAgainButton = new QPushButton("TRY AGAIN");
-    QPushButton* gameOverMenuButton = new QPushButton("MAIN MENU");
-
-    tryAgainButton->setFixedSize(320, 72);
-    gameOverMenuButton->setFixedSize(320, 72);
-
-    QString gameOverBtnStyle =
-        "QPushButton {"
-        "   background-color: rgba(0,0,0,210);"
-        "   color: white;"
-        "   border: 3px solid white;"
-        "   border-radius: 0px;"
-        "   font-size: 24px;"
-        "   font-weight: bold;"
-        "   padding: 12px;"
-        "}"
-        "QPushButton:hover {"
-        "   background-color: rgba(20,20,20,255);"
-        "   border: 3px solid rgb(0,255,255);"
-        "   color: rgb(0,255,255);"
-        "}";
-
-    tryAgainButton->setStyleSheet(gameOverBtnStyle);
-    gameOverMenuButton->setStyleSheet(gameOverBtnStyle);
-
-    gameOverContainerLayout->addWidget(titleWrap, 0, Qt::AlignCenter);
-    gameOverContainerLayout->addSpacing(25);
-    gameOverContainerLayout->addWidget(tryAgainButton, 0, Qt::AlignCenter);
-    gameOverContainerLayout->addWidget(gameOverMenuButton, 0, Qt::AlignCenter);
-
-    gameOverLayout->addWidget(gameOverContainer, 0, Qt::AlignCenter);
-
-    // Simple glitch animation
-    QTimer* glitchTimer = new QTimer(gameOverOverlay);
-
-    QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
-        static bool flip = false;
-        flip = !flip;
-
-        if (flip) {
-            cyanText->move(8, 0);
-            magentaText->move(-8, 0);
-            glitch1->setGeometry(110, 118, 210, 4);
-            glitch2->setGeometry(920, 184, 120, 4);
-            glitch3->setGeometry(240, 296, 250, 3);
-            glitch4->setGeometry(740, 334, 200, 3);
+        if (i % 3 == 0) {
+            line->setStyleSheet("background-color: rgba(0,255,255,120); border: none;");
+        } else if (i % 3 == 1) {
+            line->setStyleSheet("background-color: rgba(255,0,200,120); border: none;");
         } else {
-            cyanText->move(4, 0);
-            magentaText->move(-4, 0);
-            glitch1->setGeometry(130, 120, 180, 4);
-            glitch2->setGeometry(900, 180, 140, 4);
-            glitch3->setGeometry(260, 300, 220, 3);
-            glitch4->setGeometry(760, 330, 170, 3);
+            line->setStyleSheet("background-color: rgba(255,255,255,60); border: none;");
         }
-    });
 
-    QObject::connect(player, &Player::died, [=]() {
-    paused = true;
-
-    // stop player focus
-    view->clearFocus();
-
-    // make sure overlays fill full screen
-    deathFadeOverlay->setGeometry(view->viewport()->rect());
-    gameOverOverlay->setGeometry(view->viewport()->rect());
-
-    // Screen shake
-    QTransform baseTransform = view->transform();
-
-QTimer* shakeTimer = new QTimer(view);
-int* shakeStep = new int(0);
-
-QObject::connect(shakeTimer, &QTimer::timeout, [=]() mutable {
-    (*shakeStep)++;
-
-    int dx = 0;
-    int dy = 0;
-
-    switch ((*shakeStep) % 6) {
-        case 0: dx = -10; dy = 0; break;
-        case 1: dx = 10; dy = 0; break;
-        case 2: dx = 0; dy = -8; break;
-        case 3: dx = 0; dy = 8; break;
-        case 4: dx = -6; dy = -6; break;
-        case 5: dx = 6; dy = 6; break;
+        line->hide();
+        glitchLines.push_back(line);
     }
 
-    view->setTransform(baseTransform);
-    view->translate(dx, dy);
-
-    if (*shakeStep >= 12) {
-        shakeTimer->stop();
-        view->setTransform(baseTransform);
-        delete shakeStep;
-        shakeTimer->deleteLater();
-    }
-});
-
-shakeTimer->start(30);
-
-    // Fade to black
-    deathFadeOverlay->show();
-    deathFadeOverlay->raise();
-
-    QTimer* fadeTimer = new QTimer(deathFadeOverlay);
+    QTimer* fadeTimer = new QTimer(transitionOverlay);
     int* alpha = new int(0);
 
     QObject::connect(fadeTimer, &QTimer::timeout, [=]() mutable {
         *alpha += 20;
         if (*alpha > 255) *alpha = 255;
 
-        deathFadeOverlay->setStyleSheet(
+        transitionOverlay->setStyleSheet(
             QString("background-color: rgba(0,0,0,%1);").arg(*alpha)
         );
 
@@ -689,43 +522,131 @@ shakeTimer->start(30);
             delete alpha;
             fadeTimer->deleteLater();
 
-            gameOverOverlay->show();
-            gameOverOverlay->raise();
+            introContainer->show();
+            introContainer->raise();
+
+            for (QFrame* line : glitchLines) line->show();
+
+            QTimer* glitchTimer = new QTimer(introContainer);
+            QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
+                static bool flip = false;
+                flip = !flip;
+
+                if (flip) {
+                    cyanText->move(-7, 0);
+                    magentaText->move(7, 0);
+                } else {
+                    cyanText->move(-4, 0);
+                    magentaText->move(4, 0);
+                }
+            });
             glitchTimer->start(120);
+
+            QTimer::singleShot(2500, [=]() {
+                glitchTimer->stop();
+                glitchTimer->deleteLater();
+
+                gameLevel* oldLevel = currentLevel;
+                QGraphicsView* oldView = gameView;
+
+                // Build and present the new fullscreen view BEFORE retiring the
+                // old one — the new fullscreen window will cover the old, so the
+                // desktop never flashes between the two.
+                unlockLevel(2);
+                startLevel(2);
+
+                oldView->lower();
+                oldView->deleteLater();
+                if (oldLevel) oldLevel->deleteLater();
+
+                transitionOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+                transitionOverlay->deleteLater();
+            });
         }
     });
 
     fadeTimer->start(35);
-});
+}
 
-    QObject::connect(tryAgainButton, &QPushButton::clicked, [=]() {
-        glitchTimer->stop();
-        paused = false;
-
-        deathFadeOverlay->hide();
-        deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
-        gameOverOverlay->hide();
-
-        currentScene = new QGraphicsScene();
-        QGraphicsView* newGameView = createGameView(currentScene);
-        newGameView->showFullScreen();
-
-        emit gameStarted();
-
-        view->hide();
-    });
+// The function's purpose is to set up the scene
+QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     
-    QObject::connect(gameOverMenuButton, &QPushButton::clicked, [=]() {
-    glitchTimer->stop();
-    paused = false;
+    // Add an else if statement here when adding a level
+    if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
+        currentLevel = L1;
+        currentLevelNumber = 1;
+        currentLevel->setupScene();
+        L1->spawnEnemies();
+        currentLevel->setupSpawnKeyEvent();
+    } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
+        currentLevel = L2;
+        currentLevelNumber = 2;
+        currentLevel->setupScene();
+    }
 
-    deathFadeOverlay->hide();
-    deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+    QGraphicsView* gameView = new QGraphicsView(currentLevel->getScene());
+    gameView->setRenderHint(QPainter::Antialiasing);
+    gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gameView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gameView->setFrameStyle(0);
+    gameView->setBackgroundBrush(Qt::black);
+    gameView->setAlignment(Qt::AlignCenter);
+    gameView->showFullScreen();
+    view = gameView;
 
-    showMainMenu(view, this);
-});  
+    // Wait for fullscreen activation events to finish processing before
+    // giving focus to the player; otherwise the player won't receive key events.
+    // This also helps identify what player we need to focus on depending on the level
+    QTimer::singleShot(0, [this, gameView]() {
+        gameView->setFocus();
+        if (Player* p = currentLevel->getPlayer()) {
+            currentLevel->getScene()->setFocusItem(p);
+            p->setFocus();
+        } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
+            currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
+            L2->getSidePlayer()->setFocus();
+        }
+    });
 
-    return view;
+    auto fitScene = [gameView, this]() {
+        gameView->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
+    };
+
+    fitScene();
+    QTimer::singleShot(0, [fitScene]() { fitScene(); });
+    QTimer::singleShot(50, [fitScene]() { fitScene(); });
+
+    pauseMenu* pause = new pauseMenu(gameView, currentLevel);
+    QObject::connect(pause, &pauseMenu::leaveRequested, [gameView, this]() {
+        showMainMenu(gameView, this);
+    });
+
+    gameOver* death_screen = new gameOver(gameView, currentLevel);
+
+    QObject::connect(death_screen, &gameOver::tryAgainRequested, [this, gameView]() {
+        int restartTo = currentLevelNumber;
+        gameLevel* oldLevel = currentLevel;
+        QGraphicsView* oldView = gameView;
+
+        startLevel(restartTo);
+
+        oldView->lower();
+        oldView->deleteLater();
+        if (oldLevel) oldLevel->deleteLater();
+    });
+
+    QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
+        showMainMenu(gameView, this);
+    });
+
+    // add a transition here when adding a level
+    if (Player* player = currentLevel->getPlayer()) {
+        QObject::connect(player, &Player::level2Requested, [this, gameView]() {
+            playLevel2Transition(gameView);
+        });
+    }
+
+    return gameView;
 }
 
 void MenuWindow::resizeEvent(QResizeEvent* event) {
@@ -736,7 +657,7 @@ void MenuWindow::resizeEvent(QResizeEvent* event) {
     }
     if (panel) {
         int panelW = 450;
-        int panelH = 430;
+        int panelH = 540;
 
         int panelX = (width() - panelW) / 2;
         int panelY = (height() - panelH) / 2 + 80;
@@ -750,10 +671,16 @@ void MenuWindow::resizeEvent(QResizeEvent* event) {
 }
 
 void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
+    paused = true;
+
     menu->showFullScreen();
     menu->raise();
     menu->activateWindow();
-    QApplication::processEvents();
 
-    currentView->hide();
+    if (currentView) {
+        currentView->setEnabled(false);
+        currentView->hide();
+        currentView->close();
+        currentView->deleteLater();
+    }
 }

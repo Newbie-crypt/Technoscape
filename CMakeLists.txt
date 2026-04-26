@@ -24,6 +24,12 @@ set(SOURCE_FILES
     src/enemies.cpp
     src/menu_gameScene.cpp
     src/keyitem.cpp
+    src/gameLevel.cpp
+    src/pauseMenu.cpp
+    src/gameOver.cpp
+    src/levelOne.cpp
+    src/levelTwo.cpp
+    src/sideplayer.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -36,6 +42,12 @@ set(SOURCE_FILES
     include/menu_gameScene.hpp
     include/leghitbox.hpp
     include/keyitem.hpp
+    include/gameLevel.hpp
+    include/pauseMenu.hpp
+    include/gameOver.hpp
+    include/levelOne.hpp
+    include/levelTwo.hpp
+    include/sideplayer.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

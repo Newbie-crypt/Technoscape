@@ -21,12 +21,10 @@ void Enemy::onHit(int damage)
     health -= damage;
     if (health <= 0)
     {
-        isDead = true;
-        if (--numEnemiesAlive == 0) emit ThreeEnemiesDead();
+        died = true;
+        emit isDead();
     }
 }
-
-int Enemy::numEnemiesAlive = 0;
 
 void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
     QList<QGraphicsItem*> colliding_items = collidingItems();
@@ -62,7 +60,6 @@ void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
 
 Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
 
-    numEnemiesAlive++;
     // Loading all the spritesheets
     spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png");
     spritesheets[AnimationState::Attacking].load(":assets/OrangeRobot_Attack1.png");
@@ -136,11 +133,10 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     if (paused) {
         return;
     }
-    if(isDead)
+    if (died)
         {
         timer->stop();
         timer2->stop();
-        numEnemiesAlive--;
         scene()->removeItem(this);
         delete this;
         return;

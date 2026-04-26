@@ -8,14 +8,14 @@ Door::Door(int x, int y, int w, int h) : locked(true) {
 
     bool debug = false;
 
-if (debug) {
-    body->setBrush(QColor(255,0,0,90));
-    body->setPen(QPen(Qt::red,2));
-} else {
-    body->setBrush(Qt::NoBrush);
-    body->setPen(Qt::NoPen);
-     
-}
+    if (debug) {
+        body->setBrush(QColor(255,0,0,90));
+        body->setPen(QPen(Qt::red,2));
+    } else {
+        body->setBrush(Qt::NoBrush);
+        body->setPen(Qt::NoPen);
+        
+    }
 
     addToGroup(body);
     setPos(x, y);
@@ -30,11 +30,11 @@ void Door::unlock() {
 
     bool debug = false;
 
-if (debug) {
-    body->setBrush(QColor(255,0,0,90));
-    body->setPen(QPen(Qt::red,2));
-} else {
-    body->setBrush(Qt::NoBrush);
-    body->setPen(Qt::NoPen);
-}
+    if (debug) {
+        body->setBrush(QColor(255,0,0,90));
+        body->setPen(QPen(Qt::red,2));
+    } else {
+        body->setBrush(Qt::NoBrush);
+        body->setPen(Qt::NoPen);
+    }
 }

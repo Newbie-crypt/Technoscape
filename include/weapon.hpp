@@ -6,6 +6,8 @@
 #include <QSoundEffect>
 #include <QTimer>
 
+extern double sfxVolume;
+
 // Inherit QObject for timers/slots, and QGraphicsPixmapItem for visuals
 class Weapon : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT

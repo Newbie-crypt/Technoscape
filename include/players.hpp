@@ -10,15 +10,13 @@
 #include <QSoundEffect>
 #include <QMediaPlayer>
 #include <QAudioOutput>
-#include <map>
 #include "weapon.hpp"
 #include "classes.hpp"
 #include <QGraphicsTextItem>
 #include "../include/door.hpp"
 #include "../include/keyitem.hpp"
 #include "../include/leghitbox.hpp"
-#include <queue>
-#include <unordered_map>
+
 
 
 
@@ -51,6 +49,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void hideInteractionText();
         bool trapCooldown;
         void resetTrapCooldown();
+        
         // QSoundEffect walkSound; // I don't think this is used anymore, since we used my implementation of footsteps. -Sabagh
         // QTimer* footstepTimer; // I don't think this is used anymore, since we used my implementation of footsteps. -Sabagh
         QMediaPlayer* trapPlayer;
@@ -97,8 +96,9 @@ class Player : public QObject, public QGraphicsPixmapItem {
         ~Player();  // Destructor.
     
     signals:
-    void died();
-    
+        void died();
+        void level2Requested();
+
     public slots:
         void processMovement();
 

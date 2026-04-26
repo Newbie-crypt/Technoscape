@@ -20,7 +20,7 @@ Weapon::Weapon(QGraphicsItem* parent) : QGraphicsPixmapItem(parent) {
 
 
 
-    setPos(16, 32); // Moving the gun to the player's right side initially instead of floating at his head.
+    setPos(16, 32); // Overridden immediately by Player constructor calling aimAt()
     setTransformOriginPoint(boundingRect().center());
 
     // Audio moved from player constructor.
@@ -29,7 +29,7 @@ Weapon::Weapon(QGraphicsItem* parent) : QGraphicsPixmapItem(parent) {
     {
         shotPool[i] = new QSoundEffect(this); //passes this class as parent to prevent memory leak. QT handles memory clean-up for individual pointers :)
         shotPool[i] -> setSource(QUrl("qrc:/assets/fire.wav")); // Preload fire sound for whole pool.
-        shotPool[i] -> setVolume(1);
+        shotPool[i] -> setVolume(sfxVolume/3);
     }
 
     currentShotSound = 0;
@@ -79,6 +79,7 @@ void Weapon::shoot() {
     scene()->addItem(bullet);
 
     // Audio
+    shotPool[currentShotSound]->setVolume(sfxVolume / 3);
     shotPool[currentShotSound] -> play();
     currentShotSound++;
     if(currentShotSound >= 5) {currentShotSound = 0;}

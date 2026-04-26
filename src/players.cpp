@@ -5,6 +5,7 @@
 #include "../include/trap.hpp"
 #include "../include/classes.hpp"
 #include "../include/weapon.hpp"
+#include "../include/keyitem.hpp"
 #include <QBrush>
 #include <QTimer>
 #include <QGraphicsScene>
@@ -21,11 +22,14 @@
 #include <QUrl>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QPropertyAnimation>
+#include <QWidget>
+#include <QGraphicsOpacityEffect>
 #include <QPen>
 #include <QColor>
 #include <QTransform>
-#include "../include/weapon.hpp"
-#include "../include/keyitem.hpp"
+#include "menu_gameScene.hpp"
+
 
 
 extern bool paused;
@@ -43,7 +47,7 @@ Player::Player(double x, double y) {
     trapPlayer->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
         ));
-    trapAudio->setVolume(0.25);
+    trapAudio->setVolume(sfxVolume);
 
      doorPlayer = new QMediaPlayer();
     doorAudio = new QAudioOutput();
@@ -52,7 +56,7 @@ Player::Player(double x, double y) {
     doorPlayer->setSource(QUrl::fromLocalFile(
         QCoreApplication::applicationDirPath() + "/assets/sounds/door.wav"
         ));
-    doorAudio->setVolume(0.95);
+    doorAudio->setVolume(sfxVolume);
 
     footstepPool = new QSoundEffect*[8];
 
@@ -60,7 +64,7 @@ Player::Player(double x, double y) {
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
         footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
-        footstepPool[i]->setVolume(1);
+        footstepPool[i]->setVolume(sfxVolume);
     }
 
     gruntPool = new QSoundEffect* [8];
@@ -68,11 +72,12 @@ Player::Player(double x, double y) {
     for (int i = 0; i < 8; i++){
         gruntPool[i] = new QSoundEffect(this);
         gruntPool[i]->setSource(QUrl("qrc:/assets/grunt.wav"));  // Preload grunt sound for whole pool.
-        gruntPool[i]->setVolume(1);
+        gruntPool[i]->setVolume(sfxVolume);
     }
 
     // Related objects.
     gun = new Weapon(this);
+    gun->aimAt(lastAimDirection); // Position gun correctly before first move
     legs = new LegHitbox(this);
 
 
@@ -112,6 +117,7 @@ void Player::decreaseHealth(int h) {
     screenFlash->setZValue(502);
     QTimer::singleShot(120, [this, screenFlash]() {delete screenFlash;});
     // Sound to go along with it
+    gruntPool[currentGruntSound]->setVolume(sfxVolume);
     gruntPool[currentGruntSound] -> play();
     currentGruntSound++;
 
@@ -367,8 +373,9 @@ void Player::handleFootsteps(int moveDirection) // Footsteps sound
     (isMovingUp && isMovingDown) ||
     (isMovingLeft && isMovingRight);
 
-if (moveDirection != 0 && !isConflicting) { // Added isColliding to merge Kareem's collide logic with my walking
+    if (moveDirection != 0 && !isConflicting) { // Added isColliding to merge Kareem's collide logic with my walking
         if ((currentFrameIndex == 1 || currentFrameIndex == 5) && currentFrameIndex != previousFrameIndex) {    //Footstep sound, 2 per second.
+            footstepPool[currentFootSound]->setVolume(sfxVolume);
             footstepPool[currentFootSound] -> play();
             currentFootSound++;
             if(currentFootSound >= 8) {currentFootSound = 0;}
@@ -392,6 +399,7 @@ void Player::checkTrapCollision() {
             trap->trigger();
             trapCooldown = true;
 
+            trapAudio->setVolume(sfxVolume);
             trapPlayer->stop();
             trapPlayer->setPosition(0);
             trapPlayer->play();
@@ -444,7 +452,13 @@ void Player::checkDoorOpen() {
         }
 
         if (door && !door->isLocked()) {
-            showToBeContinued();
+            paused = true;
+
+            if (movementTimer) {
+                movementTimer->stop();
+            }
+
+            emit level2Requested();
             return;
         }
     }
@@ -527,6 +541,7 @@ void Player::unlockDoor() {
     scene()->addItem(rightEnergy);
 
     // Play door sound
+    doorAudio->setVolume(sfxVolume);
     doorPlayer->stop();
     doorPlayer->setPosition(0);
     doorPlayer->play();
@@ -586,102 +601,6 @@ void Player::unlockDoor() {
     });
 }
 
-void Player::showToBeContinued() {
-    if (scene() == nullptr) {
-        return;
-    }
-
-    QList<QGraphicsItem*> scene_items = scene()->items();
-
-    for (int i = 0; i < scene_items.size(); i++) {
-        QGraphicsTextItem* textItem = dynamic_cast<QGraphicsTextItem*>(scene_items[i]);
-
-        if (textItem) {
-            if (textItem->toPlainText() == "To Be Continued") {
-                return;
-            }
-        }
-    }
-// Stop gameplay
-    paused = true;
-
-    if (movementTimer) {
-        movementTimer->stop();
-    }
-
-    for (int i = 0; i < 8; i++) {
-        if (footstepPool[i]) {
-            footstepPool[i]->stop();
-        }
-    }
-
-    if (trapPlayer) {
-        trapPlayer->stop();
-    }
-
-    if (doorPlayer) {
-        doorPlayer->stop();
-    }
-
-
-    QGraphicsRectItem* blackScreen = new QGraphicsRectItem(0, 0, 800, 600);
-    blackScreen->setBrush(QColor(8, 10, 20));
-    blackScreen->setPen(Qt::NoPen);
-    blackScreen->setZValue(1000);
-    scene()->addItem(blackScreen);
-
-    for (int i = 0; i < 35; i++) {
-        int x = rand() % 760;
-        int y = rand() % 600;
-        int w = 20 + rand() % 120;
-        int h = 1 + rand() % 3;
-
-        QGraphicsRectItem* line = new QGraphicsRectItem(x, y, w, h);
-
-        if (i % 3 == 0) {
-            line->setBrush(QColor(0, 180, 255, 120));
-        }
-        else if (i % 3 == 1) {
-            line->setBrush(QColor(255, 0, 180, 120));
-        }
-        else {
-            line->setBrush(QColor(255, 255, 255, 50));
-        }
-
-        line->setPen(Qt::NoPen);
-        line->setZValue(1001);
-        scene()->addItem(line);
-    }
-
-    QGraphicsTextItem* cyanText = scene()->addText("To Be Continued");
-    cyanText->setDefaultTextColor(QColor(0, 255, 255));
-    cyanText->setFont(QFont("Arial", 30, QFont::Bold));
-    cyanText->setZValue(1002);
-
-    QGraphicsTextItem* pinkText = scene()->addText("To Be Continued");
-    pinkText->setDefaultTextColor(QColor(255, 0, 180));
-    pinkText->setFont(QFont("Arial", 30, QFont::Bold));
-    pinkText->setZValue(1003);
-
-    QGraphicsTextItem* mainText = scene()->addText("To Be Continued");
-    mainText->setDefaultTextColor(Qt::white);
-    mainText->setFont(QFont("Arial", 30, QFont::Bold));
-    mainText->setZValue(1004);
-
-    QRectF rect = mainText->boundingRect();
-    double textX = (800 - rect.width()) / 2;
-    double textY = 240;
-
-    cyanText->setPos(textX - 3, textY);
-    pinkText->setPos(textX + 3, textY + 1);
-    mainText->setPos(textX, textY);
-
-    hide();
-        if (paused) {
-        return;
-    }
-}
-
 
 void Player::keyPressEvent(QKeyEvent* event){
     if(event->isAutoRepeat()) {return;} // To stop the weird little bug with key holding. a...aaaaaaaaaaaaa for example.
@@ -715,7 +634,7 @@ void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
 
-    QGraphicsPixmapItem::keyPressEvent(event);
+    event->accept();
 }
 
 void Player::keyReleaseEvent(QKeyEvent* event) {
