@@ -22,6 +22,7 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QTimer>
+#include <QtMath>
 #include <QGraphicsView>
 #include <QApplication>
 #include <QGraphicsPixmapItem>
