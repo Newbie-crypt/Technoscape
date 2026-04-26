@@ -77,6 +77,7 @@ Player::Player(double x, double y) {
 
     // Related objects.
     gun = new Weapon(this);
+    gun->aimAt(lastAimDirection);
     legs = new LegHitbox(this);
 
 
