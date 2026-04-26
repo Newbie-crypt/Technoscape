@@ -1,4 +1,5 @@
 #include "../include/menu_gameScene.hpp"
+#include "../include/sideplayer.hpp"
 
 bool paused = false;
 QMediaPlayer* music;
@@ -1258,7 +1259,7 @@ bool* trap1PlayerDead = new bool(false);
 bool* trap1DeathSequenceRunning = new bool(false);
 
 // temporary test player
-TestSidePlayer* testPlayer = new TestSidePlayer();
+SidePlayer* testPlayer = new SidePlayer();
 testPlayer->setPos(90, 340);
 scene->addItem(testPlayer);
 scene->setFocusItem(testPlayer);
@@ -1410,7 +1411,7 @@ if (*trap1Open && !(*trap1PlayerDead) && !(*trap1DeathSequenceRunning) &&
     Door* level2Door = new Door(57, 320, 58, 96);
     scene->addItem(level2Door);
 
-    QObject::connect(testPlayer, &TestSidePlayer::died, [=]() {
+    QObject::connect(testPlayer, &SidePlayer::died, [=]() {
         qDebug() << "Trap 1 death triggered";
 
         paused = true;

@@ -15,12 +15,14 @@ SidePlayer::SidePlayer()
     sheetVault[JUMP] = QPixmap(":/assets/Level2/Side_jump.png");
     sheetVault[FALL] = QPixmap(":/assets/Level2/Side_backjump.png");
     sheetVault[DAMAGED] = QPixmap(":/assets/Level2/Side_hurt.png");
+
     // Setting default to idle.
     activeSheet = &sheetVault[IDLE];
     setPixmap(activeSheet->copy(0,0,71,67));
     setZValue(500);
 
     setFlag(QGraphicsItem::ItemIsFocusable);
+    setShapeMode(QGraphicsPixmapItem::BoundingRectShape); //To make sure the jumping doesn't lead to bugging into the ground (QT ShapeMode disregarding transparent pixels)
     setFocus();
 
     timer = new QTimer(this);
@@ -33,17 +35,17 @@ void SidePlayer::processMovement()
     if (paused || !scene() || isFrozen) return;
 
     movePlayer();
-
-
+    updateAnimation();
 }
 
 void SidePlayer::movePlayer(){
     // Helper variable for the function.
     double dx = 0.0;
+    speedMultiplier = isSprinting ? 2.5 : 1;
     // If moving to the right or left, add 4.0 in said direction and move by that much.
-    if (isMovingLeft) dx -= 4.0;
-    if (isMovingRight) dx += 4.0;
-    dx *= speedMultiplier;
+    if (isMovingLeft) dx -= 1.0;
+    if (isMovingRight) dx += 1.0;
+    dx = dx * speedMultiplier;
     moveBy(dx, 0);
 
     // Horizontal Collisions.
@@ -58,8 +60,8 @@ void SidePlayer::movePlayer(){
     // Vertical Movement
     isGrounded = false; // Assume falling
 
-    velocityY += 0.6; // Slow down the fall
-    if (velocityY > 12) velocityY = 12; // Terminal velocity check
+    velocityY += 0.4; // Slow down the fall
+    if (velocityY > 9) velocityY = 9; // Terminal velocity check
 
     moveBy(0, velocityY);
 
@@ -83,6 +85,58 @@ void SidePlayer::movePlayer(){
     }
 
 }
+Sheet SidePlayer::checkAnimationType(){
+    // Individual checks for each type of animation
+    if(!isGrounded) return JUMP; //!!Check if falling up or down, and switch from jump to FALL
+    if(isMovingLeft && isMovingRight) return IDLE;
+    if((isMovingLeft || isMovingRight) && isSprinting) return RUN;
+    if(isMovingLeft||isMovingRight) return WALK;
+    return IDLE;
+}
+
+void SidePlayer::updateAnimation(){
+    currentState = checkAnimationType(); // Get current state
+    if(currentState != lastState) currentFrame = 0; // If it's different from the last state, restart the animation timer.
+
+    switch (currentState) // Rule of thumb for changing the values here. DON'T. Just call me.
+    {
+        case WALK:
+            currentFrame +=4;
+            currentFrame = currentFrame % 320; break; // 16 different Pixmaps, so %320 so the highest we get to is 15 with int division (by 20), so on so forth.
+            break;
+        case RUN:
+            currentFrame+=2;
+            currentFrame = currentFrame % 160;  break;
+            break;
+        case IDLE:
+            currentFrame++;
+            currentFrame = currentFrame % 80;  break;
+        case JUMP:
+            currentFrame+=3;
+            currentFrame = currentFrame % 100;  break; //!!These two will be a bit problematic later.
+        case FALL:
+            currentFrame+=2;
+            currentFrame = currentFrame % 100;  break;
+        case DAMAGED:
+            currentFrame+=2;
+            currentFrame = currentFrame % 20;  break; // Unnecessary, but to keep code consistent and not check outside.
+    }
+
+    // Get the current state's sprite sheet, and go to the current animation.
+    activeSheet =&sheetVault[currentState];
+    setPixmap(activeSheet->copy(71 * (currentFrame/20), 0, 71, 67));
+
+    // Check which way to face
+    if (isMovingLeft && !isMovingRight) {
+        setTransform(QTransform().translate(71, 0).scale(-1, 1));
+    } else if (isMovingRight && !isMovingLeft) {
+        setTransform(QTransform());
+    }
+
+    // Update for check at next function call.
+    lastState = currentState;
+}
+
 
 void SidePlayer::keyPressEvent(QKeyEvent* event)
 {
@@ -93,7 +147,7 @@ void SidePlayer::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_Shift) isSprinting = true;
 
     if ((event->key() == Qt::Key_W || event->key() == Qt::Key_Up || event->key() == Qt::Key_Space) && isGrounded) {
-        velocityY = -11.5; //Start the jump
+        velocityY = -9.0; //Start the jump
         isJumping = true;
         isGrounded = false; // Make sure isGrounded is set to false.
     }
