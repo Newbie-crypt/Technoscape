@@ -124,7 +124,8 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
 }
 
 void pauseMenu::openPauseMenu() {
-    if (level->getPlayer()->isDead()) {
+    Player* player = level->getPlayer();
+    if (player && player->isDead()) {
         return;
     }
 
@@ -134,9 +135,9 @@ void pauseMenu::openPauseMenu() {
 
     paused = true;
 
-    // remove control from player
+    // remove control from the focus item (player or side player)
     level->getScene()->setFocusItem(nullptr);
-    level->getPlayer()->clearFocus();
+    if (player) player->clearFocus();
     view->clearFocus();
 
     pauseOverlay->setGeometry(view->viewport()->rect());
@@ -151,8 +152,11 @@ void pauseMenu::closePauseMenu() {
 
     // give control back to player
     view->setFocus();
-    level->getScene()->setFocusItem(level->getPlayer());
-    level->getPlayer()->setFocus();
+    Player* player = level->getPlayer();
+    if (player) {
+        level->getScene()->setFocusItem(player);
+        player->setFocus();
+    }
 }
 
 void pauseMenu::togglePauseMenu() {

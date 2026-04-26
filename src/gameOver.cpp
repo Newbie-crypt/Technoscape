@@ -144,7 +144,7 @@ gameOver::gameOver(QGraphicsView* inputView, gameLevel* inputLevel) {
         }
     });
     
-    QObject::connect(inputLevel->getPlayer(), &Player::died, [=]() {
+    QObject::connect(inputLevel, &gameLevel::playerDied, [=]() {
             paused = true;
 
             // stop player focus

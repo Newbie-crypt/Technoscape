@@ -37,7 +37,6 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    QGraphicsScene* scene = new QGraphicsScene;
 
     music = new QMediaPlayer;
     audio = new QAudioOutput;
@@ -52,11 +51,11 @@ int main(int argc, char* argv[]) {
         QCoreApplication::applicationDirPath() + "/assets/sounds/music.mp3"
     ));
     music->setLoops(QMediaPlayer::Infinite);
-    audio->setVolume(0.12);
+    audio->setVolume(musicVolume);
     music->play();
 
     MenuWindow menu;
     menu.showFullScreen();
-    
+
     return app.exec();
 }

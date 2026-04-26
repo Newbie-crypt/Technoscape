@@ -20,9 +20,10 @@ class gameLevel : public QObject {
         Player* getPlayer() {return player;}
         virtual void setupSpawnKeyEvent() = 0;
     protected:
-        QGraphicsScene* scene;
-        Player* player;
+        QGraphicsScene* scene = nullptr;
+        Player* player = nullptr;
     signals:
         void levelComplete();
+        void playerDied();
 };
 

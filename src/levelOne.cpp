@@ -58,6 +58,8 @@ void levelOne::setupScene() {
     scene->addItem(player);
     scene->addItem(health_bar);
 
+    QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
+
     // HUD KEY (hidden until collected)
     KeyItem* hudKey = new KeyItem(
         QCoreApplication::applicationDirPath() + "/assets/key.gif",
