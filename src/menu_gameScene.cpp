@@ -556,7 +556,12 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
                 startLevel(2);
 
                 oldView->lower();
-                oldView->deleteLater();
+
+               QTimer::singleShot(150, oldView, [oldView]() {
+               oldView->hide();
+               oldView->close();
+               oldView->deleteLater();
+              });
                 if (oldLevel) oldLevel->deleteLater();
 
                 transitionOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -618,7 +623,19 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
     pauseMenu* pause = new pauseMenu(gameView, currentLevel);
     QObject::connect(pause, &pauseMenu::leaveRequested, [gameView, this]() {
+        gameLevel* oldLevel = currentLevel;
+
+        if (oldLevel && oldLevel->getScene()) {
+            oldLevel->getScene()->clear();   // kills old enemies immediately
+        }
+
+        currentLevel = nullptr;
+
         showMainMenu(gameView, this);
+
+        if (oldLevel) {
+            oldLevel->deleteLater();
+        }
     });
 
     gameOver* death_screen = new gameOver(gameView, currentLevel);
@@ -630,14 +647,29 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
         startLevel(restartTo);
 
-        oldView->lower();
+        QTimer::singleShot(150, oldView, [oldView]() {
+        oldView->hide();
+        oldView->close();
         oldView->deleteLater();
-        if (oldLevel) oldLevel->deleteLater();
+    });
+         if (oldLevel) oldLevel->deleteLater();
     });
 
-    QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
-        showMainMenu(gameView, this);
-    });
+QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
+    gameLevel* oldLevel = currentLevel;
+
+    if (oldLevel && oldLevel->getScene()) {
+        oldLevel->getScene()->clear();
+    }
+
+    currentLevel = nullptr;
+
+    showMainMenu(gameView, this);
+
+    if (oldLevel) {
+        oldLevel->deleteLater();
+    }
+});
 
     // add a transition here when adding a level
     if (Player* player = currentLevel->getPlayer()) {
@@ -676,11 +708,16 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
     menu->showFullScreen();
     menu->raise();
     menu->activateWindow();
+    QApplication::processEvents();
 
     if (currentView) {
         currentView->setEnabled(false);
-        currentView->hide();
-        currentView->close();
-        currentView->deleteLater();
+        currentView->lower();
+
+        QTimer::singleShot(150, currentView, [currentView]() {
+            currentView->hide();
+            currentView->close();
+            currentView->deleteLater();
+        });
     }
 }

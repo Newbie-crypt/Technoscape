@@ -118,7 +118,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     });
 
     QObject::connect(leaveButton, &QPushButton::clicked, [=]() {
-        paused = false;
+        paused = true;
         emit leaveRequested();
     });
 }

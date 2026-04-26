@@ -102,6 +102,7 @@ class MenuWindow : public QWidget {
         void unlockLevel(int level);
         void playLevel2Transition(QGraphicsView* view);
 
+        QGraphicsView* gameView;
         QGraphicsView* view;
         gameLevel* currentLevel;
         QPushButton* continueButton = nullptr;
