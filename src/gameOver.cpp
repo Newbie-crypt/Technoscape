@@ -227,7 +227,6 @@ gameOver::gameOver(QGraphicsView* inputView, gameLevel* inputLevel) {
 
             emit tryAgainRequested();
 
-            inputView->hide();
     });
 
     QObject::connect(gameOverMenuButton, &QPushButton::clicked, [=]() {

@@ -501,8 +501,11 @@ void levelTwo::setupLogicTimer() {
                                         droneLasers[i]->show();
 
                                         QTimer* droneTimer = new QTimer(this);
-                                        int* phase = new int(0);
+                                        int* phase = new int(1);
                                         droneTimers->push_back(droneTimer);
+
+                                        droneLasers[i]->setBrush(QColor(255, 0, 0, 255));
+                                        *droneLaserOn[i] = true;
 
                                         QObject::connect(droneTimer, &QTimer::timeout, [this, droneTimer, phase, i]() mutable {
                                             if (*trap3Finished) {

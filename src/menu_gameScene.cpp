@@ -80,19 +80,40 @@ void MenuWindow::startLevel(int level) {
 
     currentLevelNumber = level;
 
+    QGraphicsView* gameView = nullptr;
+
     if (level == 1) {
-        createGameView(new levelOne);
-        this->hide();
-        emit gameStarted();
-        return;
+        gameView = createGameView(new levelOne);
     }
 
     if (level == 2) {
-        createGameView(new levelTwo);
-        this->hide();
-        emit gameStarted();
-        return;
+        gameView = createGameView(new levelTwo);
     }
+
+    if (!gameView) return;
+
+    gameView->showFullScreen();
+    gameView->raise();
+    gameView->activateWindow();
+    gameView->repaint();
+    QApplication::processEvents();
+
+    QTimer::singleShot(100, this, [this, gameView]() {
+        this->hide();
+
+        gameView->setFocus();
+        gameView->activateWindow();
+
+        if (Player* p = currentLevel->getPlayer()) {
+            currentLevel->getScene()->setFocusItem(p);
+            p->setFocus();
+        } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
+            currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
+            L2->getSidePlayer()->setFocus();
+        }
+    });
+
+    emit gameStarted();
 }
 
 MenuWindow::MenuWindow() {
@@ -590,6 +611,7 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     }
 
     QGraphicsView* gameView = new QGraphicsView(currentLevel->getScene());
+    gameView->setFocusPolicy(Qt::StrongFocus);
     gameView->setRenderHint(QPainter::Antialiasing);
     gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gameView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -625,8 +647,8 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     QObject::connect(pause, &pauseMenu::leaveRequested, [gameView, this]() {
         gameLevel* oldLevel = currentLevel;
 
-        if (oldLevel && oldLevel->getScene()) {
-            oldLevel->getScene()->clear();   // kills old enemies immediately
+        if (oldLevel && oldLevel->getScene() && currentLevelNumber == 1) {
+            oldLevel->getScene()->clear();   
         }
 
         currentLevel = nullptr;
@@ -658,10 +680,9 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
     gameLevel* oldLevel = currentLevel;
 
-    if (oldLevel && oldLevel->getScene()) {
-        oldLevel->getScene()->clear();
+    if (oldLevel && oldLevel->getScene() && currentLevelNumber == 1) {
+        oldLevel->getScene()->clear();   // only for Level 1 enemies
     }
-
     currentLevel = nullptr;
 
     showMainMenu(gameView, this);
@@ -712,7 +733,6 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
 
     if (currentView) {
         currentView->setEnabled(false);
-        currentView->lower();
 
         QTimer::singleShot(150, currentView, [currentView]() {
             currentView->hide();
