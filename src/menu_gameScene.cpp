@@ -1430,15 +1430,17 @@ for (int i = 0; i < 4; i++) {
 
 bool* trap3Started = new bool(false);
 
-QShortcut* collectShortcut = new QShortcut(QKeySequence(Qt::Key_C), view);
-collectShortcut->setContext(Qt::ApplicationShortcut);
-
-QObject::connect(collectShortcut, &QShortcut::activated, [=]() {
-    if (paused || !scene || !scene->views().size()) return;
-    if (!testPlayer || !testPlayer->scene() || paused) return;
-    if (!(*trap3Started)) return;
+auto collectFakeKey = [=]() {
+    if (paused) return;
+    if (!scene || scene->views().isEmpty()) return;
+    if (!testPlayer || !testPlayer->scene()) return;
     if (*fakeKeyCollected) return;
-    if (!testPlayer->sceneBoundingRect().intersects(fakeKeyCollectZone->sceneBoundingRect())) return;
+    if (!baitItem->isVisible()) return;
+
+    if (!testPlayer->sceneBoundingRect().intersects(fakeKeyCollectZone->sceneBoundingRect())) {
+        return;
+    }
+
     *fakeKeyCollected = true;
     *trap3Finished = true;
 
@@ -1452,15 +1454,29 @@ QObject::connect(collectShortcut, &QShortcut::activated, [=]() {
         *droneLaserOn[i] = false;
     }
 
-        for (QTimer* timer : *droneTimers) {
-            if (timer) {
-                timer->stop();
-                timer->deleteLater();
-            }
+    for (QTimer* timer : *droneTimers) {
+        if (timer) {
+            timer->stop();
+            timer->deleteLater();
         }
-        droneTimers->clear();
-        realLevel2Key->show();
-});
+    }
+
+    droneTimers->clear();
+    realLevel2Key->show();
+
+    qDebug() << "Fake key collected";
+};
+
+for (QShortcut* oldShortcut : view->findChildren<QShortcut*>("collectFakeKeyShortcut")) {
+    oldShortcut->deleteLater();
+}
+
+QShortcut* collectShortcut = new QShortcut(QKeySequence(Qt::Key_C), view);
+collectShortcut->setObjectName("collectFakeKeyShortcut");
+collectShortcut->setContext(Qt::ApplicationShortcut);
+collectShortcut->setAutoRepeat(false);
+
+QObject::connect(collectShortcut, &QShortcut::activated, collectFakeKey);
 
 
 // sound
@@ -1783,7 +1799,7 @@ if (*trap3Started && !(*trap1PlayerDead)) {
 // =========================
 // FAKE KEY INTERACTION TEXT
 // =========================
-if (*trap3Started && !(*fakeKeyCollected) && baitItem->isVisible()) {
+if (!(*fakeKeyCollected) && baitItem->isVisible()) {
     if (testPlayer->sceneBoundingRect().intersects(fakeKeyCollectZone->sceneBoundingRect())) {
         fakeKeyText->show();
     } else {
