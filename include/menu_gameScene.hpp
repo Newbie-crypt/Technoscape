@@ -35,7 +35,6 @@
 #include "trap.hpp"
 #include "door.hpp"
 #include "enemies.hpp"
-#include "test_side_player.hpp"
 #include <QShortcut>
 #include <QKeySequence>
 #include <QCoreApplication>

@@ -55,8 +55,8 @@ void SidePlayer::movePlayer(){
     double dx = 0.0;
     speedMultiplier = isSprinting ? 2.5 : 1;
     // If moving to the right or left, add 4.0 in said direction and move by that much.
-    if (isMovingLeft) dx -= 1.0;
-    if (isMovingRight) dx += 1.0;
+    if (isMovingLeft) dx -= 1.5;
+    if (isMovingRight) dx += 1.5;
     dx = dx * speedMultiplier;
     moveBy(dx, 0);
 

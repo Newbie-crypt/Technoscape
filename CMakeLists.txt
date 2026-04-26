@@ -24,7 +24,7 @@ set(SOURCE_FILES
     src/enemies.cpp
     src/menu_gameScene.cpp
     src/keyitem.cpp
-    src/test_side_player.cpp
+    src/sideplayer.cpp 
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -37,13 +37,10 @@ set(SOURCE_FILES
     include/menu_gameScene.hpp
     include/leghitbox.hpp
     include/keyitem.hpp
-    include/test_side_player.hpp
     include/sideplayer.hpp
     )
 
-qt_add_executable(main ${SOURCE_FILES} resources.qrc
-    include/sideplayer.hpp
-    src/sideplayer.cpp)
+qt_add_executable(main ${SOURCE_FILES} resources.qrc)
 
 target_link_libraries(main PRIVATE Qt6::Widgets Qt6::Multimedia)
 target_include_directories(main PRIVATE include)
