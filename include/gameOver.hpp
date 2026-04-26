@@ -9,7 +9,7 @@
 #include <QTransform>
 #include <QGraphicsView>
 #include <QGraphicsScene>
-#include "gameLevels.hpp"
+#include "gameLevel.hpp"
 
 class gameOver : public QObject {
     Q_OBJECT

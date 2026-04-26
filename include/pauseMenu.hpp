@@ -8,7 +8,7 @@
 #include <QShortcut>
 #include <QKeySequence>
 #include <QGraphicsView>
-#include "gameLevels.hpp"
+#include "gameLevel.hpp"
 
 
 class pauseMenu : public QObject {

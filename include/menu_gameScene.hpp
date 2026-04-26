@@ -42,9 +42,10 @@
 #include "machine.hpp"
 #include "classes.hpp"
 #include "keyitem.hpp"
-#include "gameLevels.hpp"
+#include "gameLevel.hpp"
 #include "pauseMenu.hpp"
 #include "gameOver.hpp"
+#include "levelOne.hpp"
 
 extern bool paused;
 extern QMediaPlayer* music;

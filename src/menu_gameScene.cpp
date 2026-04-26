@@ -1,4 +1,4 @@
-#include "../include/menu_gameScene.hpp"
+#include "menu_gameScene.hpp"
 
 bool paused = false;
 QMediaPlayer* music;

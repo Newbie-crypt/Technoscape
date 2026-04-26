@@ -20,7 +20,7 @@ Weapon::Weapon(QGraphicsItem* parent) : QGraphicsPixmapItem(parent) {
 
 
 
-    setPos(16, 32); // Moving the gun to the player's right side initially instead of floating at his head.
+    setPos(16, 32); // Overridden immediately by Player constructor calling aimAt()
     setTransformOriginPoint(boundingRect().center());
 
     // Audio moved from player constructor.
