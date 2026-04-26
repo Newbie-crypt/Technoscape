@@ -29,7 +29,7 @@ Weapon::Weapon(QGraphicsItem* parent) : QGraphicsPixmapItem(parent) {
     {
         shotPool[i] = new QSoundEffect(this); //passes this class as parent to prevent memory leak. QT handles memory clean-up for individual pointers :)
         shotPool[i] -> setSource(QUrl("qrc:/assets/fire.wav")); // Preload fire sound for whole pool.
-        shotPool[i] -> setVolume(sfxVolume);
+        shotPool[i] -> setVolume(sfxVolume/3);
     }
 
     currentShotSound = 0;

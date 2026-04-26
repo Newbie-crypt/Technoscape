@@ -1,5 +1,6 @@
 #include "../include/sideplayer.hpp"
 #include "../include/wall.hpp"
+#include "menu_gameScene.hpp"
 #include <QBrush>
 #include <QGraphicsScene>
 #include <typeinfo>
@@ -24,6 +25,17 @@ SidePlayer::SidePlayer()
     setFlag(QGraphicsItem::ItemIsFocusable);
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape); //To make sure the jumping doesn't lead to bugging into the ground (QT ShapeMode disregarding transparent pixels)
     setFocus();
+
+
+    footstepPool = new QSoundEffect*[8];
+
+
+    for (int i = 0; i < 8; i++) {
+        footstepPool[i] = new QSoundEffect(this);
+        footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
+        footstepPool[i]->setVolume(sfxVolume);
+    }
+
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &SidePlayer::processMovement);
@@ -102,11 +114,19 @@ void SidePlayer::updateAnimation(){
     {
         case WALK:
             currentFrame +=4;
-            currentFrame = currentFrame % 320; break; // 16 different Pixmaps, so %320 so the highest we get to is 15 with int division (by 20), so on so forth.
+            currentFrame = currentFrame % 320;  // 16 different Pixmaps, so %320 so the highest we get to is 15 with int division (by 20), so on so forth.
+            if(currentFrame == 20 || currentFrame == 160) //Play footstep sound for sprite 1 and 8
+            {
+                handleFootSteps();
+            }
             break;
         case RUN:
             currentFrame+=2;
-            currentFrame = currentFrame % 160;  break;
+            currentFrame = currentFrame % 160;
+            if(currentFrame == 40 || currentFrame == 120) //Play footstep sound for sprite 2 and 9
+            {
+                handleFootSteps();
+            }
             break;
         case IDLE:
             currentFrame++;
@@ -122,9 +142,14 @@ void SidePlayer::updateAnimation(){
             currentFrame = currentFrame % 20;  break; // Unnecessary, but to keep code consistent and not check outside.
     }
 
+
     // Get the current state's sprite sheet, and go to the current animation.
     activeSheet =&sheetVault[currentState];
     setPixmap(activeSheet->copy(71 * (currentFrame/20), 0, 71, 67));
+
+    //!!Lama teb2a rayeb implement proper jumping seperately to make sure it matches better.
+
+
 
     // Check which way to face
     if (isMovingLeft && !isMovingRight) {
@@ -132,11 +157,15 @@ void SidePlayer::updateAnimation(){
     } else if (isMovingRight && !isMovingLeft) {
         setTransform(QTransform());
     }
-
     // Update for check at next function call.
     lastState = currentState;
 }
 
+void SidePlayer::handleFootSteps(){
+    footstepPool[currentFootSound] -> play();
+    currentFootSound++;
+    if(currentFootSound >= 8) {currentFootSound = 0;}
+}
 
 void SidePlayer::keyPressEvent(QKeyEvent* event)
 {
