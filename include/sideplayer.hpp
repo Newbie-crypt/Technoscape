@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QSoundEffect>
+#include "../include/leghitbox.hpp"
 
 enum Sheet{WALK, RUN, IDLE, JUMP, FALL, DAMAGED};
 
@@ -32,10 +33,13 @@ private:
     Sheet checkAnimationType();
     void updateAnimation();
     void handleFootSteps();
+    // Related objects
+    LegHitbox* legs;
 
 public:
     SidePlayer();
     void setFrozen(bool value) { isFrozen = value; }
+    void playerDied();
 
 signals:
     void died();

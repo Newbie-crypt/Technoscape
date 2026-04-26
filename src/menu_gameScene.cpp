@@ -1804,23 +1804,14 @@ if (*trap3Started && !(*fakeKeyCollected) && baitItem->isVisible()) {
         qDebug() << "Trap 1 death triggered";
 
         paused = true;
+        testPlayer->setFrozen(true);
 
-        if (showGameOverScreen) {
-            showGameOverScreen();
-        } else {
-            qDebug() << "ERROR: showGameOverScreen is empty";
-        }
 
-        QTimer::singleShot(50, scene, [=]() {
-            if (trap1LogicTimer) trap1LogicTimer->stop();
+        testPlayer->playerDied();
 
-            if (testPlayer && testPlayer->scene()) {
-                scene->removeItem(testPlayer);
-            }
-
-            if (testPlayer) {
-                testPlayer->deleteLater();
-            }
+        QTimer::singleShot(800, scene, [=]() {
+            testPlayer->hide();             // testPlayer automatically gets cleaned up with the scene since it's a child of the scene, so just hide it to avoid segmentation error.
+            if (showGameOverScreen) showGameOverScreen();
         });
     });
     

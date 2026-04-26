@@ -23,18 +23,19 @@ SidePlayer::SidePlayer()
     setZValue(500);
 
     setFlag(QGraphicsItem::ItemIsFocusable);
-    setShapeMode(QGraphicsPixmapItem::BoundingRectShape); //To make sure the jumping doesn't lead to bugging into the ground (QT ShapeMode disregarding transparent pixels)
+    // setShapeMode(QGraphicsPixmapItem::BoundingRectShape); //To make sure the jumping doesn't lead to bugging into the ground (QT ShapeMode disregarding transparent pixels)
     setFocus();
 
-
     footstepPool = new QSoundEffect*[8];
-
 
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
         footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
         footstepPool[i]->setVolume(sfxVolume);
     }
+
+    legs = new LegHitbox(this);
+    legs->setPos(32, 58);
 
 
     timer = new QTimer(this);
@@ -61,7 +62,7 @@ void SidePlayer::movePlayer(){
     moveBy(dx, 0);
 
     // Horizontal Collisions.
-    QList<QGraphicsItem*> horizontalHits = collidingItems();
+    QList<QGraphicsItem*> horizontalHits = legs->collidingItems();
     for (QGraphicsItem* item : horizontalHits) {
         if (typeid(*item) == typeid(Wall)) {
             moveBy(-dx, 0);
@@ -78,7 +79,7 @@ void SidePlayer::movePlayer(){
     moveBy(0, velocityY);
 
 
-    QList<QGraphicsItem*> verticalHits = collidingItems(); // Check for collisions with vertical wall.
+    QList<QGraphicsItem*> verticalHits = legs->collidingItems(); // Check for collisions with vertical wall.
     for (QGraphicsItem* item : verticalHits) {
         if (typeid(*item) == typeid(Wall)) {
             if (velocityY > 0) { // If wall is below, reverse movement and set player state to grounded
@@ -93,7 +94,9 @@ void SidePlayer::movePlayer(){
     }
 
     if (y() > 650) {
+        isFrozen = true;
         emit died();
+        return;
     }
 
 }
@@ -165,6 +168,11 @@ void SidePlayer::handleFootSteps(){
     footstepPool[currentFootSound] -> play();
     currentFootSound++;
     if(currentFootSound >= 8) {currentFootSound = 0;}
+}
+
+void SidePlayer::playerDied(){
+    activeSheet= &sheetVault[DAMAGED];
+    setPixmap(sheetVault[DAMAGED]);
 }
 
 void SidePlayer::keyPressEvent(QKeyEvent* event)
