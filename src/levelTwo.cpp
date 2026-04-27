@@ -26,7 +26,11 @@ levelTwo::~levelTwo() {
     delete trap3Finished;
     delete fakeKeyCollected;
     delete droneTimers;
+    delete realKeyCollected;
+    delete level2DoorOpened;
     for (bool* b : droneLaserOn) delete b;
+    for (bool* b : spikeTrapActive) delete b;
+    for (bool* b : spikeTrapCoolingDown) delete b;
 }
 
 void levelTwo::setupScene() {
@@ -38,9 +42,9 @@ void levelTwo::setupScene() {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/closedlevel2.png";
     }
 
-    QGraphicsPixmapItem* background = scene->addPixmap(level2Bg);
-    background->setZValue(-100);
-    background->setPos(0, 0);
+    level2Background = scene->addPixmap(level2Bg);
+    level2Background->setZValue(-100);
+    level2Background->setPos(0, 0);
 
     auto addWall = [&](int x, int y, int w, int h) -> Wall* {
         Wall* wall = new Wall(x, y, w, h);
@@ -63,6 +67,7 @@ void levelTwo::setupScene() {
 
     setupTrap1();
     setupTrap2AndTrap3();
+    setupTrap4();
     setupLogicTimer();
 
     Door* level2Door = new Door(57, 320, 58, 96);
@@ -80,7 +85,113 @@ void levelTwo::setupScene() {
             emit playerDied();
         });
     });
-}
+    QObject::connect(sidePlayer, &SidePlayer::useKeyRequested, [this]() {
+        if (paused) return;
+        if (!(*realKeyCollected) || *level2DoorOpened) return;
+
+        if (sidePlayer->x() < 130 && sidePlayer->y() > 250 && sidePlayer->y() < 430) {
+            *level2DoorOpened = true;
+
+            if (doorUseText) doorUseText->hide();
+
+            int doorX = 48;
+            int doorY = 311;
+            int doorW = 57;
+            int doorH = 102;
+
+            QGraphicsRectItem* blackout = new QGraphicsRectItem(doorX, doorY, doorW, doorH);
+            blackout->setBrush(QColor(5, 10, 25, 255));
+            blackout->setPen(Qt::NoPen);
+            blackout->setZValue(300);
+            scene->addItem(blackout);
+
+            QGraphicsRectItem* glowFrame = new QGraphicsRectItem(doorX - 6, doorY - 6, doorW + 12, doorH + 12);
+            glowFrame->setBrush(Qt::NoBrush);
+            glowFrame->setPen(QPen(QColor(0, 255, 255, 220), 4));
+            glowFrame->setZValue(301);
+            scene->addItem(glowFrame);
+
+            QGraphicsRectItem* innerFrame = new QGraphicsRectItem(doorX - 2, doorY - 2, doorW + 4, doorH + 4);
+            innerFrame->setBrush(Qt::NoBrush);
+            innerFrame->setPen(QPen(QColor(120, 255, 255, 180), 2));
+            innerFrame->setZValue(302);
+            scene->addItem(innerFrame);
+
+            QGraphicsRectItem* scanLine = new QGraphicsRectItem(doorX - 4, doorY + 8, doorW + 8, 8);
+            scanLine->setBrush(QColor(255, 255, 255, 180));
+            scanLine->setPen(Qt::NoPen);
+            scanLine->setZValue(303);
+            scene->addItem(scanLine);
+
+            QGraphicsRectItem* leftEnergy = new QGraphicsRectItem(doorX - 10, doorY, 4, doorH);
+            leftEnergy->setBrush(QColor(0, 255, 255, 180));
+            leftEnergy->setPen(Qt::NoPen);
+            leftEnergy->setZValue(303);
+            scene->addItem(leftEnergy);
+
+            QGraphicsRectItem* rightEnergy = new QGraphicsRectItem(doorX + doorW + 6, doorY, 4, doorH);
+            rightEnergy->setBrush(QColor(0, 255, 255, 180));
+            rightEnergy->setPen(Qt::NoPen);
+            rightEnergy->setZValue(303);
+            scene->addItem(rightEnergy);
+            
+            QTimer::singleShot(120, this, [=]() {
+                glowFrame->setPen(QPen(QColor(255, 80, 80, 220), 4));
+                innerFrame->setPen(QPen(QColor(255, 180, 180, 180), 2));
+                scanLine->setBrush(QColor(255, 120, 120, 200));
+            });
+
+            QTimer::singleShot(240, this, [=]() {
+                glowFrame->setPen(QPen(QColor(0, 255, 255, 220), 4));
+                innerFrame->setPen(QPen(QColor(120, 255, 255, 180), 2));
+                scanLine->setBrush(QColor(255, 255, 255, 210));
+                scanLine->setRect(doorX - 4, doorY + 35, doorW + 8, 8);
+            });
+
+            QTimer::singleShot(380, this, [=]() {
+                scanLine->setRect(doorX - 4, doorY + 70, doorW + 8, 10);
+                blackout->setBrush(QColor(0, 0, 0, 255));
+                leftEnergy->setBrush(QColor(0, 255, 255, 255));
+                rightEnergy->setBrush(QColor(0, 255, 255, 255));
+            });
+
+            QTimer::singleShot(1000, this, [=]() {
+                QPixmap openBg("assets/openlevel2.png");
+
+                if (!openBg.isNull() && level2Background) {
+                    level2Background->setPixmap(openBg);
+                } else {
+                    qDebug() << "ERROR: IMAGE NOT FOUND: assets/openlevel2.png";
+                }
+
+                blackout->setBrush(QColor(0, 0, 0, 0));
+                scanLine->setBrush(QColor(180, 255, 255, 120));
+                glowFrame->setPen(QPen(QColor(0, 255, 255, 140), 3));
+                innerFrame->setPen(QPen(QColor(255, 255, 255, 120), 1));
+            });
+
+            QTimer::singleShot(1250, this, [=]() {
+                scene->removeItem(blackout);
+                scene->removeItem(glowFrame);
+                scene->removeItem(innerFrame);
+                scene->removeItem(scanLine);
+                scene->removeItem(leftEnergy);
+                scene->removeItem(rightEnergy);
+
+                delete blackout;
+                delete glowFrame;
+                delete innerFrame;
+                delete scanLine;
+                delete leftEnergy;
+                delete rightEnergy;
+
+                QGraphicsTextItem* enterDoorText = scene->addText("Press E to enter");
+                enterDoorText->setDefaultTextColor(Qt::white);
+                enterDoorText->setFont(QFont("Arial", 16, QFont::Bold));
+                enterDoorText->setPos(285, 479);
+                enterDoorText->setZValue(1000);
+            });}
+    });   }
 
 void levelTwo::setupTrap1() {
     QPixmap fakeFloorImg("assets/fake_floor_panel.png");
@@ -149,7 +260,7 @@ void levelTwo::setupTrap2AndTrap3() {
     fakeKeyText = scene->addText("Press C to collect");
     fakeKeyText->setDefaultTextColor(Qt::white);
     fakeKeyText->setFont(QFont("Arial", 16, QFont::Bold));
-    fakeKeyText->setPos(610, 315);
+    fakeKeyText->setPos(285, 479);
     fakeKeyText->setZValue(1000);
     fakeKeyText->hide();
 
@@ -161,6 +272,23 @@ void levelTwo::setupTrap2AndTrap3() {
     realLevel2Key->setZValue(900);
     realLevel2Key->hide();
     scene->addItem(realLevel2Key);
+
+    realKeyCollected = new bool(false);
+    level2DoorOpened = new bool(false);
+
+    realKeyText = scene->addText("Press C to collect");
+    realKeyText->setDefaultTextColor(Qt::white);
+    realKeyText->setFont(QFont("Arial", 16, QFont::Bold));
+    realKeyText->setPos(285, 479);
+    realKeyText->setZValue(1000);
+    realKeyText->hide();
+
+    doorUseText = scene->addText("Press O to use key");
+    doorUseText->setDefaultTextColor(Qt::white);
+    doorUseText->setFont(QFont("Arial", 16, QFont::Bold));
+    doorUseText->setPos(285, 479);
+    doorUseText->setZValue(1000);
+    doorUseText->hide();
 
     fakeKeyCollected = new bool(false);
     trap3Finished = new bool(false);
@@ -250,6 +378,14 @@ void levelTwo::setupTrap2AndTrap3() {
         if (paused) return;
         if (!scene || scene->views().isEmpty()) return;
         if (!sidePlayer || !sidePlayer->scene()) return;
+        if (*fakeKeyCollected && !(*realKeyCollected) && realLevel2Key->isVisible()) {
+        if (sidePlayer->sceneBoundingRect().intersects(realLevel2Key->sceneBoundingRect())) {
+            *realKeyCollected = true;
+            realLevel2Key->hide();
+            realKeyText->hide();
+            return;
+        }
+        }
         if (*fakeKeyCollected) return;
         if (!baitItem->isVisible()) return;
 
@@ -279,6 +415,11 @@ void levelTwo::setupTrap2AndTrap3() {
 
         droneTimers->clear();
         realLevel2Key->show();
+
+        for (int i = 0; i < spikeTrapBases.size(); i++) {
+            spikeTrapBases[i]->show();
+            spikeTrapTriggers[i]->show();
+        }
     });
 
     hoverTrapSound = new QMediaPlayer(this);
@@ -297,6 +438,74 @@ void levelTwo::setupTrap2AndTrap3() {
     ));
     laserAudio->setVolume(sfxVolume);
 }
+
+//Trap 4
+void levelTwo::setupTrap4() {
+    QPixmap baseImg("assets/spike_trap_base.png");
+    QPixmap spikesImg("assets/spike_trap_spikes.png");
+
+    if (baseImg.isNull()) {
+        qDebug() << "ERROR: IMAGE NOT FOUND: assets/spike_trap_base.png";
+    }
+
+    if (spikesImg.isNull()) {
+        qDebug() << "ERROR: IMAGE NOT FOUND: assets/spike_trap_spikes.png";
+    }
+
+    QVector<QPointF> positions = {
+    QPointF(510, 375),
+    QPointF(390, 375),
+    QPointF(270, 375)
+};
+
+    for (int i = 0; i < positions.size(); i++) {
+        QGraphicsPixmapItem* base = scene->addPixmap(
+            baseImg.scaled(135, 90, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+        );
+        base->setPos(positions[i]);
+        base->setZValue(300);
+        base->hide();
+
+        QGraphicsPixmapItem* spikes = scene->addPixmap(
+            spikesImg.scaled(135, 120, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+        );
+        spikes->setPos(positions[i].x(), positions[i].y());
+        spikes->setZValue(350);
+        spikes->hide();
+
+        QGraphicsRectItem* trigger = new QGraphicsRectItem(
+            positions[i].x() + 5,
+            positions[i].y() - 135,
+            125,
+            145
+        );
+        trigger->setPen(Qt::NoPen);
+        trigger->setBrush(Qt::NoBrush); 
+        trigger->setZValue(10);
+        trigger->hide();
+        scene->addItem(trigger);
+
+        QGraphicsRectItem* killZone = new QGraphicsRectItem(
+            positions[i].x() + 18,
+            positions[i].y() - 135,
+            100,
+            145
+        );
+        killZone->setPen(Qt::NoPen);
+        killZone->setBrush(Qt::NoBrush); 
+        killZone->setZValue(360);
+        killZone->hide();
+        scene->addItem(killZone);
+
+        spikeTrapBases.push_back(base);
+        spikeTrapSpikes.push_back(spikes);
+        spikeTrapTriggers.push_back(trigger);
+        spikeTrapKillZones.push_back(killZone);
+        spikeTrapActive.push_back(new bool(false));
+        spikeTrapCoolingDown.push_back(new bool(false));
+    }
+}
+
 
 void levelTwo::setupLogicTimer() {
     QVector<int> laserIntervals = {750, 950, 650, 850};
@@ -567,7 +776,121 @@ void levelTwo::setupLogicTimer() {
             }
         }
 
-        // FAKE KEY INTERACTION TEXT
+        if (*fakeKeyCollected && !(*trap1PlayerDead)) {
+            for (int i = 0; i < spikeTrapBases.size(); i++) {
+                if (!(*spikeTrapActive[i]) &&
+                    !(*spikeTrapCoolingDown[i]) &&
+                    sidePlayer->collidesWithItem(spikeTrapTriggers[i])) {
+
+                    *spikeTrapActive[i] = true;
+                    *spikeTrapCoolingDown[i] = true;
+
+                    hoverTrapSound->stop();
+                    hoverTrapSound->setPosition(0);
+                    hoverTrapAudio->setVolume(sfxVolume);
+                    hoverTrapSound->play();
+
+                        spikeTrapBases[i]->setOpacity(0.45);
+
+                    QTimer::singleShot(220, this, [this, i]() {
+                        if (!scene || !scene->views().size()) return;
+                        spikeTrapBases[i]->setOpacity(1.0);
+                    });
+
+                    QTimer::singleShot(220, this, [this, i]() {
+                        if (paused || !sidePlayer || !sidePlayer->scene()) return;
+
+                        qreal finalY = spikeTrapBases[i]->y() - 58;
+                        qreal startY = spikeTrapBases[i]->y() - 12;
+
+                        spikeTrapSpikes[i]->setY(startY);
+                        spikeTrapSpikes[i]->show();
+
+                        QTimer* extendTimer = new QTimer(this);
+                        int* step = new int(0);
+
+                        QObject::connect(extendTimer, &QTimer::timeout, [this, extendTimer, step, i, finalY]() mutable {
+                            if (paused || !scene || !scene->views().size()) return;
+
+                            (*step)++;
+                            spikeTrapSpikes[i]->moveBy(0, -8);
+
+                            if (spikeTrapSpikes[i]->y() <= finalY || *step >= 7) {
+                                spikeTrapSpikes[i]->setY(finalY);
+                                spikeTrapKillZones[i]->show();
+
+                                extendTimer->stop();
+                                delete step;
+                                extendTimer->deleteLater();
+                            }
+                        });
+
+                        extendTimer->start(16);
+
+                    QTimer::singleShot(700, this, [this, i]() {
+                        QTimer* waitTimer = new QTimer(this);
+
+                        QObject::connect(waitTimer, &QTimer::timeout, [this, i, waitTimer]() {
+                            if (paused || !scene || !scene->views().size()) return;
+
+                            spikeTrapSpikes[i]->hide();
+                            spikeTrapKillZones[i]->hide();
+
+                            *spikeTrapActive[i] = false;
+
+                            QTimer::singleShot(2000, this, [this, i]() {
+                                if (paused || !scene || !scene->views().size()) return;
+                                *spikeTrapCoolingDown[i] = false;
+                            });
+
+                            waitTimer->stop();
+                            waitTimer->deleteLater();
+                        });
+
+                        waitTimer->start(50); 
+                    });
+    });}
+                if (*spikeTrapActive[i] &&
+                    !(*trap1PlayerDead) &&
+                    spikeTrapKillZones[i]->isVisible() &&
+                    sidePlayer->collidesWithItem(spikeTrapKillZones[i])) {
+
+                    *trap1PlayerDead = true;
+                    sidePlayer->setFrozen(true);
+
+                    laserSound->stop();
+                    laserSound->setPosition(0);
+                    laserAudio->setVolume(sfxVolume);
+                    laserSound->play();
+
+                    QTimer::singleShot(250, this, [this]() {
+                        if (paused || !sidePlayer || !sidePlayer->scene()) return;
+                        emit sidePlayer->died();
+                    });
+
+                    return;
+                }
+            }
+        }
+
+        // REAL KEY INTERACTION
+        if (*fakeKeyCollected && !(*realKeyCollected) && realLevel2Key->isVisible()) {
+            if (sidePlayer->sceneBoundingRect().intersects(realLevel2Key->sceneBoundingRect())) {
+                realKeyText->show();
+            } else {
+                realKeyText->hide();
+            }
+        }
+
+        // DOOR USE TEXT
+        if (*realKeyCollected && !(*level2DoorOpened)) {
+            if (sidePlayer->x() < 130 && sidePlayer->y() > 250 && sidePlayer->y() < 430) {
+                doorUseText->show();
+            } else {
+                doorUseText->hide();
+            }
+        }
+
         if (!(*fakeKeyCollected) && baitItem->isVisible()) {
             if (sidePlayer->sceneBoundingRect().intersects(fakeKeyCollectZone->sceneBoundingRect())) {
                 fakeKeyText->show();

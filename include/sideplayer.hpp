@@ -44,6 +44,8 @@ public:
 signals:
     void died();
     void collectKeyRequested();
+    void useKeyRequested();
+    void enterDoorRequested();
 
 public slots:
     void processMovement();

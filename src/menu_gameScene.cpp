@@ -698,6 +698,11 @@ QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() 
             playLevel2Transition(gameView);
         });
     }
+    if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
+    QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this, gameView]() {
+        qDebug() << "Level 3 transition later";
+    });
+}
 
     return gameView;
 }

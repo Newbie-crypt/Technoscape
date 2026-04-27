@@ -191,6 +191,8 @@ void SidePlayer::keyPressEvent(QKeyEvent* event)
     }
 
     if (event->key() == Qt::Key_C) emit collectKeyRequested();
+    if (event->key() == Qt::Key_O) emit useKeyRequested();
+    if (event->key() == Qt::Key_E) emit enterDoorRequested();
 
 
     QGraphicsPixmapItem::keyPressEvent(event);
