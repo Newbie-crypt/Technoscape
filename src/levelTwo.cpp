@@ -838,7 +838,7 @@ void levelTwo::setupLogicTimer() {
 
                             *spikeTrapActive[i] = false;
 
-                            QTimer::singleShot(2000, this, [this, i]() {
+                            QTimer::singleShot(1850, this, [this, i]() {
                                 if (paused || !scene || !scene->views().size()) return;
                                 *spikeTrapCoolingDown[i] = false;
                             });
