@@ -570,8 +570,14 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
 
 // The function's purpose is to set up the scene
 QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
-    
-    QGraphicsView* gameView = new QGraphicsView(currentLevel->getScene());
+    levelThree* L3 = new levelThree;
+    view = new QGraphicsView;
+    view->setRenderHint(QPainter::Antialiasing);
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setFrameStyle(0);
+    view->setBackgroundBrush(Qt::black);
+    view->setAlignment(Qt::AlignCenter);
 
     // Add an else if statement here when adding a level
     // if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
@@ -585,25 +591,19 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     //     currentLevelNumber = 2;
     //     currentLevel->setupScene();
     // }
-    levelThree* L3 = new levelThree(view);
-    currentLevel = L3;
-    L3->setupScene();
-
     
-    gameView->setRenderHint(QPainter::Antialiasing);
-    gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    gameView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    gameView->setFrameStyle(0);
-    gameView->setBackgroundBrush(Qt::black);
-    gameView->setAlignment(Qt::AlignCenter);
-    gameView->showFullScreen();
-    view = gameView;
+    currentLevel = L3;
+    L3->setView(view);
+    L3->setupScene();
+    view->setScene(L3->getScene());
+    view->showFullScreen();
+
 
     // Wait for fullscreen activation events to finish processing before
     // giving focus to the player; otherwise the player won't receive key events.
     // This also helps identify what player we need to focus on depending on the level
-    QTimer::singleShot(0, [this, gameView]() {
-        gameView->setFocus();
+    QTimer::singleShot(0, [this]() {
+        this->view->setFocus();
         if (Player* p = currentLevel->getPlayer()) {
             currentLevel->getScene()->setFocusItem(p);
             p->setFocus();
@@ -621,19 +621,19 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     // QTimer::singleShot(0, [fitScene]() { fitScene(); });
     // QTimer::singleShot(50, [fitScene]() { fitScene(); });
 
-    gameView->fitInView(200, 200, 800, 600);
+    view->fitInView(200, 200, 800, 600);
 
-    pauseMenu* pause = new pauseMenu(gameView, currentLevel);
-    QObject::connect(pause, &pauseMenu::leaveRequested, [gameView, this]() {
-        showMainMenu(gameView, this);
+    pauseMenu* pause = new pauseMenu(view, currentLevel);
+    QObject::connect(pause, &pauseMenu::leaveRequested, [this]() {
+        showMainMenu(this->view, this);
     });
 
-    gameOver* death_screen = new gameOver(gameView, currentLevel);
+    gameOver* death_screen = new gameOver(view, currentLevel);
 
-    QObject::connect(death_screen, &gameOver::tryAgainRequested, [this, gameView]() {
+    QObject::connect(death_screen, &gameOver::tryAgainRequested, [this]() {
         int restartTo = currentLevelNumber;
         gameLevel* oldLevel = currentLevel;
-        QGraphicsView* oldView = gameView;
+        QGraphicsView* oldView = this->view;
 
         startLevel(restartTo);
 
@@ -642,18 +642,18 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         if (oldLevel) oldLevel->deleteLater();
     });
 
-    QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
-        showMainMenu(gameView, this);
+    QObject::connect(death_screen, &gameOver::mainMenuRequested, [this]() {
+        showMainMenu(this->view, this);
     });
 
     // add a transition here when adding a level
     if (Player* player = currentLevel->getPlayer()) {
-        QObject::connect(player, &Player::level2Requested, [this, gameView]() {
-            playLevel2Transition(gameView);
+        QObject::connect(player, &Player::level2Requested, [this]() {
+            playLevel2Transition(this->view);
         });
     }
 
-    return gameView;
+    return this->view;
 }
 
 void MenuWindow::resizeEvent(QResizeEvent* event) {
@@ -688,6 +688,6 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
         currentView->setEnabled(false);
         currentView->hide();
         currentView->close();
-        currentView->deleteLater();
+        // currentView->deleteLater();
     }
 }

@@ -1,28 +1,33 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <QGraphicsItem>
+#include <QWidget>
 #include <QObject>
 #include <QPainter>
+#include <QPaintEvent>
+#include <QGraphicsItem>
 using namespace std;
 
-class HealthBar : public QGraphicsItem {
+class HealthBar : public QWidget {
+    Q_OBJECT
     private:
         int maxHP;
         int currentHP;
         QPixmap frame;
         QPixmap fill;
     public:
-        HealthBar() : maxHP(100), currentHP(100) {
+        HealthBar(QWidget* parent = nullptr) : QWidget(parent), maxHP(100), currentHP(100) {
             frame = QPixmap(":/assets/No_Health.png");
             frame = frame.scaled(150, 50, Qt::KeepAspectRatio);
             fill = QPixmap(":/assets/Full_Health.png");
             fill = fill.scaled(150, 50, Qt::KeepAspectRatio);
+            setFixedSize(frame.size());
+            setAttribute(Qt::WA_TransparentForMouseEvents);
         }
 
         void setHP(int hp) {
             currentHP = hp;
-            update(); // calls the paint function, and the boundingRect() functions that are inherited from the parent class QGraphicsItem.
+            update();
         }
 
         void decreaseHP(int value) {
@@ -32,27 +37,22 @@ class HealthBar : public QGraphicsItem {
 
         int getHP() {return currentHP;}
 
-        QRectF boundingRect() const override {
-            return QRectF(0, 0, frame.width(), frame.height());
-        }
-
-        void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override {
+    protected:
+        void paintEvent(QPaintEvent*) override {
+            QPainter painter(this);
             double ratio = (double) currentHP / maxHP;
             int fillWidth = fill.width() * ratio;
 
-            painter->drawPixmap(0, 0, frame);
-
-
-            painter->drawPixmap(
-                QRectF(0, 0, fillWidth, fill.height()),
+            painter.drawPixmap(0, 0, frame);
+            painter.drawPixmap(
+                QRect(0, 0, fillWidth, fill.height()),
                 fill,
-                QRectF(0, 0, fillWidth, fill.height())
+                QRect(0, 0, fillWidth, fill.height())
             );
-
         }
 };
 
-class Projectile : public QObject, public QGraphicsPixmapItem{
+class Projectile : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
     private:
         QTimer* movementTimer;

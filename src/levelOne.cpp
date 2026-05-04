@@ -1,4 +1,5 @@
 #include "levelOne.hpp"
+#include <QLabel>
 
 levelOne::levelOne() : gameLevel() {}
 
@@ -42,21 +43,21 @@ void levelOne::setupScene() {
 
     QPixmap health_symbol_image (":/assets/health_symbol.png");
     health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    
-    QGraphicsPixmapItem* health_symbol = scene->addPixmap(health_symbol_image);
-    health_symbol->setPos(15, 540);
+    QLabel* health_symbol = new QLabel(view);
+    health_symbol->setPixmap(health_symbol_image);
+    health_symbol->setAttribute(Qt::WA_TransparentForMouseEvents);
+    health_symbol->move(15, 540);
+    health_symbol->show();
 
-    HealthBar* health_bar = new HealthBar;
-    health_bar->setPos(76, 542);
-    health_bar->setZValue(1000);
-
+    HealthBar* health_bar = new HealthBar(view);
+    health_bar->move(80, 542);
+    health_bar->show();
 
     // May the main character spawn!
     player = new Player(0, 0);
     player->setHealthBar(health_bar);
     player->setPos(568, 300);
     scene->addItem(player);
-    scene->addItem(health_bar);
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
 
@@ -117,6 +118,9 @@ void levelOne::spawnEnemies() {
     robots[2]->setPos(109, 219);
     robots[3]->setPos(246, 450);
     robots[4]->setPos(453, 450);
+
+
+
 
     for (int i = 0; i < number_of_robots; i++) {
         QObject::connect(robots[i], &Enemy::isDead, [this]() {

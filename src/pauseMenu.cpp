@@ -9,7 +9,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     
     // ===== WORKING PAUSE UI ON TOP OF GAME =====
 
-    pauseButton = new QPushButton(view->viewport());
+    pauseButton = new QPushButton(view);
     pauseButton->setGeometry(20, 20, 56, 56);
     pauseButton->setText("");
     pauseButton->setStyleSheet(
