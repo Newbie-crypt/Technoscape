@@ -21,5 +21,6 @@
         <file>assets/Level2/Side_jump.png</file>
         <file>assets/Level2/Side_backjump.png</file>
         <file>assets/Level2/Side_hurt.png</file>
+        <file>assets/levelThree/levelThreeScene.png</file>
     </qresource>
 </RCC>

@@ -48,6 +48,7 @@
 #include "gameOver.hpp"
 #include "levelOne.hpp"
 #include "levelTwo.hpp"
+#include "levelThree.hpp"
 
 
 extern bool paused;

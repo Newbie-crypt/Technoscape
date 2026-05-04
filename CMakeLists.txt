@@ -30,6 +30,7 @@ set(SOURCE_FILES
     src/levelOne.cpp
     src/levelTwo.cpp
     src/sideplayer.cpp
+    src/levelThree.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -48,6 +49,7 @@ set(SOURCE_FILES
     include/levelOne.hpp
     include/levelTwo.hpp
     include/sideplayer.hpp
+    include/levelThree.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

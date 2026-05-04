@@ -571,20 +571,25 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
 // The function's purpose is to set up the scene
 QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     
-    // Add an else if statement here when adding a level
-    if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
-        currentLevel = L1;
-        currentLevelNumber = 1;
-        currentLevel->setupScene();
-        L1->spawnEnemies();
-        currentLevel->setupSpawnKeyEvent();
-    } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
-        currentLevel = L2;
-        currentLevelNumber = 2;
-        currentLevel->setupScene();
-    }
-
     QGraphicsView* gameView = new QGraphicsView(currentLevel->getScene());
+
+    // Add an else if statement here when adding a level
+    // if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
+    //     currentLevel = L1;
+    //     currentLevelNumber = 1;
+    //     currentLevel->setupScene();
+    //     L1->spawnEnemies();
+    //     currentLevel->setupSpawnKeyEvent();
+    // } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
+    //     currentLevel = L2;
+    //     currentLevelNumber = 2;
+    //     currentLevel->setupScene();
+    // }
+    levelThree* L3 = new levelThree(view);
+    currentLevel = L3;
+    L3->setupScene();
+
+    
     gameView->setRenderHint(QPainter::Antialiasing);
     gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gameView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -608,13 +613,15 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         }
     });
 
-    auto fitScene = [gameView, this]() {
-        gameView->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
-    };
+    // auto fitScene = [gameView, this]() {
+    //     gameView->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
+    // };
 
-    fitScene();
-    QTimer::singleShot(0, [fitScene]() { fitScene(); });
-    QTimer::singleShot(50, [fitScene]() { fitScene(); });
+    // // fitScene();
+    // QTimer::singleShot(0, [fitScene]() { fitScene(); });
+    // QTimer::singleShot(50, [fitScene]() { fitScene(); });
+
+    gameView->fitInView(200, 200, 800, 600);
 
     pauseMenu* pause = new pauseMenu(gameView, currentLevel);
     QObject::connect(pause, &pauseMenu::leaveRequested, [gameView, this]() {
