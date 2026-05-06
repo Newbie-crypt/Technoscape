@@ -19,8 +19,11 @@ class levelThree : public gameLevel  {
         QGraphicsPixmapItem* background;
         QLabel* health_symbol;
         HealthBar* health_bar;
+    protected:
+        void setupWalls() override;
     signals:
         void waveOneComplete();
         void waveTwoComplete();
         void waveThreeComplete();
+    
 };

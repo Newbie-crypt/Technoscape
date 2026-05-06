@@ -22,10 +22,6 @@ void levelOne::setupScene() {
 
     scene->setSceneRect(0, 0, 800, 600);
 
-    auto addWall = [&](int x, int y, int w, int h) {
-        scene->addItem(new Wall(x, y, w, h));
-    };
-
     auto addTrap = [&](int x, int y, int w, int h) {
         scene->addItem(new Trap(x, y, w, h));
     };
@@ -77,15 +73,7 @@ void levelOne::setupScene() {
     player->setFocus();
 
     // WALLS
-    addWall(48, 0, 723, 46);
-    addWall(0, 0, 46, 346);
-    addWall(0, 344, 74, 149);
-    addWall(0, 494, 800, 106);
-    addWall(771, 0, 29, 199);
-    addWall(766, 198, 34, 296);
-    addWall(582, 66, 67, 100);
-    addWall(412, 66, 166, 25);
-    addWall(45, 88, 22, 83);
+    this->setupWalls();
 
     // DOOR
     Door* door = new Door(658, 155, 100, 25);
@@ -142,4 +130,17 @@ void levelOne::setupSpawnKeyEvent() {
         worldKey->setZValue(300);
         scene->addItem(worldKey);
     });
-}   
+} 
+
+
+void levelOne::setupWalls() {
+    addWall(48, 0, 723, 46);
+    addWall(0, 0, 46, 346);
+    addWall(0, 344, 74, 149);
+    addWall(0, 494, 800, 106);
+    addWall(771, 0, 29, 199);
+    addWall(766, 198, 34, 296);
+    addWall(582, 66, 67, 100);
+    addWall(412, 66, 166, 25);
+    addWall(45, 88, 22, 83);
+}

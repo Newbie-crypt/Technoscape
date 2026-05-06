@@ -14,4 +14,6 @@ class levelOne : public gameLevel  {
         Robot** robots;
     signals:
         void allEnemiesDead();
+    protected:
+        void setupWalls() override;
 };

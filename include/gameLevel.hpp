@@ -21,10 +21,14 @@ class gameLevel : public QObject {
         virtual void setupSpawnKeyEvent() = 0;
         void setView(QGraphicsView* v) { view = v; }
         QGraphicsView* getView() { return view; }
+        
     protected:
         QGraphicsScene* scene = nullptr;
         Player* player = nullptr;
         QGraphicsView* view = nullptr;
+
+        void addWall(int x, int y, int w, int h) {scene->addItem(new Wall(x, y, w, h));}
+        virtual void setupWalls() = 0;
     signals:
         void levelComplete();
         void playerDied();

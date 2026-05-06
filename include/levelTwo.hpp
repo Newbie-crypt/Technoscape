@@ -71,4 +71,6 @@ class levelTwo : public gameLevel {
         QAudioOutput* laserAudio = nullptr;
 
         QTimer* trap1LogicTimer = nullptr;
+    protected:
+        void setupWalls() {}
 };
