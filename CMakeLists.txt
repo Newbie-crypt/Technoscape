@@ -31,6 +31,7 @@ set(SOURCE_FILES
     src/levelTwo.cpp
     src/sideplayer.cpp
     src/levelThree.cpp
+    src/generic_robot.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -50,6 +51,7 @@ set(SOURCE_FILES
     include/levelTwo.hpp
     include/sideplayer.hpp
     include/levelThree.hpp
+    include/generic_robot.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

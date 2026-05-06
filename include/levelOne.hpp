@@ -1,5 +1,6 @@
 #pragma once
 #include "gameLevel.hpp"
+#include "generic_robot.hpp"
 
 class levelOne : public gameLevel  {
     Q_OBJECT   
