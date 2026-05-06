@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <QGraphicsItem>
+#include <QGraphicsScene>
 #include <QObject>
 #include <QPainter>
 using namespace std;
@@ -73,4 +74,10 @@ class Hittable{
     public:
     virtual void onHit(int damage) = 0;
     virtual ~Hittable();
+};
+
+class GameScene : public QGraphicsScene {
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override {}
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override {}
 };
