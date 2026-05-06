@@ -880,7 +880,7 @@ void levelTwo::setupLogicTimer() {
             } else {
                 realKeyText->hide();
             }
-        }
+        },
 
         // DOOR USE TEXT
         if (*realKeyCollected && !(*level2DoorOpened)) {
