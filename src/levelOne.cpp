@@ -41,12 +41,11 @@ void levelOne::setupScene() {
     health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     QLabel* health_symbol = new QLabel(view);
     health_symbol->setPixmap(health_symbol_image);
-    health_symbol->setAttribute(Qt::WA_TransparentForMouseEvents);
-    health_symbol->move(15, 540);
+    health_symbol->move(15, 800);
     health_symbol->show();
 
     HealthBar* health_bar = new HealthBar(view);
-    health_bar->move(80, 542);
+    health_bar->move(80, 800);
     health_bar->show();
 
     // May the main character spawn!
