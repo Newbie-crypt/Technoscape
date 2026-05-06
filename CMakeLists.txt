@@ -32,6 +32,7 @@ set(SOURCE_FILES
     src/sideplayer.cpp
     src/levelThree.cpp
     src/generic_robot.cpp
+    src/suicide_drone.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -52,6 +53,7 @@ set(SOURCE_FILES
     include/sideplayer.hpp
     include/levelThree.hpp
     include/generic_robot.hpp
+    include/suicide_drone.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

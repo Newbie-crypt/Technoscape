@@ -23,7 +23,8 @@
 enum class AnimationState : int {
     Idle,
     Running,
-    Attacking
+    Attacking,
+    Exploding
 };
 
 

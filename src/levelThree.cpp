@@ -1,5 +1,5 @@
 #include "levelThree.hpp"
-
+ 
 levelThree::levelThree() : gameLevel() {}
 
 void levelThree::setupScene() {
@@ -40,6 +40,8 @@ void levelThree::setupScene() {
     player->setHealthBar(health_bar);
     player->setPos(568, 300);
     scene->addItem(player);
+
+    
     
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
@@ -59,11 +61,20 @@ void levelThree::setupScene() {
 
     timer->start(16);
 
+    
+    startWaveOne();
 }
 
 levelThree::~levelThree() {}
 
 void levelThree::setupSpawnKeyEvent() {}
+
+
+void levelThree::startWaveOne() {
+    suicideDrone* drone = new suicideDrone(player);
+    scene->addItem(drone);
+    drone->setPos(100, 100);
+}
 
 
 void levelThree::setupWalls() {

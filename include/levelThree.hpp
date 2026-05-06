@@ -4,6 +4,7 @@
 #include <QGraphicsPixmapItem>
 #include <QLabel>
 #include "classes.hpp"
+#include "suicide_drone.hpp"
 
 class levelThree : public gameLevel  {
     Q_OBJECT
@@ -19,6 +20,8 @@ class levelThree : public gameLevel  {
         QGraphicsPixmapItem* background;
         QLabel* health_symbol;
         HealthBar* health_bar;
+
+        void startWaveOne();
     protected:
         void setupWalls() override;
     signals:

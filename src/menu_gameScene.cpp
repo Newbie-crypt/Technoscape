@@ -570,7 +570,8 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
 
 // The function's purpose is to set up the scene
 QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
-    levelOne* L3 = new levelOne;
+    // levelOne* L3 = new levelOne;
+    levelThree* L3 = new levelThree;
     view = new QGraphicsView;
     view->setRenderHint(QPainter::Antialiasing);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -595,8 +596,8 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     currentLevel = L3;
     L3->setView(view);
     L3->setupScene();
-    L3->spawnEnemies();
-    L3->setupSpawnKeyEvent();
+    // L3->spawnEnemies();
+    // L3->setupSpawnKeyEvent();
     view->setScene(L3->getScene());
     view->showFullScreen();
 

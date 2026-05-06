@@ -22,5 +22,8 @@
         <file>assets/Level2/Side_backjump.png</file>
         <file>assets/Level2/Side_hurt.png</file>
         <file>assets/levelThree/levelThreeScene.png</file>
+        <file>assets/droneExplosion.png</file>
+        <file>assets/suicideDrone_walk.png</file>
+        <file>assets/sounds/kaboom.wav</file>
     </qresource>
 </RCC>

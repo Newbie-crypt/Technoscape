@@ -26,13 +26,22 @@ class Enemy: public QGraphicsObject, public Hittable {
     Q_OBJECT
     private:
     protected:
-        void checkCollision(double dx, double dy);
+        std::map<AnimationState, QPixmap> spritesheets;
+        std::map<AnimationState, int> spritesheet_rows;
+        std::map<AnimationState, int> spritesheet_columns;
+        std::map<AnimationState, int> frame_count;
+        std::map<AnimationState, std::vector<QPixmap>> animations;
+        int currentFrame = 0;
+        AnimationState currentAnimationState = AnimationState::Idle;
+        int frame_width;
+        int frame_height;
         int health;
         bool died = false;
         QPixmap sprite; 
         double speed;
         QPointF velocity;
         Player* target;
+        void checkCollision(double dx, double dy);
         virtual void changeAnimationState(AnimationState state) = 0;
     public:
         Enemy(int h, const QString& asset, double s);

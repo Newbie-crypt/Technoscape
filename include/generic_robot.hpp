@@ -27,15 +27,6 @@ class Robot: public Enemy {
     Q_OBJECT
     private:
         // Consider moving this to enemy for the child classes to inherit them for less redundancy
-        std::map<AnimationState, QPixmap> spritesheets;
-        std::map<AnimationState, int> spritesheet_rows;
-        std::map<AnimationState, int> spritesheet_columns;
-        std::map<AnimationState, int> frame_count;
-        std::map<AnimationState, std::vector<QPixmap>> animations;
-        int currentFrame = 0;
-        AnimationState currentAnimationState = AnimationState::Idle;
-        int frame_width;
-        int frame_height;
         const int number_of_states = 3; // Idle, attacking, running
     public:
         Robot(Player* t);
