@@ -70,6 +70,24 @@ class Projectile : public QObject, public QGraphicsPixmapItem{
         void processMovement();
 };
 
+class Coin : public QObject, public QGraphicsPixmapItem{
+    Q_OBJECT
+    private:
+        bool isFake;
+        int currentAnimation = 0;
+
+        void processFrame();
+
+        QPixmap coinSheet;
+        QTimer* coinTimer;
+
+    public:
+        Coin(bool fake = false);
+        void setFake(bool b) {isFake = b;}
+        bool getFake() {return isFake;}
+        ~Coin();
+};
+
 class Hittable{
     public:
     virtual void onHit(int damage) = 0;

@@ -1,13 +1,18 @@
 #include "levelFour.hpp"
+#include "classes.hpp"
 
 #include <QDebug>
 #include <QFont>
 #include <QPixmap>
 #include <QTimer>
+#include <cstdlib>
+
 
 extern bool paused;
 
-levelFour::levelFour() : gameLevel() {}
+levelFour::levelFour() : gameLevel() {
+    coinMovement = new QTimer(this);
+}
 
 levelFour::~levelFour() {
     delete playerDead;
@@ -60,7 +65,7 @@ void levelFour::setupScene() {
         paused = true;
 
         sidePlayer->setFrozen(true);
-        sidePlayer->playerDied();
+        sidePlayer->playerDied(1);
 
         QTimer::singleShot(800, this, [this]() {
             if (sidePlayer) sidePlayer->hide();
@@ -75,8 +80,49 @@ void levelFour::setupTrap1() {
 }
 
 void levelFour::setupTrap2() {
-    
-    // Trap 2 
+
+    coins = new Coin*[10];
+    for (int i = 0; i < 10; i++) coins[i] = new Coin();
+    int fakeCoin = (rand() % 2 == 1) ? 3 : 7;
+    coins[fakeCoin]->setFake(true);
+
+    int initX = 425;
+    for (int i = 0; i < 10; i++)
+    {
+        coins[i]->setScale(1.25);
+        coins[i]->setPos(initX + (24*i) , 460);
+        coins[i]->setZValue(1);
+        scene->addItem(coins[i]);
+    }
+
+    moving = 3;
+
+    coinPool = new QSoundEffect* [10];
+
+    for (int i = 0; i < 10; i++){
+        coinPool[i] = new QSoundEffect(this);
+        coinPool[i]->setSource(QUrl("qrc:/assets/sounds/coin_sound.wav"));  // Preload grunt sound for whole pool.
+        coinPool[i]->setVolume(sfxVolume * 0.25);
+    }
+
+    QTimer* trap1Logic = new QTimer(this);
+    QObject::connect(coinMovement, &QTimer::timeout, this, [this]() {
+        if (paused || !scene || scene->views().isEmpty()) return;
+        if (!sidePlayer || !sidePlayer->scene()) return;
+        if (*playerDead) return;
+
+        int dy = (moving > 0) ? -1 : 1;     // up while positive, down while -ve
+        for (int i = 0; i < 10; i++){
+            if (coins[i] == nullptr) continue;
+            coins[i]->moveBy(0, dy);
+        }
+
+        moving--;
+        if (moving == -6) moving = 6;
+    });
+
+
+    coinMovement->start(100);
 }
 
 void levelFour::setupTrap3() {
@@ -95,8 +141,22 @@ void levelFour::updateTrap1() {
 }
 
 void levelFour::updateTrap2() {
-    
+
     // Trap 2 logic goes here.
+    for(int i = 0; i < 10; i++)
+    {
+        if (coins[i] == nullptr) continue;
+        if(sidePlayer->collidesWithItem(coins[i])){
+            if(coins[i]->getFake()) {
+                sidePlayer->playerDied(2);
+                emit sidePlayer->died();
+            }
+            coinPool[i]->play();
+            delete coins[i];
+            coins[i] = nullptr;
+        }
+    }
+
 }
 
 void levelFour::updateTrap3() {

@@ -22,6 +22,8 @@
 #include <QUrl>
 #include <QMediaDevices>
 #include <QAudioDevice>
+#include <cstdlib>
+#include <ctime>
 #include "../include/players.hpp"
 #include "../include/wall.hpp"
 #include "../include/furniture.hpp"
@@ -53,6 +55,8 @@ int main(int argc, char* argv[]) {
     music->setLoops(QMediaPlayer::Infinite);
     audio->setVolume(musicVolume);
     music->play();
+
+    srand(time(0));
 
     MenuWindow menu;
     menu.showFullScreen();

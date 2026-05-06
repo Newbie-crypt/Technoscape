@@ -39,7 +39,7 @@ private:
 public:
     SidePlayer();
     void setFrozen(bool value) { isFrozen = value; }
-    void playerDied();
+    void playerDied(int type);
 
 signals:
     void died();

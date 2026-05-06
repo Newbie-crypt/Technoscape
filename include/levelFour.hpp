@@ -4,6 +4,7 @@
 #include <QGraphicsTextItem>
 #include <QTimer>
 #include <QVector>
+#include "classes.hpp"
 #include "gameLevel.hpp"
 #include "sideplayer.hpp"
 #include "wall.hpp"
@@ -39,4 +40,9 @@ private:
     bool* playerDead = nullptr;
 
     QTimer* logicTimer = nullptr;
+    QTimer* coinMovement = nullptr;
+
+    Coin** coins = nullptr;
+    int moving = 3;
+    QSoundEffect** coinPool;
 };

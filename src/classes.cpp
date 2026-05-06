@@ -91,6 +91,24 @@ void Projectile::processMovement()
         }
 }
 
+Coin::Coin(bool fake) : isFake(fake) {
+    coinSheet = QPixmap(":/assets/Level4/spr_coin_azu.png");
+    setPixmap(coinSheet.copy(0, 0, 16, 16)); // Initially set the pixmap to the first frame of the animation
+    coinTimer = new QTimer(this);
+    QObject::connect(coinTimer, &QTimer::timeout, this, &Coin::processFrame);
+    coinTimer->start(200); //Change animation every 200 milliseconds
+}
+
+void Coin::processFrame(){
+    setPixmap(coinSheet.copy(currentAnimation * 16, 0, 16, 16));
+    currentAnimation++;
+    if(currentAnimation >= 3) {currentAnimation = 0;}
+}
+
+Coin::~Coin(){
+    coinTimer->stop();
+}
+
 Hittable::~Hittable() {}
 
 Projectile::~Projectile() {

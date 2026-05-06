@@ -78,7 +78,7 @@ void levelTwo::setupScene() {
 
         paused = true;
         sidePlayer->setFrozen(true);
-        sidePlayer->playerDied();
+        sidePlayer->playerDied(1);
 
         QTimer::singleShot(800, this, [this]() {
             sidePlayer->hide();
