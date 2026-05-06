@@ -90,6 +90,10 @@ void MenuWindow::startLevel(int level) {
         gameView = createGameView(new levelTwo);
     }
 
+    if (level == 4) {
+    gameView = createGameView(new levelFour);
+    }
+
     if (!gameView) return;
 
     gameView->showFullScreen();
@@ -271,7 +275,7 @@ MenuWindow::MenuWindow() {
     // Continue saved progress: jumps to the highest level the player unlocked.
     QObject::connect(continueButton, &QPushButton::clicked, [this]() {
         QTimer::singleShot(120, [this]() {
-            startLevel(highestUnlockedLevel);
+            startLevel(4);
         });
     });
 
@@ -608,6 +612,10 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         currentLevel = L2;
         currentLevelNumber = 2;
         currentLevel->setupScene();
+    } else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
+    currentLevel = L4;
+    currentLevelNumber = 4;
+    currentLevel->setupScene();
     }
 
     QGraphicsView* gameView = new QGraphicsView(currentLevel->getScene());
@@ -632,7 +640,10 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
             currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
             L2->getSidePlayer()->setFocus();
-        }
+        } else if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
+    currentLevel->getScene()->setFocusItem(L4->getSidePlayer());
+    L4->getSidePlayer()->setFocus();
+    }
     });
 
     auto fitScene = [gameView, this]() {
