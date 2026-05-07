@@ -3,6 +3,7 @@
 #include <QPixmap>
 #include <QGraphicsPixmapItem>
 #include <QLabel>
+#include <QPointer>
 #include "classes.hpp"
 #include "suicide_drone.hpp"
 
@@ -20,7 +21,7 @@ class levelThree : public gameLevel  {
         QGraphicsPixmapItem* background;
         QLabel* health_symbol;
         HealthBar* health_bar;
-        suicideDrone* drone[10];
+        QPointer<suicideDrone> drone[10];
 
         void startWaveOne();
     protected:

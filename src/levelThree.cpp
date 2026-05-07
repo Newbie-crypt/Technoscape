@@ -1,6 +1,11 @@
 #include "levelThree.hpp"
  
 levelThree::levelThree() : gameLevel() {}
+levelThree::~levelThree() {
+    for (int i = 0; i < 10; i++) {
+        if (drone[i]) delete drone[i]; // QPointer is null if the drone already self-deleted
+    }
+}
 
 void levelThree::setupScene() {
 
@@ -41,20 +46,23 @@ void levelThree::setupScene() {
     player->setPos(568, 300);
     scene->addItem(player);
 
-    
-    
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
 
     scene->setFocusItem(player);
     player->setFocus();
 
-    QTimer* timer = new QTimer;
-    QObject::connect(timer, &QTimer::timeout, [this] () {
-        // Here, we are utilizing the magic of lerp which is a useful mathematical function used to smoothly transition between 2 points.
-        // If we were to just center on the player, the transition would be way less smooth
+    QTimer* timer = new QTimer(this);
+    QPointer<Player> safePlayer = player;
+    QObject::connect(timer, &QTimer::timeout, [this, safePlayer] () {
+        // The player gets deleted when the player dies and the user clicks play again. To prevent
+        // Any segmentation fault, this if statement is used.
+        if (!safePlayer) return;
+
+        // Here, we are using the magic of lerp, a mathematical function which uses linear interpolation for the 
+        // view to smoothly follow the player.
         QPointF current = this->view->mapToScene(this->view->viewport()->rect().center());
-        QPointF target  = this->getPlayer()->pos();
+        QPointF target  = safePlayer->pos();
         QPointF next    = current + (target - current) * 0.1;
         this->view->centerOn(next);
     });
@@ -64,8 +72,6 @@ void levelThree::setupScene() {
     
     startWaveOne();
 }
-
-levelThree::~levelThree() {}
 
 void levelThree::setupSpawnKeyEvent() {}
 
@@ -117,3 +123,4 @@ void levelThree::setupWalls() {
     addWall(1274, 51, 49, 124);
     addWall(1293, 173, 31, 22);
 }
+

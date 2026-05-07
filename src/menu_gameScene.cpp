@@ -93,6 +93,14 @@ void MenuWindow::startLevel(int level) {
         emit gameStarted();
         return;
     }
+
+    if (level == 3) {
+        createGameView(new levelThree);
+        this->hide();
+        emit gameStarted();
+        return;
+    }
+
 }
 
 MenuWindow::MenuWindow() {
@@ -594,6 +602,7 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     // }
     
     currentLevel = L3;
+    currentLevelNumber = 3;
     L3->setView(view);
     L3->setupScene();
     // L3->spawnEnemies();
@@ -638,11 +647,13 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         gameLevel* oldLevel = currentLevel;
         QGraphicsView* oldView = this->view;
 
+        if (oldLevel) oldLevel->getScene()->clear(); 
         startLevel(restartTo);
 
         oldView->lower();
-        // oldView->deleteLater();
-        // if (oldLevel) oldLevel->deleteLater();
+        if (oldLevel) oldLevel->deleteLater();
+        oldView->deleteLater();
+        
     });
 
     QObject::connect(death_screen, &gameOver::mainMenuRequested, [this]() {

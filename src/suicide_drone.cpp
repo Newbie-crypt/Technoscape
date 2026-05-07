@@ -123,7 +123,6 @@ void suicideDrone::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWi
     // The drone will be destructed after exploding.
     if (currentFrame == 6 && currentAnimationState == AnimationState::Attacking) {
         scene()->removeItem(this);
-        delete this;
     }
 }
 
