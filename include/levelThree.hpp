@@ -21,7 +21,8 @@ class levelThree : public gameLevel  {
         QGraphicsPixmapItem* background;
         QLabel* health_symbol;
         HealthBar* health_bar;
-        QPointer<suicideDrone> drone[10];
+        QPointer<suicideDrone> drone[10]; // What made us use QPointer instead of the standard C++ pointer is that QPointer automatically becomes NULL once the dynamically
+        // allocated object is deleted, making the deletion process easier.
 
         void startWaveOne();
     protected:

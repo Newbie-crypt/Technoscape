@@ -24,6 +24,9 @@
         <file>assets/levelThree/levelThreeScene.png</file>
         <file>assets/droneExplosion.png</file>
         <file>assets/suicideDrone_walk.png</file>
+        <file>assets/bruteAttack.png</file>
+        <file>assets/bruteDeath.png</file>
+        <file>assets/bruteHurt.png</file>
         <file>assets/sounds/kaboom.wav</file>
     </qresource>
 </RCC>
