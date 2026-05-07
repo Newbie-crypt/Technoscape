@@ -28,6 +28,19 @@ class Robot: public Enemy {
     private:
         // Consider moving this to enemy for the child classes to inherit them for less redundancy
         const int number_of_states = 3; // Idle, attacking, running
+        // A* pathfinding state. The grid is built once, lazily, on the first
+        // Chase() call (because we need the scene to be set first).
+        std::vector<std::vector<bool>> blockedCells;
+        bool facingLeft = false;
+        int gridCols = 0;
+        int gridRows = 0;
+        bool gridBuilt = false;
+        std::vector<QPointF> currentPath;
+        std::size_t pathIndex = 0;
+        int repathCounter = 0;
+
+        void buildWallGrid();
+        std::vector<QPointF> findPath(int sc, int sr, int gc, int gr);
     public:
         Robot(Player* t);
         void Attack() override;

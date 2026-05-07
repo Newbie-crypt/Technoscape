@@ -87,11 +87,17 @@ void levelThree::startWaveOne() {
         scene->addItem(drone[i]);
         drone[i]->setPos(rand() % 1200 + 95, rand() % 890 + 40);
     }
-    const int number_of_brutes = 1;
+    const int number_of_brutes = 0;
     for (int i = 0; i < number_of_brutes; i++) {
         brutes[i] = new brute(player);
         scene->addItem(brutes[i]);
         brutes[i]->setPos(200, 210);
+    }
+    const int number_of_robots = 1;
+    for (int i = 0; i < number_of_robots; i++) {
+        robots[i] = new Robot(player);
+        scene->addItem(robots[i]);
+        robots[i]->setPos(200, 220);
     }
 }
 

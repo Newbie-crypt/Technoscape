@@ -7,12 +7,6 @@
 
 extern bool paused;
 
-// A* tuning. CELL_SIZE is the side of a grid cell in scene pixels.
-// REPATH_INTERVAL is how many Chase() ticks pass before recomputing the path
-// (Chase fires every 50ms, so 10 ≈ 0.5s).
-static constexpr int CELL_SIZE = 32;
-static constexpr int REPATH_INTERVAL = 10;
-
 QRectF brute::boundingRect() const {
     return QRectF(0, 40, frame_width - 40, frame_height - 40);
 }
@@ -154,6 +148,16 @@ void brute::Move() {
     moveBy(10, 0);
 }
 
+// FOR TRANSPARENCY: THE ENTIRE A* PATHFINDING ALGORITHM IS DEVELOPED BY CLAUDE, NOT WRITTEN BY HAND.
+
+// A* tuning. CELL_SIZE is the side of a grid cell in scene pixels.
+// REPATH_INTERVAL is how many Chase() ticks pass before recomputing the path
+// (Chase fires every 50ms, so 10 ≈ 0.5s).
+static constexpr int CELL_SIZE = 32;
+static constexpr int REPATH_INTERVAL = 10;
+
+
+
 // Build the navigation grid by scanning the scene for Wall items. Cells whose
 // centre falls inside (or near) a wall are flagged as blocked. We inflate each
 // wall's footprint by one cell on every side so the brute's body — which is
@@ -169,10 +173,14 @@ void brute::buildWallGrid() {
     for (QGraphicsItem* item : scene()->items()) {
         if (typeid(*item) != typeid(Wall)) continue;
         QRectF wr = item->sceneBoundingRect();
-        int c0 = std::max(0,            static_cast<int>(std::floor(wr.left()   / CELL_SIZE)) - 1);
-        int c1 = std::min(gridCols - 1, static_cast<int>(std::floor(wr.right()  / CELL_SIZE)) + 1);
-        int r0 = std::max(0,            static_cast<int>(std::floor(wr.top()    / CELL_SIZE)) - 1);
-        int r1 = std::min(gridRows - 1, static_cast<int>(std::floor(wr.bottom() / CELL_SIZE)) + 1);
+
+        // Calculate the cell coordinates the "Wall" object occupies
+        int c0 = std::max(0,            static_cast<int>(std::floor(wr.left()   / CELL_SIZE)));
+        int c1 = std::min(gridCols - 1, static_cast<int>(std::floor(wr.right()  / CELL_SIZE)));
+        int r0 = std::max(0,            static_cast<int>(std::floor(wr.top()    / CELL_SIZE)));
+        int r1 = std::min(gridRows - 1, static_cast<int>(std::floor(wr.bottom() / CELL_SIZE)));
+
+        // Then block these coordinates
         for (int c = c0; c <= c1; c++)
             for (int r = r0; r <= r1; r++)
                 blockedCells[c][r] = true;
