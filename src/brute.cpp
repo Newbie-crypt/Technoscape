@@ -10,7 +10,7 @@ void brute::Attack() {
     changeAnimationState(AnimationState::Attacking);
 }
 
-brute::brute(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 5) {
+brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     currentAnimationState = AnimationState::Running;
     // Loading all the spritesheets
     // spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png"); (idle is no longer neede)
@@ -64,7 +64,7 @@ brute::brute(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 5) {
         // Calls the boundingRect() and paint() methods
         update();
 
-        if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
+        if (currentAnimationState == AnimationState::Attacking && currentFrame == 4) {
             target->decreaseHealth(40);
         }
     });
