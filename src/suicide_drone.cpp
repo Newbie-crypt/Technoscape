@@ -2,7 +2,7 @@
 
 extern bool paused;
 
-suicideDrone::suicideDrone(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 7) {
+suicideDrone::suicideDrone(Player* t) : Enemy(1, ":/assets/Standing_Robot.png", 7) {
     currentAnimationState = AnimationState::Running;
     boom = new QSoundEffect(this);
     boom->setSource(QUrl("qrc:/assets/sounds/kaboom.wav")); 
@@ -78,17 +78,15 @@ suicideDrone::suicideDrone(Player* t) : Enemy(100, ":/assets/Standing_Robot.png"
         }
         if (died)
             {
-            timer->stop();
+            this->explode();
             timer2->stop();
-            scene()->removeItem(this);
-            delete this;
             return;
         }
 
 
         if (target->collidesWithItem(this)) {
             this->explode();
-            QTimer::singleShot(2000, [] () {});
+            timer2->stop();
         } else {
             this->Chase();
         }
@@ -123,6 +121,7 @@ void suicideDrone::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWi
 
     // The drone will be destructed after exploding.
     if (currentFrame == 6 && currentAnimationState == AnimationState::Attacking) {
+        scene()->removeItem(this);
         delete this;
     }
 }
