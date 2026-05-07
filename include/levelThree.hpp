@@ -20,6 +20,7 @@ class levelThree : public gameLevel  {
         QGraphicsPixmapItem* background;
         QLabel* health_symbol;
         HealthBar* health_bar;
+        suicideDrone* drone[10];
 
         void startWaveOne();
     protected:

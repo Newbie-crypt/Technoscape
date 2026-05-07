@@ -14,7 +14,7 @@ class gameLevel : public QObject {
     Q_OBJECT
     public:
         gameLevel();
-        virtual ~gameLevel() {}
+        virtual ~gameLevel();
         virtual void setupScene() = 0;
         QGraphicsScene* getScene() {return scene;}
         Player* getPlayer() {return player;}

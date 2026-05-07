@@ -86,6 +86,7 @@ suicideDrone::suicideDrone(Player* t) : Enemy(1, ":/assets/Standing_Robot.png", 
 
         if (target->collidesWithItem(this)) {
             this->explode();
+            target->decreaseHealth(50);
             timer2->stop();
         } else {
             this->Chase();

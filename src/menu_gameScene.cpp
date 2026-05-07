@@ -641,8 +641,8 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         startLevel(restartTo);
 
         oldView->lower();
-        oldView->deleteLater();
-        if (oldLevel) oldLevel->deleteLater();
+        // oldView->deleteLater();
+        // if (oldLevel) oldLevel->deleteLater();
     });
 
     QObject::connect(death_screen, &gameOver::mainMenuRequested, [this]() {

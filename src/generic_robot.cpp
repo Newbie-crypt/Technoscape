@@ -54,18 +54,18 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     
     // Every 100ms, we are changing the frame, depending on the currentAnimationState which changes via the other functions in this class
     connect(timer, &QTimer::timeout, [this]() {
-    if (paused) {
-        return;
-    }
+        if (paused) {
+            return;
+        }
 
-    currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
+        currentFrame = (currentFrame + 1) % frame_count[currentAnimationState];
 
-    // Calls the boundingRect() and paint() methods
-    update();
+        // Calls the boundingRect() and paint() methods
+        update();
 
-    if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
-        target->decreaseHealth(10);
-    }
+        if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
+            target->decreaseHealth(10);
+        }
     });
 
     timer->start(100);

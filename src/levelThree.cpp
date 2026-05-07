@@ -71,11 +71,14 @@ void levelThree::setupSpawnKeyEvent() {}
 
 
 void levelThree::startWaveOne() {
-    suicideDrone* drone = new suicideDrone(player);
-    scene->addItem(drone);
-    drone->setPos(100, 100);
+    srand(time(0));
+    const int number_of_drones = 10;
+    for (int i = 0; i < number_of_drones; i++) {
+        drone[i] = new suicideDrone(player);
+        scene->addItem(drone[i]);
+        drone[i]->setPos(rand() % 1200 + 95, rand() % 890 + 40);
+    }
 }
-
 
 void levelThree::setupWalls() {
     addWall(235, 92, 127, 111);
