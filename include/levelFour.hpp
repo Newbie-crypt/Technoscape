@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QVector>
 #include "classes.hpp"
+#include <QApplication>
+#include <QGuiApplication>
 #include "gameLevel.hpp"
 #include "sideplayer.hpp"
 #include "wall.hpp"
@@ -37,6 +39,41 @@ private:
     void updateTrap3();
     void updateTrap4();
 
+    //Trap 1
+    QGraphicsPixmapItem* fakeFloorSprite = nullptr;
+    Wall** fakeFloorCollision = nullptr;
+    QGraphicsRectItem* trap1TriggerZone = nullptr;
+    QGraphicsRectItem* trap1KillZone = nullptr;
+    QGraphicsRectItem* trap1LaserEffect = nullptr;
+    bool* trap1Triggered = nullptr;
+    bool* trap1Open = nullptr;
+    bool* trap1CoolingDown = nullptr;
+    bool* trap1PlayerDead = nullptr;
+    bool* trap1DeathSequenceRunning = nullptr;
+    QGraphicsRectItem* trap1RightSideTrigger = nullptr;
+    QGraphicsPixmapItem* trap1Slider = nullptr;
+    QGraphicsRectItem* trap1SliderHitbox = nullptr;
+    bool* trap1RightSideReached = nullptr;
+    bool* trap1SliderActive = nullptr;
+    bool* trap1Completed = nullptr;
+
+
+
+
+    // Trap 4 
+    QGraphicsPixmapItem* trap4Ceiling = nullptr;
+
+    QGraphicsPixmapItem* trap4Item = nullptr;
+    QGraphicsRectItem* trap4ItemZone = nullptr;
+    QGraphicsTextItem* trap4ItemText = nullptr;
+    QTimer* trap4UrgentTimer = nullptr;
+    bool* trap4UrgentStart = nullptr;
+    bool* trap4Started = nullptr;
+    bool* trap4ItemCollected = nullptr;
+    bool* trap4PlayerDead = nullptr;
+    bool* trap4NextLevelRequested = nullptr;
+
+    
     bool* playerDead = nullptr;
 
     QTimer* logicTimer = nullptr;
