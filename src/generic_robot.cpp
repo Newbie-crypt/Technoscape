@@ -132,8 +132,8 @@ void Robot::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     }
 
     // Uncomment this if you want to see the boundaries of the object
-    painter->setPen(QPen(Qt::red, 1));
-    painter->drawRect(boundingRect());
+    // painter->setPen(QPen(Qt::red, 1));
+    // painter->drawRect(boundingRect());
 }
 void Robot::Move() {
     // Here's an application of the changeAnimationState

@@ -6,7 +6,7 @@
 Wall::Wall(int x, int y, int w, int h)
     : QGraphicsRectItem(0, 0, w, h)
 {
-    bool debug = true;
+    bool debug = false;
 
     if (debug) {
         setBrush(QColor(255,0,0,90));

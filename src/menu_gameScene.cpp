@@ -637,6 +637,7 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
     pauseMenu* pause = new pauseMenu(view, currentLevel);
     QObject::connect(pause, &pauseMenu::leaveRequested, [this]() {
+        if (currentLevel) currentLevel->deleteLater();
         showMainMenu(this->view, this);
     });
 
