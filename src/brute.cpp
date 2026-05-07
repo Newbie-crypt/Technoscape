@@ -3,7 +3,7 @@
 extern bool paused;
 
 QRectF brute::boundingRect() const {
-    return QRectF(5, 11, frame_width - 8, frame_height - 11);
+    return QRectF(0, 40, frame_width - 40, frame_height - 40);
 }
 
 void brute::Attack() {
@@ -11,11 +11,11 @@ void brute::Attack() {
 }
 
 brute::brute(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 5) {
-
+    currentAnimationState = AnimationState::Running;
     // Loading all the spritesheets
     // spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png"); (idle is no longer neede)
     spritesheets[AnimationState::Attacking].load(":assets/bruteAttack.png");
-    spritesheets[AnimationState::Running].load(":assets/Orange.png");
+    spritesheets[AnimationState::Running].load(":assets/bruteWalk.png");
 
     // Keeping track of the number of frames in each spritesheet
     // frame_count[AnimationState::Idle] = 5;
@@ -33,6 +33,7 @@ brute::brute(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 5) {
     // All frames in the spritesheets are of the same size, independent of the object's state.
     frame_width = spritesheets[AnimationState::Running].width() / spritesheet_columns[AnimationState::Running];
     frame_height = spritesheets[AnimationState::Running].height() / spritesheet_rows[AnimationState::Running];
+
 
 
     int r = 0;
@@ -90,7 +91,6 @@ brute::brute(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 5) {
         timer->stop();
         timer2->stop();
         scene()->removeItem(this);
-        delete this;
         return;
     }
 

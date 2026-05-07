@@ -2,9 +2,12 @@
  
 levelThree::levelThree() : gameLevel() {}
 levelThree::~levelThree() {
-    for (int i = 0; i < 10; i++) {
-        if (drone[i]) delete drone[i]; // QPointer is null if the drone already self-deleted
-    }
+    // for (int i = 0; i < 10; i++) {
+    //     if (drone[i]) delete drone[i]; // QPointer is null if the drone already self-deleted
+    // }
+    // for (int i = 0; i < number_of_brutes; i++) {
+    //     if (brutes[i]) delete brutes[i];
+    // }
 }
 
 void levelThree::setupScene() {
@@ -78,11 +81,17 @@ void levelThree::setupSpawnKeyEvent() {}
 
 void levelThree::startWaveOne() {
     srand(time(0));
-    const int number_of_drones = 10;
+    const int number_of_drones = 0;
     for (int i = 0; i < number_of_drones; i++) {
         drone[i] = new suicideDrone(player);
         scene->addItem(drone[i]);
         drone[i]->setPos(rand() % 1200 + 95, rand() % 890 + 40);
+    }
+    const int number_of_brutes = 1;
+    for (int i = 0; i < number_of_brutes; i++) {
+        brutes[i] = new brute(player);
+        scene->addItem(brutes[i]);
+        brutes[i]->setPos(200, 210);
     }
 }
 

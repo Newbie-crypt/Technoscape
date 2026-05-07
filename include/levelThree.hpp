@@ -6,6 +6,7 @@
 #include <QPointer>
 #include "classes.hpp"
 #include "suicide_drone.hpp"
+#include "brute.hpp"
 
 class levelThree : public gameLevel  {
     Q_OBJECT
@@ -23,7 +24,9 @@ class levelThree : public gameLevel  {
         HealthBar* health_bar;
         QPointer<suicideDrone> drone[10]; // What made us use QPointer instead of the standard C++ pointer is that QPointer automatically becomes NULL once the dynamically
         // allocated object is deleted, making the deletion process easier.
-
+        // const int number_of_drones;
+        // const int number_of_brutes;
+        QPointer<brute> brutes[10];
         void startWaveOne();
     protected:
         void setupWalls() override;
