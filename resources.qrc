@@ -24,6 +24,7 @@
         <file>assets/Level2/Side_backjump.png</file>
         <file>assets/Level2/Side_hurt.png</file>
         <file>assets/Level4/spr_coin_azu.png</file>
+	<file>assets/Level4/turret_idle.png</file>
 
     </qresource>
 </RCC>

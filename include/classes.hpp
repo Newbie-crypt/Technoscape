@@ -5,7 +5,11 @@
 #include <QGraphicsScene>
 #include <QObject>
 #include <QPainter>
+#include <QSoundEffect>
+#include <QTimer>
 using namespace std;
+
+extern double sfxVolume;
 
 class HealthBar : public QGraphicsItem {
     private:
@@ -86,6 +90,37 @@ class Coin : public QObject, public QGraphicsPixmapItem{
         void setFake(bool b) {isFake = b;}
         bool getFake() {return isFake;}
         ~Coin();
+};
+
+// Stationary random-firing turret for side-view levels.
+// Mirrors Weapon's projectile/audio logic, but is positioned relative to scene instead of player and fires on its own timer.
+class Turret : public QObject, public QGraphicsPixmapItem{
+    Q_OBJECT
+    private:
+        int damage;
+        int fireRate;          // Cooldown between timer calls
+        int fireDirection;     // matches Projectile/Weapon: 1,2,4,5,6,8,9,10 (but we would only need 1,2,4,and 8 here.
+        int randomShot;
+        bool canShoot;
+        QPixmap turretSheet;
+
+        QTimer* fireTimer;     // runs a random check to see if a shot should be fired or not
+
+        QSoundEffect** shotPool;
+        int currentShotSound;
+
+    public:
+        // x,y place the turret in scene coordinates and dir picks one of the 8 fire directions.
+        Turret(double x = 0, double y = 0, int dir = 4, int rate = 1000);
+        ~Turret();
+
+        int getDirection() {return fireDirection;}
+        void setDirection(int dir) {fireDirection = dir;}
+        void stopFiring(); // helper function for when the bullet collides with the player
+
+    public slots:
+        void shoot();          // Spawns a Projectile in fireDirection
+        void resetCooldown();
 };
 
 class Hittable{

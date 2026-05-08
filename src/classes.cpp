@@ -105,6 +105,54 @@ void Coin::processFrame(){
     if(currentAnimation >= 3) {currentAnimation = 0;}
 }
 
+Turret::Turret(double x, double y, int dir, int rate) : fireDirection(dir), fireRate(rate){
+    turretSheet = QPixmap(":/assets/Level4/turret_idle.png");
+    setPixmap(turretSheet);
+    setPos(x, y);
+
+    damage = 10;
+    canShoot = true;
+    randomShot = 50; // % chance of firing on each fireTimer tick
+
+    // Audio pool, mirrors Weapon.
+    shotPool = new QSoundEffect*[5];
+    for (int i = 0; i < 5; i++) {
+        shotPool[i] = new QSoundEffect(this);
+        shotPool[i]->setSource(QUrl("qrc:/assets/sounds/fire.wav"));
+        shotPool[i]->setVolume(sfxVolume / 3);
+    }
+    currentShotSound = 0;
+
+    fireTimer = new QTimer(this); // on every tick, there is a randomshot % chance of firing
+    QObject::connect(fireTimer, &QTimer::timeout, this, [this]() {
+        if (canShoot && (rand() % 100) < randomShot) shoot();
+    });
+    fireTimer->start(fireRate);
+}
+
+void Turret::shoot() {
+    QPointF c = mapToScene(boundingRect().center()); //find the center of the turret.
+    Projectile* bullet = new Projectile(c.x(), c.y(), fireDirection, this);
+    scene()->addItem(bullet);
+
+    shotPool[currentShotSound]->setVolume(sfxVolume / 3);
+    shotPool[currentShotSound]->play();
+    currentShotSound++;
+    if (currentShotSound >= 5) currentShotSound = 0;
+}
+
+void Turret::resetCooldown() {
+    canShoot = true;
+}
+
+void Turret::stopFiring() {
+    if (fireTimer) fireTimer->stop();
+}
+
+Turret::~Turret() {
+    delete[] shotPool;
+}
+
 Coin::~Coin(){
     coinTimer->stop();
 }
