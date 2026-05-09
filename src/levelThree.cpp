@@ -77,7 +77,7 @@ void levelThree::setupScene() {
 
     timer->start(16);
 
-    startWaveThree();
+    startWaveOne();
 
     QObject::connect(this, &levelThree::waveOneComplete, [this](){
         startWaveTwo();
