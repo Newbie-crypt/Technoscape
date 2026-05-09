@@ -42,10 +42,12 @@ private:
     QTimer* logicTimer = nullptr;
     QTimer* coinMovement = nullptr;
 
+    // Coins Trap (2)
     Coin** coins = nullptr;
     int moving = 3;
     QSoundEffect** coinPool;
 
+    //Turret Trap (3)
     Turret* turret = nullptr;
     int realCoinsRemaining = 0; // Decrements when a real coin is picked up, turret spawns when it hits 0.
     bool turretDestroyed = false; // Once the player rams the turret, prevents the spawn condition from re-triggering. Fixes bug where turret kept reappearing after player walked away.
