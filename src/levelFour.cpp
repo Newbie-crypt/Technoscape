@@ -94,8 +94,6 @@ void levelFour::setupScene() {
         if (turret) {
             turret->stopFiring();
         }
-    });
-
         QTimer::singleShot(800, this, [this]() {
             if (sidePlayer) {
                 sidePlayer->hide();
@@ -104,6 +102,8 @@ void levelFour::setupScene() {
             emit playerDied();
         });
     });
+
+
 }
 
 void levelFour::setupTrap1() {
@@ -190,7 +190,7 @@ void levelFour::setupTrap2() {
     coins = new Coin*[10];
     for (int i = 0; i < 10; i++) coins[i] = new Coin();
     int fakeCoin = (rand() % 2 == 1) ? 3 : 7;
-    coins[fakeCoin]->setFake(true);
+    coins[fakeCoin-1]->setFake(true);
     realCoinsRemaining = 9; // 10 coins minus the one fake.
 
     int initX = 425;
@@ -552,7 +552,10 @@ void levelFour::updateTrap2() {
             coins[i] = nullptr;
         }
     }
+}
 
+void levelFour::updateTrap3() {
+    
     // Spawn the turret behind the player once every real coin is collected.
     // The fake coin (if still around) disappears with the last pickup.
     if (turret == nullptr && realCoinsRemaining <= 0 && !turretDestroyed) {
@@ -597,11 +600,6 @@ void levelFour::updateTrap2() {
             }
         }
     }
-}
-
-void levelFour::updateTrap3() {
-    
-    // Trap 3 logic goes here.
 }
 
 void levelFour::updateTrap4() {
