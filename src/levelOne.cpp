@@ -1,6 +1,7 @@
 #include "levelOne.hpp"
+#include <QLabel>
 
-levelOne::levelOne() : gameLevel() {}
+levelOne::levelOne(QGraphicsView* view) : gameLevel(view) {}
 
 levelOne::~levelOne() {
     delete[] robots;
@@ -8,6 +9,8 @@ levelOne::~levelOne() {
 
 
 void levelOne::setupScene() {
+    fitScene();
+
     // Section 1: Preparing the scene of level 1
     scene->clear();
 
@@ -20,10 +23,6 @@ void levelOne::setupScene() {
     background->setZValue(-100);
 
     scene->setSceneRect(0, 0, 800, 600);
-
-    auto addWall = [&](int x, int y, int w, int h) {
-        scene->addItem(new Wall(x, y, w, h));
-    };
 
     auto addTrap = [&](int x, int y, int w, int h) {
         scene->addItem(new Trap(x, y, w, h));
@@ -42,21 +41,21 @@ void levelOne::setupScene() {
 
     QPixmap health_symbol_image (":/assets/health_symbol.png");
     health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    
-    QGraphicsPixmapItem* health_symbol = scene->addPixmap(health_symbol_image);
-    health_symbol->setPos(15, 540);
+    QLabel* health_symbol = new QLabel(view);
+    health_symbol->setPixmap(health_symbol_image);
+    health_symbol->setAttribute(Qt::WA_TransparentForMouseEvents);
+    health_symbol->move(15, 800);
+    health_symbol->show();
 
-    HealthBar* health_bar = new HealthBar;
-    health_bar->setPos(76, 542);
-    health_bar->setZValue(1000);
-
+    HealthBar* health_bar = new HealthBar(view);
+    health_bar->move(80, 800);
+    health_bar->show();
 
     // May the main character spawn!
     player = new Player(0, 0);
     player->setHealthBar(health_bar);
     player->setPos(568, 300);
     scene->addItem(player);
-    scene->addItem(health_bar);
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
 
@@ -76,15 +75,7 @@ void levelOne::setupScene() {
     player->setFocus();
 
     // WALLS
-    addWall(48, 0, 723, 46);
-    addWall(0, 0, 46, 346);
-    addWall(0, 344, 74, 149);
-    addWall(0, 494, 800, 106);
-    addWall(771, 0, 29, 199);
-    addWall(766, 198, 34, 296);
-    addWall(582, 66, 67, 100);
-    addWall(412, 66, 166, 25);
-    addWall(45, 88, 22, 83);
+    this->setupWalls();
 
     // DOOR
     Door* door = new Door(658, 155, 100, 25);
@@ -118,6 +109,9 @@ void levelOne::spawnEnemies() {
     robots[3]->setPos(246, 450);
     robots[4]->setPos(453, 450);
 
+
+
+
     for (int i = 0; i < number_of_robots; i++) {
         QObject::connect(robots[i], &Enemy::isDead, [this]() {
             number_of_robots--;
@@ -138,4 +132,17 @@ void levelOne::setupSpawnKeyEvent() {
         worldKey->setZValue(300);
         scene->addItem(worldKey);
     });
-}   
+} 
+
+
+void levelOne::setupWalls() {
+    addWall(48, 0, 723, 46);
+    addWall(0, 0, 46, 346);
+    addWall(0, 344, 74, 149);
+    addWall(0, 494, 800, 106);
+    addWall(771, 0, 29, 199);
+    addWall(766, 198, 34, 296);
+    addWall(582, 66, 67, 100);
+    addWall(412, 66, 166, 25);
+    addWall(45, 88, 22, 83);
+}

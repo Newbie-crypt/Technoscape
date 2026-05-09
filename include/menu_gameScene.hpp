@@ -49,6 +49,7 @@
 #include "levelOne.hpp"
 #include "levelTwo.hpp"
 #include "levelFour.hpp"
+#include "levelThree.hpp"
 
 
 extern bool paused;
@@ -101,7 +102,7 @@ class MenuWindow : public QWidget {
         void loadProgress();
         void saveProgress();
         void unlockLevel(int level);
-        void playLevel2Transition(QGraphicsView* view);
+        void playLevelTransition(QGraphicsView* view, int level);
 
         QGraphicsView* gameView;
         QGraphicsView* view;

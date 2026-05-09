@@ -87,4 +87,6 @@ class levelTwo : public gameLevel {
 
         QTimer* trap1LogicTimer = nullptr;
         QGraphicsPixmapItem* level2Background = nullptr;
+    protected:
+        void setupWalls() {}
 };

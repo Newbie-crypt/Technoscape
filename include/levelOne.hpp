@@ -1,10 +1,11 @@
 #pragma once
 #include "gameLevel.hpp"
+#include "generic_robot.hpp"
 
 class levelOne : public gameLevel  {
     Q_OBJECT   
     public:
-        levelOne();
+        levelOne(QGraphicsView* view);
         ~levelOne();
         void setupScene() override;
         void spawnEnemies();
@@ -14,4 +15,6 @@ class levelOne : public gameLevel  {
         Robot** robots;
     signals:
         void allEnemiesDead();
+    protected:
+        void setupWalls() override;
 };

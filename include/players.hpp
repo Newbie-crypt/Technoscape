@@ -98,7 +98,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
     signals:
         void died();
         void level2Requested();
-
+        void moved();
     public slots:
         void processMovement();
 

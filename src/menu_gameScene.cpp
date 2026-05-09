@@ -89,9 +89,12 @@ void MenuWindow::startLevel(int level) {
     if (level == 2) {
         gameView = createGameView(new levelTwo);
     }
+    if (level == 3) {
+        gameView = createGameView(new levelThree);
+    }
 
     if (level == 4) {
-    gameView = createGameView(new levelFour);
+        gameView = createGameView(new levelFour);
     }
 
     if (!gameView) return;
@@ -118,6 +121,8 @@ void MenuWindow::startLevel(int level) {
     });
 
     emit gameStarted();
+    
+
 }
 
 MenuWindow::MenuWindow() {
@@ -398,7 +403,7 @@ MenuWindow::MenuWindow() {
 
         QObject::connect(closeButton, &QPushButton::clicked, [=]() {
             settingsOverlay->deleteLater();
-        });
+        }); 
 
         layout->addWidget(settingsTitle);
         layout->addWidget(musicLabel);
@@ -459,7 +464,7 @@ MenuWindow::MenuWindow() {
     showFullScreen();
 }
 
-void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
+void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
     paused = true;
 
     QWidget* transitionOverlay = new QWidget(gameView->viewport());
@@ -471,8 +476,8 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
     QWidget* introContainer = new QWidget(transitionOverlay);
     introContainer->setGeometry(0, 0, transitionOverlay->width(), transitionOverlay->height());
     introContainer->hide();
-
-    QLabel* cyanText = new QLabel("LEVEL 2", introContainer);
+    QString text = "LEVEL " + QString::number(level);
+    QLabel* cyanText = new QLabel(text, introContainer);
     cyanText->setAlignment(Qt::AlignCenter);
     cyanText->setGeometry(0, 0, introContainer->width(), introContainer->height());
     cyanText->move(-4, 0);
@@ -485,7 +490,7 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
         "letter-spacing: 4px;"
     );
 
-    QLabel* magentaText = new QLabel("LEVEL 2", introContainer);
+    QLabel* magentaText = new QLabel(text, introContainer);
     magentaText->setAlignment(Qt::AlignCenter);
     magentaText->setGeometry(0, 0, introContainer->width(), introContainer->height());
     magentaText->move(4, 0);
@@ -498,7 +503,7 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
         "letter-spacing: 4px;"
     );
 
-    QLabel* mainText = new QLabel("LEVEL 2", introContainer);
+    QLabel* mainText = new QLabel(text, introContainer);
     mainText->setAlignment(Qt::AlignCenter);
     mainText->setGeometry(0, 0, introContainer->width(), introContainer->height());
     mainText->setStyleSheet(
@@ -600,40 +605,54 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
 
 // The function's purpose is to set up the scene
 QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
-    
+    view = new QGraphicsView;
+    view->setRenderHint(QPainter::Antialiasing);
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setFrameStyle(0);
+    view->setBackgroundBrush(Qt::black);
+    view->setAlignment(Qt::AlignCenter);
     // Add an else if statement here when adding a level
-    if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
-        currentLevel = L1;
-        currentLevelNumber = 1;
-        currentLevel->setupScene();
-        L1->spawnEnemies();
-        currentLevel->setupSpawnKeyEvent();
-    } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
-        currentLevel = L2;
-        currentLevelNumber = 2;
-        currentLevel->setupScene();
-    } else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
-    currentLevel = L4;
-    currentLevelNumber = 4;
-    currentLevel->setupScene();
-    }
+    // if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
+    //     currentLevel = L1;
+    //     currentLevelNumber = 1;
+    //     currentLevel->setupScene();
+    //     L1->spawnEnemies();
+    //     currentLevel->setupSpawnKeyEvent();
+    // } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
+    //     currentLevel = L2;
+    //     currentLevelNumber = 2;
+    //     currentLevel->setupScene();
+    // } else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
+    //     currentLevel = L3;
+    //     currentLevelNumber = 3;
+    //     L3->setView(view);
+    //     L3->setupScene();
+    // }
+    // else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
+    //     currentLevel = L4;
+    //     currentLevelNumber = 4;
+    //     currentLevel->setupScene();
+    // }
 
-    QGraphicsView* gameView = new QGraphicsView(currentLevel->getScene());
-    gameView->setFocusPolicy(Qt::StrongFocus);
-    gameView->setRenderHint(QPainter::Antialiasing);
-    gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    gameView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    gameView->setFrameStyle(0);
-    gameView->setBackgroundBrush(Qt::black);
-    gameView->setAlignment(Qt::AlignCenter);
-    gameView->showFullScreen();
-    view = gameView;
+    currentLevel = new levelThree;
+    currentLevelNumber = 3;
+    currentLevel->setView(view);
+    currentLevel->setupScene();
+
+
+    view->setScene(currentLevel->getScene());
+    view->showFullScreen();
+
+    // view->setScene(inputLevel->getScene());
+    // view->showFullScreen();
+
 
     // Wait for fullscreen activation events to finish processing before
     // giving focus to the player; otherwise the player won't receive key events.
     // This also helps identify what player we need to focus on depending on the level
-    QTimer::singleShot(0, [this, gameView]() {
-        gameView->setFocus();
+    QTimer::singleShot(0, [this]() {
+        this->view->setFocus();
         if (Player* p = currentLevel->getPlayer()) {
             currentLevel->getScene()->setFocusItem(p);
             p->setFocus();
@@ -646,76 +665,55 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     }
     });
 
-    auto fitScene = [gameView, this]() {
-        gameView->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
-    };
+    // auto fitScene = [this]() {
+    //     view->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
+    // };
 
-    fitScene();
-    QTimer::singleShot(0, [fitScene]() { fitScene(); });
-    QTimer::singleShot(50, [fitScene]() { fitScene(); });
+    // // fitScene();
+    // QTimer::singleShot(0, [fitScene]() { fitScene(); });
+    // QTimer::singleShot(50, [fitScene]() { fitScene(); });
 
-    pauseMenu* pause = new pauseMenu(gameView, currentLevel);
-    QObject::connect(pause, &pauseMenu::leaveRequested, [gameView, this]() {
-        gameLevel* oldLevel = currentLevel;
+    view->fitInView(200, 200, 800, 600);
 
-        if (oldLevel && oldLevel->getScene() && currentLevelNumber == 1) {
-            oldLevel->getScene()->clear();   
-        }
-
-        currentLevel = nullptr;
-
-        showMainMenu(gameView, this);
-
-        if (oldLevel) {
-            oldLevel->deleteLater();
-        }
+    pauseMenu* pause = new pauseMenu(view, currentLevel);
+    QObject::connect(pause, &pauseMenu::leaveRequested, [this]() {
+        if (currentLevel) currentLevel->deleteLater();
+        showMainMenu(this->view, this);
     });
 
-    gameOver* death_screen = new gameOver(gameView, currentLevel);
+    gameOver* death_screen = new gameOver(view, currentLevel);
 
-    QObject::connect(death_screen, &gameOver::tryAgainRequested, [this, gameView]() {
+    QObject::connect(death_screen, &gameOver::tryAgainRequested, [this]() {
         int restartTo = currentLevelNumber;
         gameLevel* oldLevel = currentLevel;
-        QGraphicsView* oldView = gameView;
+        QGraphicsView* oldView = this->view;
 
+        if (oldLevel) oldLevel->getScene()->clear(); 
         startLevel(restartTo);
 
-        QTimer::singleShot(150, oldView, [oldView]() {
-        oldView->hide();
-        oldView->close();
+        oldView->lower();
+        if (oldLevel) oldLevel->deleteLater();
         oldView->deleteLater();
+        
     });
-         if (oldLevel) oldLevel->deleteLater();
+
+    QObject::connect(death_screen, &gameOver::mainMenuRequested, [this]() {
+        showMainMenu(this->view, this);
     });
-
-QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
-    gameLevel* oldLevel = currentLevel;
-
-    if (oldLevel && oldLevel->getScene() && currentLevelNumber == 1) {
-        oldLevel->getScene()->clear();   // only for Level 1 enemies
-    }
-    currentLevel = nullptr;
-
-    showMainMenu(gameView, this);
-
-    if (oldLevel) {
-        oldLevel->deleteLater();
-    }
-});
 
     // add a transition here when adding a level
     if (Player* player = currentLevel->getPlayer()) {
-        QObject::connect(player, &Player::level2Requested, [this, gameView]() {
-            playLevel2Transition(gameView);
+        QObject::connect(player, &Player::level2Requested, [this]() {
+            playLevelTransition(this->view, currentLevelNumber);
         });
     }
     if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
-    QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this, gameView]() {
+    QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this]() {
         qDebug() << "Level 3 transition later";
     });
 }
 
-    return gameView;
+    return this->view;
 }
 
 void MenuWindow::resizeEvent(QResizeEvent* event) {
@@ -750,6 +748,7 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
     if (currentView) {
         currentView->setEnabled(false);
 
+        // Check here if there are any segmentation faults.
         QTimer::singleShot(150, currentView, [currentView]() {
             currentView->hide();
             currentView->close();

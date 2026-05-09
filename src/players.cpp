@@ -258,8 +258,10 @@ void Player::processMovement()
     int speedMultiplier = isSprinting ? 1.5 : 1;
 
     applyPhysics(moveDirection, speedMultiplier); // Move character
-    updateSprite(moveDirection, speedMultiplier);    // Animate character
+    updateSprite(moveDirection, speedMultiplier); // Animate character
     handleFootsteps(moveDirection);
+
+    emit moved();
 
     checkTrapCollision();
     checkDoorOpen();

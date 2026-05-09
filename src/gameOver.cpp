@@ -2,14 +2,14 @@
 extern bool paused;
 // This constructor is responsible for designing the "Game Over" screen that pops up after the player dies.
 gameOver::gameOver(QGraphicsView* inputView, gameLevel* inputLevel) {
-    deathFadeOverlay = new QWidget(inputView->viewport());
+    deathFadeOverlay = new QWidget(inputView);
     deathFadeOverlay->setGeometry(inputView->viewport()->rect());
     deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
     deathFadeOverlay->hide();
     deathFadeOverlay->raise();
        
     // UI of the Game over screen.
-    gameOverOverlay = new QWidget(inputView->viewport());
+    gameOverOverlay = new QWidget(inputView);
     gameOverOverlay->setGeometry(inputView->viewport()->rect());
     gameOverOverlay->setStyleSheet("background-color: rgba(0,0,0,255);");
     gameOverOverlay->hide();
@@ -151,8 +151,8 @@ gameOver::gameOver(QGraphicsView* inputView, gameLevel* inputLevel) {
             inputView->clearFocus();
 
             // make sure overlays fill full screen
-            deathFadeOverlay->setGeometry(inputView->viewport()->rect());
-            gameOverOverlay->setGeometry(inputView->viewport()->rect());
+            deathFadeOverlay->setGeometry(inputView->rect());
+            gameOverOverlay->setGeometry(inputView->rect());
 
             // Screen shake
             QTransform baseTransform = inputView->transform();
