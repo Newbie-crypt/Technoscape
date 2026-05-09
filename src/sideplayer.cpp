@@ -30,7 +30,7 @@ SidePlayer::SidePlayer()
 
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
-        footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
+        footstepPool[i]->setSource(QUrl("qrc:/assets/sounds/footstep.wav"));  // Preload footstep sound for whole pool.
         footstepPool[i]->setVolume(sfxVolume);
     }
 
@@ -171,9 +171,29 @@ void SidePlayer::handleFootSteps(){
     if(currentFootSound >= 8) {currentFootSound = 0;}
 }
 
-void SidePlayer::playerDied(){
-    activeSheet= &sheetVault[DAMAGED];
-    setPixmap(sheetVault[DAMAGED]);
+void SidePlayer::playerDied(int type){
+    if(type == 1){
+        activeSheet = &sheetVault[DAMAGED];
+        setPixmap(sheetVault[DAMAGED]);
+    }
+    if(type == 2)
+    {
+        QTimer* explosionAnimation= new QTimer(this);
+        QPixmap explosionPixmap = QPixmap("assets/Level4/kaboom.png");
+        QSoundEffect* explosionSound = new QSoundEffect(this);
+        explosionSound->setSource(QUrl("qrc:/assets/sounds/kablaw.wav"));
+        explosionSound->setVolume(sfxVolume);
+        explosionSound->play();
+
+        QObject::connect(explosionAnimation, &QTimer::timeout, this, [this, counter = 0, explosionPixmap]() mutable {
+            setPixmap(explosionPixmap.copy(48 * counter, 0, 48, 48));
+            counter++;
+            if (counter > 7) counter = 0;
+        });
+
+        explosionAnimation->start(50);
+    }
+
 }
 
 void SidePlayer::keyPressEvent(QKeyEvent* event)
@@ -191,6 +211,8 @@ void SidePlayer::keyPressEvent(QKeyEvent* event)
     }
 
     if (event->key() == Qt::Key_C) emit collectKeyRequested();
+    if (event->key() == Qt::Key_O) emit useKeyRequested();
+    if (event->key() == Qt::Key_E) emit enterDoorRequested();
 
 
     QGraphicsPixmapItem::keyPressEvent(event);

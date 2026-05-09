@@ -28,6 +28,7 @@ class levelTwo : public gameLevel {
 
         void setupTrap1();
         void setupTrap2AndTrap3();
+        void setupTrap4();
         void setupLogicTimer();
 
         // Trap 1
@@ -57,12 +58,26 @@ class levelTwo : public gameLevel {
         bool* trap3Started = nullptr;
         bool* trap3Finished = nullptr;
 
+        // Trap 4
+        QVector<QGraphicsPixmapItem*> spikeTrapBases;
+        QVector<QGraphicsPixmapItem*> spikeTrapSpikes;
+        QVector<QGraphicsRectItem*> spikeTrapTriggers;
+        QVector<QGraphicsRectItem*> spikeTrapKillZones;
+        QVector<bool*> spikeTrapActive;
+        QVector<bool*> spikeTrapCoolingDown;
+
         // Bait key
         QGraphicsPixmapItem* baitItem = nullptr;
         QGraphicsRectItem* fakeKeyCollectZone = nullptr;
         QGraphicsTextItem* fakeKeyText = nullptr;
         KeyItem* realLevel2Key = nullptr;
         bool* fakeKeyCollected = nullptr;
+
+        //real key
+        bool* realKeyCollected = nullptr;
+        QGraphicsTextItem* realKeyText = nullptr;
+        QGraphicsTextItem* doorUseText = nullptr;
+        bool* level2DoorOpened = nullptr;
 
         // Audio
         QMediaPlayer* hoverTrapSound = nullptr;
@@ -71,4 +86,5 @@ class levelTwo : public gameLevel {
         QAudioOutput* laserAudio = nullptr;
 
         QTimer* trap1LogicTimer = nullptr;
+        QGraphicsPixmapItem* level2Background = nullptr;
 };

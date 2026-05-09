@@ -63,7 +63,7 @@ Player::Player(double x, double y) {
 
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
-        footstepPool[i]->setSource(QUrl("qrc:/assets/footstep.wav"));  // Preload footstep sound for whole pool.
+        footstepPool[i]->setSource(QUrl("qrc:/assets/sounds/footstep.wav"));  // Preload footstep sound for whole pool.
         footstepPool[i]->setVolume(sfxVolume);
     }
 
@@ -71,7 +71,7 @@ Player::Player(double x, double y) {
 
     for (int i = 0; i < 8; i++){
         gruntPool[i] = new QSoundEffect(this);
-        gruntPool[i]->setSource(QUrl("qrc:/assets/grunt.wav"));  // Preload grunt sound for whole pool.
+        gruntPool[i]->setSource(QUrl("qrc:/assets/sounds/grunt.wav"));  // Preload grunt sound for whole pool.
         gruntPool[i]->setVolume(sfxVolume);
     }
 

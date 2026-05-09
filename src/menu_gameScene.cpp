@@ -80,19 +80,44 @@ void MenuWindow::startLevel(int level) {
 
     currentLevelNumber = level;
 
+    QGraphicsView* gameView = nullptr;
+
     if (level == 1) {
-        createGameView(new levelOne);
-        this->hide();
-        emit gameStarted();
-        return;
+        gameView = createGameView(new levelOne);
     }
 
     if (level == 2) {
-        createGameView(new levelTwo);
-        this->hide();
-        emit gameStarted();
-        return;
+        gameView = createGameView(new levelTwo);
     }
+
+    if (level == 4) {
+    gameView = createGameView(new levelFour);
+    }
+
+    if (!gameView) return;
+
+    gameView->showFullScreen();
+    gameView->raise();
+    gameView->activateWindow();
+    gameView->repaint();
+    QApplication::processEvents();
+
+    QTimer::singleShot(100, this, [this, gameView]() {
+        this->hide();
+
+        gameView->setFocus();
+        gameView->activateWindow();
+
+        if (Player* p = currentLevel->getPlayer()) {
+            currentLevel->getScene()->setFocusItem(p);
+            p->setFocus();
+        } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
+            currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
+            L2->getSidePlayer()->setFocus();
+        }
+    });
+
+    emit gameStarted();
 }
 
 MenuWindow::MenuWindow() {
@@ -250,7 +275,7 @@ MenuWindow::MenuWindow() {
     // Continue saved progress: jumps to the highest level the player unlocked.
     QObject::connect(continueButton, &QPushButton::clicked, [this]() {
         QTimer::singleShot(120, [this]() {
-            startLevel(highestUnlockedLevel);
+            startLevel(4);
         });
     });
 
@@ -556,7 +581,12 @@ void MenuWindow::playLevel2Transition(QGraphicsView* gameView) {
                 startLevel(2);
 
                 oldView->lower();
-                oldView->deleteLater();
+
+               QTimer::singleShot(150, oldView, [oldView]() {
+               oldView->hide();
+               oldView->close();
+               oldView->deleteLater();
+              });
                 if (oldLevel) oldLevel->deleteLater();
 
                 transitionOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -582,9 +612,14 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         currentLevel = L2;
         currentLevelNumber = 2;
         currentLevel->setupScene();
+    } else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
+    currentLevel = L4;
+    currentLevelNumber = 4;
+    currentLevel->setupScene();
     }
 
     QGraphicsView* gameView = new QGraphicsView(currentLevel->getScene());
+    gameView->setFocusPolicy(Qt::StrongFocus);
     gameView->setRenderHint(QPainter::Antialiasing);
     gameView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gameView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -605,7 +640,10 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
             currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
             L2->getSidePlayer()->setFocus();
-        }
+        } else if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
+    currentLevel->getScene()->setFocusItem(L4->getSidePlayer());
+    L4->getSidePlayer()->setFocus();
+    }
     });
 
     auto fitScene = [gameView, this]() {
@@ -618,7 +656,19 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
     pauseMenu* pause = new pauseMenu(gameView, currentLevel);
     QObject::connect(pause, &pauseMenu::leaveRequested, [gameView, this]() {
+        gameLevel* oldLevel = currentLevel;
+
+        if (oldLevel && oldLevel->getScene() && currentLevelNumber == 1) {
+            oldLevel->getScene()->clear();   
+        }
+
+        currentLevel = nullptr;
+
         showMainMenu(gameView, this);
+
+        if (oldLevel) {
+            oldLevel->deleteLater();
+        }
     });
 
     gameOver* death_screen = new gameOver(gameView, currentLevel);
@@ -630,14 +680,28 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
         startLevel(restartTo);
 
-        oldView->lower();
+        QTimer::singleShot(150, oldView, [oldView]() {
+        oldView->hide();
+        oldView->close();
         oldView->deleteLater();
-        if (oldLevel) oldLevel->deleteLater();
+    });
+         if (oldLevel) oldLevel->deleteLater();
     });
 
-    QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
-        showMainMenu(gameView, this);
-    });
+QObject::connect(death_screen, &gameOver::mainMenuRequested, [this, gameView]() {
+    gameLevel* oldLevel = currentLevel;
+
+    if (oldLevel && oldLevel->getScene() && currentLevelNumber == 1) {
+        oldLevel->getScene()->clear();   // only for Level 1 enemies
+    }
+    currentLevel = nullptr;
+
+    showMainMenu(gameView, this);
+
+    if (oldLevel) {
+        oldLevel->deleteLater();
+    }
+});
 
     // add a transition here when adding a level
     if (Player* player = currentLevel->getPlayer()) {
@@ -645,6 +709,11 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
             playLevel2Transition(gameView);
         });
     }
+    if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
+    QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this, gameView]() {
+        qDebug() << "Level 3 transition later";
+    });
+}
 
     return gameView;
 }
@@ -676,11 +745,15 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
     menu->showFullScreen();
     menu->raise();
     menu->activateWindow();
+    QApplication::processEvents();
 
     if (currentView) {
         currentView->setEnabled(false);
-        currentView->hide();
-        currentView->close();
-        currentView->deleteLater();
+
+        QTimer::singleShot(150, currentView, [currentView]() {
+            currentView->hide();
+            currentView->close();
+            currentView->deleteLater();
+        });
     }
 }

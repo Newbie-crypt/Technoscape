@@ -12,14 +12,19 @@
         <file>assets/OrangeRobot_Attack1.png</file>
         <file>assets/health_symbol.png</file>
         <file>assets/collide.png</file>
-        <file>assets/fire.wav</file>
-        <file>assets/footstep.wav</file>
-        <file>assets/grunt.wav</file>
+        <file>assets/sounds/fire.wav</file>
+        <file>assets/sounds/footstep.wav</file>
+        <file>assets/sounds/grunt.wav</file>
+        <file>assets/sounds/coin_sound.wav</file>
+        <file>assets/sounds/kablaw.wav</file>
         <file>assets/Level2/Side_walk.png</file>
         <file>assets/Level2/Side_run.png</file>
         <file>assets/Level2/Side_idle.png</file>
         <file>assets/Level2/Side_jump.png</file>
         <file>assets/Level2/Side_backjump.png</file>
         <file>assets/Level2/Side_hurt.png</file>
+        <file>assets/Level4/spr_coin_azu.png</file>
+	<file>assets/Level4/turret_idle.png</file>
+
     </qresource>
 </RCC>

@@ -112,8 +112,9 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
     update();
 
     if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
-        target->decreaseHealth(10);
-    }
+    if (!target || !target->scene() || !scene()) return;
+    target->decreaseHealth(10);
+        }
     });
 
     timer->start(100);
@@ -130,8 +131,8 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
    QObject::connect(timer2, &QTimer::timeout, [this, timer, timer2]() {
 
     // When the game is paused, we want the enemies to stop what they're doing!
-    if (paused) {
-        return;
+    if (paused || !target || !target->scene() || !scene()) {
+    return;
     }
     if (died)
         {
@@ -142,7 +143,7 @@ Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 3) {
         return;
     }
 
-    if (target->collidesWithItem(this)) {
+    if (target && target->scene() && target->collidesWithItem(this)) {
         this->Attack();
     } else {
         this->Chase();
