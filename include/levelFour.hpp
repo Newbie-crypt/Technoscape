@@ -10,6 +10,10 @@
 #include "gameLevel.hpp"
 #include "sideplayer.hpp"
 #include "wall.hpp"
+#include <QCoreApplication>
+#include <QSoundEffect>
+#include <QMediaPlayer>
+#include <QUrl>
 
 class levelFour : public gameLevel {
     Q_OBJECT
@@ -26,6 +30,7 @@ public:
 private:
     SidePlayer* sidePlayer = nullptr;
     QGraphicsPixmapItem* level4Background = nullptr;
+    QGraphicsPixmapItem* turretVisual = nullptr;
     
     void setupLogicTimer();
 
@@ -56,6 +61,14 @@ private:
     bool* trap1RightSideReached = nullptr;
     bool* trap1SliderActive = nullptr;
     bool* trap1Completed = nullptr;
+    QMediaPlayer* trap1OpenSound = nullptr;
+    QAudioOutput* trap1OpenAudio = nullptr;
+
+    QMediaPlayer* trapDeathSound = nullptr;
+    QAudioOutput* trapDeathAudio = nullptr;
+
+    QMediaPlayer* trap4AlarmSound = nullptr;
+    QAudioOutput* trap4AlarmAudio = nullptr;
 
 
 

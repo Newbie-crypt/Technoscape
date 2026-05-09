@@ -3,17 +3,9 @@
 #include <QLinearGradient>
 #include <QFontMetrics>
  
-levelThree::levelThree() : gameLevel() {}
+levelThree::levelThree() : gameLevel(nullptr) {}
 levelThree::~levelThree() {
-    for (int i = 0; i < 10; i++) {
-        if (drones[i]) delete drones[i]; // QPointer is null if the drone already deleted
-    }
-    for (int i = 0; i < 10; i++) {
-        if (brutes[i]) delete brutes[i];
-    }
-    for (int i = 0; i < 10; i++) {
-        if (robots[i]) delete robots[i];
-    }
+    
 }
 
 void levelThree::setupScene() {
@@ -63,9 +55,9 @@ void levelThree::setupScene() {
     QTimer* timer = new QTimer(this);
     QPointer<Player> safePlayer = player;
     QObject::connect(timer, &QTimer::timeout, [this, safePlayer] () {
-        // The player gets deleted when the player dies and the user clicks play again. To prevent
-        // Any segmentation fault, this if statement is used.
         if (!safePlayer) return;
+        if (!view) return;
+        if (!scene || scene->views().isEmpty()) return;
 
         // Here, we are using the magic of lerp, a mathematical function which uses linear interpolation for the 
         // view to smoothly follow the player.
@@ -85,6 +77,9 @@ void levelThree::setupScene() {
 
     QObject::connect(this, &levelThree::waveTwoComplete, [this]() {
         startWaveThree();
+    });
+    QObject::connect(this, &levelThree::waveThreeComplete, [this]() {
+        emit levelComplete();
     });
 }
 
@@ -111,8 +106,8 @@ void levelThree::startWaveOne() {
             emit waveOneComplete();
 
             // Quick cleanup for the array to be reused in the upcoming wave (recycling)
-            for (int i = 0; i < number_of_robots; i++) if (robots[i]) delete robots[i];
             waveTimer->stop();
+            waveTimer->deleteLater();
         });
         waveTimer->setInterval(20);
         waveTimer->start();
@@ -150,10 +145,9 @@ void levelThree::startWaveTwo() {
             emit waveTwoComplete();
 
             // Quick cleanup for the array to be reused in the upcoming wave (recycling)
-            for (int i = 0; i < number_of_robots; i++) if (robots[i]) delete robots[i];
-            for (int i = 0; i < number_of_drones; i++) if (drones[i]) delete drones[i];
-
             waveTimer->stop();
+            waveTimer->deleteLater();
+
         });
         waveTimer->setInterval(20);
         waveTimer->start();
@@ -189,8 +183,9 @@ void levelThree::startWaveThree() {
             for (auto& o : presentObjects)
                 if (dynamic_cast<Enemy*>(o)) return;
             emit waveThreeComplete();
-
+            
             waveTimer->stop();
+            waveTimer->deleteLater();
         });
         waveTimer->setInterval(20);
         waveTimer->start();

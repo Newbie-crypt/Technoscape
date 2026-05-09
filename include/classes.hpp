@@ -67,9 +67,21 @@ class Projectile : public QObject, public QGraphicsPixmapItem {
         int dir;
         int speed = 10;
         QPixmap bulletSheet;
+
+        bool ignoreWorldCollisions = false;   
+
     public:
         Projectile(double x = 0, double y = 0, int d = 35, QGraphicsItem* shooter = nullptr);
         virtual ~Projectile();
+        void playImpactAndDelete();
+
+        void setIgnoreWorldCollisions(bool value) {   
+            ignoreWorldCollisions = value;
+        }
+
+        bool getIgnoreWorldCollisions() const {        
+            return ignoreWorldCollisions;
+        }
 
     public slots:
         void processMovement();

@@ -83,12 +83,13 @@ void MenuWindow::startLevel(int level) {
     QGraphicsView* gameView = nullptr;
 
     if (level == 1) {
-        gameView = createGameView(new levelOne);
+        gameView = createGameView(new levelOne(nullptr));
     }
 
     if (level == 2) {
         gameView = createGameView(new levelTwo);
     }
+
     if (level == 3) {
         gameView = createGameView(new levelThree);
     }
@@ -117,6 +118,9 @@ void MenuWindow::startLevel(int level) {
         } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
             currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
             L2->getSidePlayer()->setFocus();
+        } else if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
+            currentLevel->getScene()->setFocusItem(L4->getSidePlayer());
+            L4->getSidePlayer()->setFocus();
         }
     });
 
@@ -476,7 +480,8 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
     QWidget* introContainer = new QWidget(transitionOverlay);
     introContainer->setGeometry(0, 0, transitionOverlay->width(), transitionOverlay->height());
     introContainer->hide();
-    QString text = "LEVEL " + QString::number(level);
+    int nextLevel = level + 1;
+    QString text = "LEVEL " + QString::number(nextLevel);
     QLabel* cyanText = new QLabel(text, introContainer);
     cyanText->setAlignment(Qt::AlignCenter);
     cyanText->setGeometry(0, 0, introContainer->width(), introContainer->height());
@@ -582,8 +587,9 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
                 // Build and present the new fullscreen view BEFORE retiring the
                 // old one — the new fullscreen window will cover the old, so the
                 // desktop never flashes between the two.
-                unlockLevel(2);
-                startLevel(2);
+
+                unlockLevel(nextLevel);
+                startLevel(nextLevel);
 
                 oldView->lower();
 
@@ -612,106 +618,128 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     view->setFrameStyle(0);
     view->setBackgroundBrush(Qt::black);
     view->setAlignment(Qt::AlignCenter);
-    // Add an else if statement here when adding a level
-    // if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
-    //     currentLevel = L1;
-    //     currentLevelNumber = 1;
-    //     currentLevel->setupScene();
-    //     L1->spawnEnemies();
-    //     currentLevel->setupSpawnKeyEvent();
-    // } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
-    //     currentLevel = L2;
-    //     currentLevelNumber = 2;
-    //     currentLevel->setupScene();
-    // } else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
-    //     currentLevel = L3;
-    //     currentLevelNumber = 3;
-    //     L3->setView(view);
-    //     L3->setupScene();
-    // }
-    // else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
-    //     currentLevel = L4;
-    //     currentLevelNumber = 4;
-    //     currentLevel->setupScene();
-    // }
 
-    currentLevel = new levelThree;
-    currentLevelNumber = 3;
-    currentLevel->setView(view);
-    currentLevel->setupScene();
-
+    // ORIGINAL LEVEL SELECTION STRUCTURE
+    if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
+        currentLevel = L1;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+        L1->spawnEnemies();
+        currentLevel->setupSpawnKeyEvent();
+    } 
+    else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
+        currentLevel = L2;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+    } 
+    else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
+        currentLevel = L3;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+    }
+    else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
+        currentLevel = L4;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+    }
 
     view->setScene(currentLevel->getScene());
     view->showFullScreen();
 
-    // view->setScene(inputLevel->getScene());
-    // view->showFullScreen();
+    view->fitInView(200, 200, 800, 600);
 
-
-    // Wait for fullscreen activation events to finish processing before
-    // giving focus to the player; otherwise the player won't receive key events.
-    // This also helps identify what player we need to focus on depending on the level
     QTimer::singleShot(0, [this]() {
         this->view->setFocus();
+
         if (Player* p = currentLevel->getPlayer()) {
             currentLevel->getScene()->setFocusItem(p);
             p->setFocus();
-        } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
+        } 
+        else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
             currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
             L2->getSidePlayer()->setFocus();
-        } else if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
-    currentLevel->getScene()->setFocusItem(L4->getSidePlayer());
-    L4->getSidePlayer()->setFocus();
-    }
+        } 
+        else if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
+            currentLevel->getScene()->setFocusItem(L4->getSidePlayer());
+            L4->getSidePlayer()->setFocus();
+        }
     });
-
-    // auto fitScene = [this]() {
-    //     view->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);
-    // };
-
-    // // fitScene();
-    // QTimer::singleShot(0, [fitScene]() { fitScene(); });
-    // QTimer::singleShot(50, [fitScene]() { fitScene(); });
-
-    view->fitInView(200, 200, 800, 600);
 
     pauseMenu* pause = new pauseMenu(view, currentLevel);
     QObject::connect(pause, &pauseMenu::leaveRequested, [this]() {
-        if (currentLevel) currentLevel->deleteLater();
+        gameLevel* oldLevel = currentLevel;
+
         showMainMenu(this->view, this);
+
+        if (oldLevel) {
+            QTimer::singleShot(600, oldLevel, [oldLevel]() {
+                oldLevel->deleteLater();
+            });
+        }
     });
 
     gameOver* death_screen = new gameOver(view, currentLevel);
 
     QObject::connect(death_screen, &gameOver::tryAgainRequested, [this]() {
         int restartTo = currentLevelNumber;
+
         gameLevel* oldLevel = currentLevel;
         QGraphicsView* oldView = this->view;
 
-        if (oldLevel) oldLevel->getScene()->clear(); 
         startLevel(restartTo);
 
-        oldView->lower();
-        if (oldLevel) oldLevel->deleteLater();
-        oldView->deleteLater();
-        
+        if (oldView) {
+            oldView->setEnabled(false);
+            oldView->lower();
+
+            QTimer::singleShot(300, oldView, [oldView]() {
+                oldView->hide();
+                oldView->close();
+                oldView->deleteLater();
+            });
+        }
+
+        if (oldLevel) {
+            QTimer::singleShot(600, oldLevel, [oldLevel]() {
+                oldLevel->deleteLater();
+            });
+        }
     });
 
+
     QObject::connect(death_screen, &gameOver::mainMenuRequested, [this]() {
+        gameLevel* oldLevel = currentLevel;
+
         showMainMenu(this->view, this);
+
+        if (oldLevel) {
+            QTimer::singleShot(600, oldLevel, [oldLevel]() {
+                oldLevel->deleteLater();
+            });
+        }
     });
 
     // add a transition here when adding a level
+    // Level 1 -> Level 2
     if (Player* player = currentLevel->getPlayer()) {
         QObject::connect(player, &Player::level2Requested, [this]() {
             playLevelTransition(this->view, currentLevelNumber);
         });
     }
+
+    // Level 2 -> Level 3
     if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
-    QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this]() {
-        qDebug() << "Level 3 transition later";
-    });
-}
+        QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this]() {
+            playLevelTransition(this->view, currentLevelNumber);
+        });
+    }
+
+    // Level 3 -> Level 4
+    if (levelThree* L3 = dynamic_cast<levelThree*>(currentLevel)) {
+        QObject::connect(L3, &gameLevel::levelComplete, [this]() {
+            playLevelTransition(this->view, currentLevelNumber);
+        });
+    }
 
     return this->view;
 }

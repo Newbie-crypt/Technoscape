@@ -40,6 +40,34 @@ Projectile::Projectile(double x, double y, int d, QGraphicsItem* shooter) : dir(
     movementTimer->start(16);
 }
 
+void Projectile::playImpactAndDelete()
+{
+    if (movementTimer) {
+        movementTimer->stop();
+    }
+
+    QPixmap collide(":assets/collide.png");
+    setPixmap(collide.copy(0, 0, 273, 375));
+
+    switch(dir)
+    {
+    case 1:  moveBy(-0.125 * collide.height()/2, 0); break;
+    case 2:  moveBy(0.125 * collide.height()/2, 0); break;
+    case 4:  moveBy(0, 0.125 * collide.height()/2); break;
+    case 8:  moveBy(0, -0.125 * collide.height()/2); break;
+    case 9:  moveBy(-0.125 * collide.height()/2, 0); break;
+    case 10: moveBy(0.125 * collide.height()/2, 0); break;
+    case 6:  moveBy(0.125 * collide.height()/2, 0); break;
+    case 5:  moveBy(-0.125 * collide.height()/2, 0); break;
+    }
+
+    QTimer::singleShot(200, this, [this]() {
+        if (scene()) {
+            scene()->removeItem(this);
+        }
+        delete this;
+    });
+}
 
 void Projectile::processMovement()
 {
@@ -53,7 +81,21 @@ void Projectile::processMovement()
         case 10: moveBy(7.071, 7.071); break;
         case 6:  moveBy(-7.071, 7.071); break;
         case 5:  moveBy(-7.071, -7.071); break;
-    }
+        }
+        if (ignoreWorldCollisions) {
+            if (x() >= 780) {
+                movementTimer->stop();
+
+                if (scene()) {
+                    scene()->removeItem(this);
+                }
+
+                delete this;
+                return;
+            }
+
+            return;
+        }    
         auto colliding_items = collidingItems();
 
         for (int i = 0; i < colliding_items.size(); i++) {
@@ -131,8 +173,14 @@ Turret::Turret(double x, double y, int dir, int rate) : fireDirection(dir), fire
 }
 
 void Turret::shoot() {
-    QPointF c = mapToScene(boundingRect().center()); //find the center of the turret.
+    QPointF c = mapToScene(boundingRect().center());
+
+    if (fireDirection == 8) {
+        c = scenePos() + QPointF(90, 23);
+    }
+
     Projectile* bullet = new Projectile(c.x(), c.y(), fireDirection, this);
+    bullet->setIgnoreWorldCollisions(true);
     scene()->addItem(bullet);
 
     shotPool[currentShotSound]->setVolume(sfxVolume / 3);

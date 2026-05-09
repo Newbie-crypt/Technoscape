@@ -58,6 +58,7 @@ void levelOne::setupScene() {
     scene->addItem(player);
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
+    QObject::connect(player, &Player::level2Requested, this, &gameLevel::levelComplete);
 
     // HUD KEY (hidden until collected)
     KeyItem* hudKey = new KeyItem(

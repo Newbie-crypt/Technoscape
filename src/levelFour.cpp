@@ -12,7 +12,7 @@
 
 extern bool paused;
 
-levelFour::levelFour() : gameLevel() {
+levelFour::levelFour() : gameLevel(nullptr) {
     coinMovement = new QTimer(this);
 }
 
@@ -183,6 +183,22 @@ void levelFour::setupTrap1() {
     trap1RightSideReached = new bool(false);
     trap1SliderActive = new bool(false);
     trap1Completed = new bool(false);
+    
+    trap1OpenSound = new QMediaPlayer(this);
+    trap1OpenAudio = new QAudioOutput(this);
+    trap1OpenSound->setAudioOutput(trap1OpenAudio);
+    trap1OpenSound->setSource(QUrl::fromLocalFile(
+    QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
+    ));
+    trap1OpenAudio->setVolume(sfxVolume);
+
+    trapDeathSound = new QMediaPlayer(this);
+    trapDeathAudio = new QAudioOutput(this);
+    trapDeathSound->setAudioOutput(trapDeathAudio);
+    trapDeathSound->setSource(QUrl::fromLocalFile(
+        QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
+    ));
+    trapDeathAudio->setVolume(sfxVolume);
 }
 
 void levelFour::setupTrap2() {
@@ -315,11 +331,22 @@ void levelFour::setupTrap4() {
             if (trap4Ceiling) {
                 trap4Ceiling->hide();
             }
+             if (trap4AlarmSound) {
+                trap4AlarmSound->stop();
+                trap4AlarmSound->setPosition(0);
+            }
 
-            qDebug() << "LEVEL 4 PORTAL ENTERED - NEXT LEVEL TRANSITION LATER";
-
+            qDebug() << "LEVEL 4 PORTAL ENTERED - GAME COMPLETE";
+                emit levelComplete();
         }
     });
+            trap4AlarmSound = new QMediaPlayer(this);
+            trap4AlarmAudio = new QAudioOutput(this);
+            trap4AlarmSound->setAudioOutput(trap4AlarmAudio);
+            trap4AlarmSound->setSource(QUrl::fromLocalFile(
+                QCoreApplication::applicationDirPath() + "/assets/sounds/alarm.wav"
+            ));
+            trap4AlarmAudio->setVolume(sfxVolume);
 }
 
 void levelFour::updateTrap1() {
@@ -346,6 +373,12 @@ void levelFour::updateTrap1() {
         playerIsStandingOnFakeFloor) {
 
         *trap1Triggered = true;
+        if (trap1OpenSound && trap1OpenAudio) {
+            trap1OpenSound->stop();
+            trap1OpenSound->setPosition(0);
+            trap1OpenAudio->setVolume(sfxVolume);
+            trap1OpenSound->play();
+        }
 
         qDebug() << "LEVEL 4 TRAP 1: PLAYER TOUCHED FAKE FLOOR - OPENING";
 
@@ -498,6 +531,13 @@ void levelFour::updateTrap1() {
 
         QTimer::singleShot(250, this, [this]() {
             if (paused || !sidePlayer || !sidePlayer->scene()) return;
+                
+                if (trapDeathSound && trapDeathAudio) {
+                    trapDeathSound->stop();
+                    trapDeathSound->setPosition(0);
+                    trapDeathAudio->setVolume(sfxVolume);
+                    trapDeathSound->play();
+                }
 
             trap1LaserEffect->setBrush(QColor(255, 0, 0, 255));
             trap1LaserEffect->setScale(1.1);
@@ -567,8 +607,21 @@ void levelFour::updateTrap3() {
         }
         turret = new Turret(32, 430, 8, 750);
         turret->setScale(2);
-        turret->setZValue(2); // Above bullets (default 0) so shots appear from inside the turret.
+        turret->setZValue(20);
         scene->addItem(turret);
+
+        QPixmap turretImg("assets/level4turret.png");
+
+        if (turretImg.isNull()) {
+            qDebug() << "ERROR: IMAGE NOT FOUND: assets/level4turret.png";
+        } else {
+           turretVisual = scene->addPixmap(
+            turretImg.scaled(75, 75, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+        );
+
+        turretVisual->setPos(25, 420);
+        turretVisual->setZValue(25);
+        }
     }
 
     if (turret != nullptr) {
@@ -582,6 +635,11 @@ void levelFour::updateTrap3() {
                     delete p;
                 }
             }
+            if (turretVisual) {
+                scene->removeItem(turretVisual);
+                delete turretVisual;
+                turretVisual = nullptr;
+            }
             scene->removeItem(turret);
             delete turret;
             turret = nullptr;
@@ -589,11 +647,27 @@ void levelFour::updateTrap3() {
             return;
         }
 
-        // bullet collision check with player.
+        // bullet collision check with player + remove bullets at right wall
         for (auto* item : scene->items()) {
             Projectile* p = dynamic_cast<Projectile*>(item);
             if (!p) continue;
+
+            // If bullet reaches the right wall, destroy it
+            if (p->x() > 780) {
+                scene->removeItem(p);
+                delete p;
+                continue;
+            }
+
+            // If bullet hits player, player dies
             if (sidePlayer->collidesWithItem(p)) {
+                p->playImpactAndDelete();
+            if (trapDeathSound && trapDeathAudio) {
+                trapDeathSound->stop();
+                trapDeathSound->setPosition(0);
+                trapDeathAudio->setVolume(sfxVolume);
+                trapDeathSound->play();
+            }
                 sidePlayer->playerDied(1);
                 emit sidePlayer->died();
                 break;
@@ -610,10 +684,15 @@ void levelFour::updateTrap4() {
     if (*trap4ItemCollected) return;
 
 
-    if (!(*trap4Started) && *trap1Completed) {
+    if (!(*trap4Started) && turretDestroyed) {
         *trap4Started = true;
         *trap4UrgentStart = true;
-
+    if (trap4AlarmSound && trap4AlarmAudio) {
+        trap4AlarmSound->stop();
+        trap4AlarmSound->setPosition(0);
+        trap4AlarmAudio->setVolume(sfxVolume);
+        trap4AlarmSound->play();
+    }
 
         qDebug() << "LEVEL 4 TRAP 4 STARTED";
 
@@ -632,7 +711,7 @@ void levelFour::updateTrap4() {
 
     bool shiftPressed = QGuiApplication::queryKeyboardModifiers() & Qt::ShiftModifier;
 
-    qreal ceilingSpeed = 0.70;   
+    qreal ceilingSpeed = 0.50;   
 
     if (*trap4UrgentStart) {
         ceilingSpeed = 1.8;
@@ -648,6 +727,13 @@ void levelFour::updateTrap4() {
 
         *trap4PlayerDead = true;
         sidePlayer->setFrozen(true);
+
+    if (trapDeathSound && trapDeathAudio) {
+        trapDeathSound->stop();
+        trapDeathSound->setPosition(0);
+        trapDeathAudio->setVolume(sfxVolume);
+        trapDeathSound->play();
+    }
 
         QTimer::singleShot(250, this, [this]() {
             if (paused || !sidePlayer || !sidePlayer->scene()) return;

@@ -29,7 +29,11 @@ class gameLevel : public QObject {
         QGraphicsView* view = nullptr;
         void addWall(int x, int y, int w, int h) {scene->addItem(new Wall(x, y, w, h));}
         virtual void setupWalls() = 0;
-        void fitScene() {view->fitInView(currentLevel->getScene()->sceneRect(), Qt::IgnoreAspectRatio);}
+        void fitScene() {
+            if (view && scene) {
+                view->fitInView(scene->sceneRect(), Qt::IgnoreAspectRatio);
+            }
+        }
 
     signals:
         void levelComplete();

@@ -1,6 +1,7 @@
 #include "gameLevel.hpp"
 
-gameLevel::gameLevel() {
+gameLevel::gameLevel(QGraphicsView* v) {
+    view = v;
     scene = new GameScene;
 }
 

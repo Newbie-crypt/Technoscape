@@ -11,7 +11,7 @@
 extern double sfxVolume;
 extern bool paused;
 
-levelTwo::levelTwo() : gameLevel() {}
+levelTwo::levelTwo() : gameLevel(nullptr) {}
 
 levelTwo::~levelTwo() {
     delete fakeFloorCollision;
@@ -191,7 +191,16 @@ void levelTwo::setupScene() {
                 enterDoorText->setPos(285, 479);
                 enterDoorText->setZValue(1000);
             });}
-    });   }
+    });   
+                QObject::connect(sidePlayer, &SidePlayer::enterDoorRequested, [this]() {
+                        if (paused) return;
+                        if (!level2DoorOpened || !(*level2DoorOpened)) return;
+
+                        if (sidePlayer->x() < 130 && sidePlayer->y() > 250 && sidePlayer->y() < 430) {
+                            emit levelComplete();
+                        }
+                    });
+}
 
 void levelTwo::setupTrap1() {
     QPixmap fakeFloorImg("assets/fake_floor_panel.png");
