@@ -620,28 +620,33 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     view->setAlignment(Qt::AlignCenter);
 
     // ORIGINAL LEVEL SELECTION STRUCTURE
-    if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
-        currentLevel = L1;
-        currentLevel->setView(view);
-        currentLevel->setupScene();
-        L1->spawnEnemies();
-        currentLevel->setupSpawnKeyEvent();
-    } 
-    else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
-        currentLevel = L2;
-        currentLevel->setView(view);
-        currentLevel->setupScene();
-    } 
-    else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
-        currentLevel = L3;
-        currentLevel->setView(view);
-        currentLevel->setupScene();
-    }
-    else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
-        currentLevel = L4;
-        currentLevel->setView(view);
-        currentLevel->setupScene();
-    }
+    // if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
+    //     currentLevel = L1;
+    //     currentLevel->setView(view);
+    //     currentLevel->setupScene();
+    //     L1->spawnEnemies();
+    //     currentLevel->setupSpawnKeyEvent();
+    // } 
+    // else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
+    //     currentLevel = L2;
+    //     currentLevel->setView(view);
+    //     currentLevel->setupScene();
+    // } 
+    // else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
+    //     currentLevel = L3;
+    //     currentLevel->setView(view);
+    //     currentLevel->setupScene();
+    // }
+    // else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
+    //     currentLevel = L4;
+    //     currentLevel->setView(view);
+    //     currentLevel->setupScene();
+    // }
+
+    bossFight* L5 = new bossFight;
+    currentLevel = L5;
+    currentLevel->setView(view);
+    currentLevel->setupScene();
 
     view->setScene(currentLevel->getScene());
     view->showFullScreen();
