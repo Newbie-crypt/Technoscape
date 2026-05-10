@@ -30,7 +30,7 @@ class bossFight : public gameLevel {
         // allocated object is deleted, making the deletion process easier.
         // const int number_of_drones;
         // const int number_of_brutes;
-        QPointer<brute> brutes[10];
+        QPointer<brute> boss;
         QPointer<Robot> robots[10];
         void letsGetReadytoRumble();
     protected:

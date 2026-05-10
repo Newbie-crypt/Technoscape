@@ -1,9 +1,6 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-#include <QGraphicsRectItem>
-#include <QKeyEvent>
-#include <QObject>
 #include <QPainter>
 #include <QTimer>
 #include <QPointF>
@@ -12,19 +9,22 @@
 #include <QAudioOutput>
 #include "weapon.hpp"
 #include "classes.hpp"
-#include <QGraphicsTextItem>
 #include "../include/door.hpp"
 #include "../include/keyitem.hpp"
-#include "../include/leghitbox.hpp"
-
-
-
-
+#include "../include/wall.hpp"
+#include "../include/furniture.hpp"
+#include "../include/door.hpp"
+#include "../include/trap.hpp"
+#include "../include/classes.hpp"
+#include "../include/weapon.hpp"
+#include "../include/keyitem.hpp"
 enum class AnimationState : int {
     Idle,
     Running,
     Attacking
 };
+
+#include "../include/leghitbox.hpp"
 
 
 class Player : public QObject, public QGraphicsPixmapItem {

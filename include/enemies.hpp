@@ -12,6 +12,7 @@
 #include <map>
 #include "weapon.hpp"
 #include "classes.hpp"
+class Player;
 #include "players.hpp"
 #include <QGraphicsScene>
 #include "wall.hpp"

@@ -22,7 +22,9 @@ class brute : public Enemy {
         int repathCounter = 0;
 
         void buildWallGrid();
+        LegHitbox* legs = nullptr;
         std::vector<QPointF> findPath(int sc, int sr, int gc, int gr);
+
     public:
         brute(Player* t);
 

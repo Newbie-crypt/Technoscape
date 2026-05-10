@@ -138,7 +138,7 @@ class Turret : public QObject, public QGraphicsPixmapItem{
 
 class Hittable{
     public:
-    virtual void onHit(int damage) = 0;
+    virtual void onHit(int damage) {}
     virtual ~Hittable();
 };
 
