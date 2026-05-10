@@ -89,6 +89,17 @@ void bossFight::setupWalls() {
     addWall(275, 24, 1094, 136);
     addWall(1013, 164, 379, 122);
     addWall(908, 165, 94, 60);
+    addWall(1212, 328, 36, 179);
+    addWall(1247, 322, 154, 314);
+    addWall(1278, 668, 117, 375);
+    addWall(1238, 783, 43, 250);
+    addWall(1169, 895, 59, 143);
+    addWall(908, 165, 94, 60);
+    addWall(840, 970, 322, 77);
+    addWall(609, 925, 228, 43);
+    addWall(143, 976, 690, 82);
+    addWall(62, 880, 89, 182);
+
 }
 
 
