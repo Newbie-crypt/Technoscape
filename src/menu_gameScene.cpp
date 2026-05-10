@@ -611,7 +611,7 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
 
 // The function's purpose is to set up the scene
 QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
-    view = new QGraphicsView;
+    view = new FittedView;
     view->setRenderHint(QPainter::Antialiasing);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

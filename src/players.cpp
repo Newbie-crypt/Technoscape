@@ -635,6 +635,7 @@ void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = true;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
+    if (event->key() == Qt::Key_L) {fireInAllDirections = fireInAllDirections ? 0 : 1;}
 
     event->accept();
 }
@@ -647,7 +648,10 @@ void Player::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = false;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = false;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = false;}
-    if (event->key() == Qt::Key_Space) {gun->shoot();}
+    if (event->key() == Qt::Key_Space) {
+        gunCheat cheat = fireInAllDirections ? ALLDIRECTIONS : NONE;
+        gun->shoot(cheat);
+    }
 }
 
 Player::~Player() {

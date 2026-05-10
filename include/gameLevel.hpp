@@ -4,12 +4,31 @@
 #include <QObject>
 #include <QGraphicsObject>
 #include <QApplication>
+#include <QResizeEvent>
 #include "wall.hpp"
 #include "trap.hpp"
 #include "keyitem.hpp"
 #include "players.hpp"
 #include "enemies.hpp"
 #include "classes.hpp"
+
+class FittedView : public QGraphicsView {
+    Q_OBJECT
+public:
+    FittedView(QWidget* parent = nullptr) : QGraphicsView(parent) {}
+
+signals:
+    void resized();
+
+protected:
+    void resizeEvent(QResizeEvent* event) override {
+        QGraphicsView::resizeEvent(event);
+        if (scene()) {
+            fitInView(scene()->sceneRect(), Qt::IgnoreAspectRatio);
+        }
+        emit resized();
+    }
+};
 
 class gameLevel : public QObject {
     Q_OBJECT

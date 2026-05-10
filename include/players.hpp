@@ -60,7 +60,8 @@ class Player : public QObject, public QGraphicsPixmapItem {
         QPixmap walkSheet;
         QPixmap idleSheet;
         // Variables
-        bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Bools
+        bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Movement Bools
+        bool fireInAllDirections = 0;
         int targetRow = 0;
         int lastSpriteRow = 0;
         int currentShotSound = 0, currentFootSound = 0, currentGruntSound = 0; // For the pool of sounds to cycle.

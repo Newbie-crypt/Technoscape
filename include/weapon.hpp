@@ -8,6 +8,14 @@
 
 extern double sfxVolume;
 
+// For gun cheats:
+enum gunCheat{
+    ALLDIRECTIONS = 1,
+    NOCOOLDOWN,
+    AUTOAIM, //BONUS
+    NONE
+};
+
 // Inherit QObject for timers/slots, and QGraphicsPixmapItem for visuals
 class Weapon : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
@@ -29,7 +37,7 @@ public:
     ~Weapon();
 
     void aimAt(int lastAimDirection);
-    void shoot();
+    void shoot(gunCheat type);
 
 public slots:
     void resetCooldown();

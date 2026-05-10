@@ -44,12 +44,20 @@ void levelOne::setupScene() {
     QLabel* health_symbol = new QLabel(view);
     health_symbol->setPixmap(health_symbol_image);
     health_symbol->setAttribute(Qt::WA_TransparentForMouseEvents);
-    health_symbol->move(15, 800);
     health_symbol->show();
 
     HealthBar* health_bar = new HealthBar(view);
-    health_bar->move(80, 800);
     health_bar->show();
+
+    auto layoutHud = [this, health_symbol, health_bar]() {
+        int y = view->height() - 100;
+        health_symbol->move(15, y);
+        health_bar->move(80, y);
+    };
+    layoutHud();
+    if (auto* fv = qobject_cast<FittedView*>(view)) {
+        QObject::connect(fv, &FittedView::resized, this, layoutHud);
+    }
 
     // May the main character spawn!
     player = new Player(0, 0);
