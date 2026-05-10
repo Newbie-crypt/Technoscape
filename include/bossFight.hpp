@@ -44,12 +44,11 @@ class bossFight : public gameLevel {
         HealthBar* health_bar;
         BossHealthBar* boss_health_bar;
         BossDamageHitbox* bossHitbox;
-        QPointer<suicideDrone> drones[10]; // What made us use QPointer instead of the standard C++ pointer is that QPointer automatically becomes NULL once the dynamically
+        QPointer<suicideDrone> drones[25]; // What made us use QPointer instead of the standard C++ pointer is that QPointer automatically becomes NULL once the dynamically
         // allocated object is deleted, making the deletion process easier.
         // const int number_of_drones;
         // const int number_of_brutes;
         QPointer<brute> boss;
-        QPointer<Robot> robots[10];
         void letsGetReadytoRumble();
     protected:
         void setupWalls() override;

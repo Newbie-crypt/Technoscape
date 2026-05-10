@@ -125,6 +125,19 @@ void bossFight::letsGetReadytoRumble() {
     QTimer::singleShot(0, this, centerBossHealthBar);
 
     hitboxTimer->start(16);
+
+    QObject::connect(boss->getHealthBar(), &BossHealthBar::halfHealthBoss, [this] {
+        srand(time(0));
+        const int number_of_drones = 20;
+        QPoint offset;
+        for (int i = 0; i < number_of_drones; i++) {
+            drones[i] = new suicideDrone(player);
+            scene->addItem(drones[i]);
+            offset.setX(rand() % 200);
+            offset.setY(rand() % 200);
+            drones[i]->setPos(boss->pos() + offset);
+        }
+    });
 }
 
 

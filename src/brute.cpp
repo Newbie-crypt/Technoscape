@@ -27,8 +27,6 @@ void brute::setHealthBar(BossHealthBar* h) {
         secondPhaseStarted = true;
         transform = true;
     });
-
-
 }
 
 brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
