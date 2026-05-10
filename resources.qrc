@@ -42,5 +42,6 @@
         <file>assets/cup.png</file>
         <file>assets/outro.mp4</file>
         <file>assets/Technoscape_Intro_AUC.mp4</file>
+        <file>assets/Technoscape_Logo.png</file>
     </qresource>
 </RCC>

@@ -40,7 +40,7 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-
+    app.setWindowIcon(QIcon(":/assets/Technoscape_Logo.png"));
     music = new QMediaPlayer;
     audio = new QAudioOutput;
 
