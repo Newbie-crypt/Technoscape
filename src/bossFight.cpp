@@ -8,9 +8,8 @@
  
 bossFight::bossFight() : gameLevel(nullptr) {}
 bossFight::~bossFight() {
-    delete bossHitbox;
     bossHitbox = nullptr;
-    delete boss;
+    boss = nullptr;
 }
 
 void bossFight::setupScene() {
@@ -101,13 +100,16 @@ void bossFight::letsGetReadytoRumble() {
 
     QTimer* hitboxTimer = new QTimer(this);
     QObject::connect(hitboxTimer, &QTimer::timeout, [this]() {
-        if (!boss || !scene || scene->views().isEmpty()) {
+        if (!boss || !bossHitbox || !scene || scene->views().isEmpty()) {
+            return;
+        }
+
+        if (!boss->scene() || !bossHitbox->scene()) {
             return;
         }
 
         bossHitbox->setRect(boss->getLegHitboxRect());
     });
-
 
     boss_health_bar->show();
     boss_health_bar->raise();

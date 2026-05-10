@@ -218,26 +218,30 @@ gameOver::gameOver(QGraphicsView* inputView, gameLevel* inputLevel) {
     });
 
     QObject::connect(tryAgainButton, &QPushButton::clicked, [=]() {
-            glitchTimer->stop();
-            paused = false;
+        tryAgainButton->setEnabled(false);
+        gameOverMenuButton->setEnabled(false);
 
-            deathFadeOverlay->hide();
-            deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
-            gameOverOverlay->hide();
-
-            emit tryAgainRequested();
-
-    });
-
-    QObject::connect(gameOverMenuButton, &QPushButton::clicked, [=]() {
         glitchTimer->stop();
-        paused = false;
+        paused = true;
 
         deathFadeOverlay->hide();
         deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+        gameOverOverlay->hide();
 
-        emit mainMenuRequested();
+        emit tryAgainRequested();
     });
+    
+    QObject::connect(gameOverMenuButton, &QPushButton::clicked, [=]() {
+            tryAgainButton->setEnabled(false);
+            gameOverMenuButton->setEnabled(false);
 
+            glitchTimer->stop();
+            paused = true;
+
+            deathFadeOverlay->hide();
+            deathFadeOverlay->setStyleSheet("background-color: rgba(0,0,0,0);");
+
+            emit mainMenuRequested();
+    });
 }
 

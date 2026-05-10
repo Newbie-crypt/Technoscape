@@ -287,7 +287,7 @@ MenuWindow::MenuWindow() {
     // Continue saved progress: jumps to the highest level the player unlocked.
     QObject::connect(continueButton, &QPushButton::clicked, [this]() {
         QTimer::singleShot(120, [this]() {
-            startLevel(4);
+            startLevel(5);
         });
     });
 
@@ -623,33 +623,33 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     view->setAlignment(Qt::AlignCenter);
 
     // ORIGINAL LEVEL SELECTION STRUCTURE
-    // if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
-    //     currentLevel = L1;
-    //     currentLevel->setView(view);
-    //     currentLevel->setupScene();
-    //     L1->spawnEnemies();
-    //     currentLevel->setupSpawnKeyEvent();
-    // } 
-    // else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
-    //     currentLevel = L2;
-    //     currentLevel->setView(view);
-    //     currentLevel->setupScene();
-    // } 
-    // else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
-    //     currentLevel = L3;
-    //     currentLevel->setView(view);
-    //     currentLevel->setupScene();
-    // }
-    // else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
-    //     currentLevel = L4;
-    //     currentLevel->setView(view);
-    //     currentLevel->setupScene();
-    // }
-
-    bossFight* L5 = new bossFight;
-    currentLevel = L5;
-    currentLevel->setView(view);
-    currentLevel->setupScene();
+    if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
+        currentLevel = L1;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+        L1->spawnEnemies();
+        currentLevel->setupSpawnKeyEvent();
+    } 
+    else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
+        currentLevel = L2;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+    } 
+    else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
+        currentLevel = L3;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+    }
+    else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
+        currentLevel = L4;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+    }
+    else if (bossFight* L5 = dynamic_cast<bossFight*>(inputLevel)) {
+        currentLevel = L5;
+        currentLevel->setView(view);
+        currentLevel->setupScene();
+    }
 
     view->setScene(currentLevel->getScene());
     view->showFullScreen();
@@ -694,26 +694,39 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         gameLevel* oldLevel = currentLevel;
         QGraphicsView* oldView = this->view;
 
-        startLevel(restartTo);
+        QWidget* blackCover = nullptr;
 
         if (oldView) {
             oldView->setEnabled(false);
-            oldView->lower();
 
-            QTimer::singleShot(300, oldView, [oldView]() {
+            blackCover = new QWidget(oldView);
+            blackCover->setGeometry(oldView->rect());
+            blackCover->setStyleSheet("background-color: black;");
+            blackCover->show();
+            blackCover->raise();
+
+            oldView->raise();
+            oldView->activateWindow();
+            oldView->repaint();
+            QApplication::processEvents();
+            oldView->setScene(nullptr);
+        }
+
+        if (oldLevel) {
+            delete oldLevel;
+            oldLevel = nullptr;
+        }
+
+        startLevel(restartTo);
+
+        if (oldView) {
+            QTimer::singleShot(250, oldView, [oldView]() {
                 oldView->hide();
                 oldView->close();
                 oldView->deleteLater();
             });
         }
-
-        if (oldLevel) {
-            QTimer::singleShot(600, oldLevel, [oldLevel]() {
-                oldLevel->deleteLater();
-            });
-        }
     });
-
 
     QObject::connect(death_screen, &gameOver::mainMenuRequested, [this]() {
         gameLevel* oldLevel = currentLevel;
