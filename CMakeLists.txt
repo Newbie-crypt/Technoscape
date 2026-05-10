@@ -35,6 +35,7 @@ set(SOURCE_FILES
     src/generic_robot.cpp
     src/suicide_drone.cpp
     src/brute.cpp
+    src/bossFight.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -58,6 +59,7 @@ set(SOURCE_FILES
     include/generic_robot.hpp
     include/suicide_drone.hpp
     include/brute.hpp
+    include/bossFight.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

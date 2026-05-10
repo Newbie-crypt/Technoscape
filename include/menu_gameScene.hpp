@@ -50,6 +50,7 @@
 #include "levelTwo.hpp"
 #include "levelFour.hpp"
 #include "levelThree.hpp"
+#include "bossFight.hpp"
 
 
 extern bool paused;
