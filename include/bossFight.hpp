@@ -10,6 +10,23 @@
 #include "generic_robot.hpp"
 #include "BossHealthBar.hpp"
 
+class BossDamageHitbox : public QGraphicsRectItem, public Hittable {
+private:
+    BossHealthBar* boss_health_bar;
+
+public:
+    BossDamageHitbox(BossHealthBar* bar) : boss_health_bar(bar) {
+        setPen(Qt::NoPen);
+        setBrush(Qt::NoBrush);
+        setZValue(2000);
+    }
+
+    void onHit(int damage) override {
+        if (boss_health_bar) {
+            boss_health_bar->decreaseHP(damage);
+        }
+    }
+};
 
 class bossFight : public gameLevel {
     Q_OBJECT
@@ -26,6 +43,7 @@ class bossFight : public gameLevel {
         QLabel* health_symbol;
         HealthBar* health_bar;
         BossHealthBar* boss_health_bar;
+        BossDamageHitbox* bossHitbox;
         QPointer<suicideDrone> drones[10]; // What made us use QPointer instead of the standard C++ pointer is that QPointer automatically becomes NULL once the dynamically
         // allocated object is deleted, making the deletion process easier.
         // const int number_of_drones;

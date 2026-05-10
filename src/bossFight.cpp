@@ -4,26 +4,12 @@
 #include <QFontMetrics>
 #include <QTimer>
 
-class BossDamageHitbox : public QGraphicsRectItem, public Hittable {
-private:
-    BossHealthBar* boss_health_bar;
 
-public:
-    BossDamageHitbox(BossHealthBar* bar) : boss_health_bar(bar) {
-        setPen(Qt::NoPen);
-        setBrush(Qt::NoBrush);
-        setZValue(2000);
-    }
-
-    void onHit(int damage) override {
-        if (boss_health_bar) {
-            boss_health_bar->decreaseHP(damage);
-        }
-    }
-};
  
 bossFight::bossFight() : gameLevel(nullptr) {}
 bossFight::~bossFight() {
+    delete bossHitbox;
+    bossHitbox = nullptr;
     delete boss;
 }
 
@@ -55,23 +41,6 @@ void bossFight::setupScene() {
     health_bar = new HealthBar(view);
     health_bar->move(80, 800);
     health_bar->show();
-
-    boss_health_bar = new BossHealthBar(view);
-    boss_health_bar->show();
-    boss_health_bar->raise();
-
-    auto centerBossHealthBar = [this]() {
-        if (!view || !boss_health_bar) return;
-
-        int x = (view->width() - boss_health_bar->width()) / 2;
-        int y = 18;
-
-        boss_health_bar->move(x, y);
-        boss_health_bar->raise();
-    };
-
-    QTimer::singleShot(0, this, centerBossHealthBar);
-
 
 
     // May the main character spawn!
@@ -122,19 +91,38 @@ void bossFight::letsGetReadytoRumble() {
     boss->setData(0, "ignoreBullet");
 
     scene->addItem(boss);
-    boss->setPos(200, 200);
+    boss->setPos(600, 400);
 
-    BossDamageHitbox* bossHitbox = new BossDamageHitbox(boss_health_bar);
+    boss_health_bar = new BossHealthBar(view);
+    boss->setHealthBar(boss_health_bar);
+
+    bossHitbox = new BossDamageHitbox(boss_health_bar);
     scene->addItem(bossHitbox);
 
     QTimer* hitboxTimer = new QTimer(this);
-    QObject::connect(hitboxTimer, &QTimer::timeout, [this, bossHitbox]() {
-        if (!boss || !bossHitbox || !scene || scene->views().isEmpty()) {
+    QObject::connect(hitboxTimer, &QTimer::timeout, [this]() {
+        if (!boss || !scene || scene->views().isEmpty()) {
             return;
         }
 
         bossHitbox->setRect(boss->getLegHitboxRect());
     });
+
+
+    boss_health_bar->show();
+    boss_health_bar->raise();
+
+    auto centerBossHealthBar = [this]() {
+        if (!view || !boss_health_bar) return;
+
+        int x = (view->width() - boss_health_bar->width()) / 2;
+        int y = 18;
+
+        boss_health_bar->move(x, y);
+        boss_health_bar->raise();
+    };
+
+    QTimer::singleShot(0, this, centerBossHealthBar);
 
     hitboxTimer->start(16);
 }
