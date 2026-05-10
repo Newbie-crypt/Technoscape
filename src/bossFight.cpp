@@ -147,7 +147,7 @@ void bossFight::setupWalls() {
     addWall(143, 976, 690, 82);
     addWall(62, 880, 89, 182);
     addWall(437, 169, 137, 53);
-    addWall(590, 170, 41, 127);
+    addWall(590, 170, 41, 110);
     addWall(812, 193, 40, 101);
     addWall(1113, 253, 121, 66);
     addWall(624, 223, 210, 70);
