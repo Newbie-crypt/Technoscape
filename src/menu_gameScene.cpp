@@ -654,8 +654,9 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         currentLevel = L5;
         currentLevel->setView(view);
         currentLevel->setupScene();
-    } if (bossFight* L5 = dynamic_cast<bossFight*>(currentLevel)) {
-        QObject::connect(L5, &gameLevel::levelComplete, [this]() {
+        QObject::connect(L5, &gameLevel::levelComplete, [this, L5]() {
+            audio->setVolume(0);
+            for (QWidget* child : view->findChildren<QWidget*>()) child->hide();
             playOutroVideo(this->view);
         });
     }
