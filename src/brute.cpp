@@ -8,7 +8,7 @@
 extern bool paused;
 
 QRectF brute::boundingRect() const {
-    return QRectF(0, 100, frame_width - 100, frame_height - 100);
+    return QRectF(0, 120, frame_width - 120, frame_height - 120);
 }
 
 void brute::Attack() {
@@ -24,7 +24,6 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
 
     // Used to randomly switch between attack patterns in the second phase of the boss fight.
     srand(time(0));
-    
 
     currentAnimationState = AnimationState::Running;
     // Loading all the spritesheets
@@ -145,6 +144,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     // Increasing the size of the object for aesthetics.
     setScale(2);
 
+    // QObject::connect(boss)
 
 }
 
