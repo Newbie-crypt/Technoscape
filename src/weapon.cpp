@@ -83,14 +83,14 @@ void Weapon::shoot(gunCheat cheat) {
     NONE
 */
     int arrDir[8] = {1, 2, 4, 8, 9, 10, 6, 5};
-    if(cheat == ALLDIRECTIONS)
+    if(cheat & ALLDIRECTIONS)
     {
         for(int i : arrDir){
             Projectile* bullet = new Projectile(mapToScene(boundingRect().center()).x(), mapToScene(boundingRect().center()).y(), i, parentItem());
             scene()->addItem(bullet);
         }
     }
-    else if (cheat == NONE)
+    else
     {
         Projectile* bullet = new Projectile(mapToScene(boundingRect().center()).x(), mapToScene(boundingRect().center()).y(), currentAimDirection, parentItem());
         scene()->addItem(bullet);
@@ -103,8 +103,11 @@ void Weapon::shoot(gunCheat cheat) {
     currentShotSound++;
     if(currentShotSound >= 5) {currentShotSound = 0;}
 
-    canShoot = false;
-    QTimer::singleShot(300, this, [this]() { canShoot = true; }); // Single shot only resets cooldown, since we only fire on space.
+    if(!(cheat & NOCOOLDOWN)){
+        canShoot = false;
+        QTimer::singleShot(300, this, [this]() { canShoot = true; }); // Single shot only resets cooldown, since we only fire on space.
+    }
+
 
     // QGraphicsRectItem* dot = new QGraphicsRectItem; // for debugging fire directions
     // dot->setRect(0, 0, 5, 5);

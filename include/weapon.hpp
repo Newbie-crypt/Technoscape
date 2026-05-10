@@ -10,10 +10,10 @@ extern double sfxVolume;
 
 // For gun cheats:
 enum gunCheat{
+    NONE = 0,
     ALLDIRECTIONS = 1,
-    NOCOOLDOWN,
-    AUTOAIM, //BONUS
-    NONE
+    NOCOOLDOWN = 2,
+    AUTOAIM = 4 //BONUS
 };
 
 // Inherit QObject for timers/slots, and QGraphicsPixmapItem for visuals

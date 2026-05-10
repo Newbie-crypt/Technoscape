@@ -10,6 +10,14 @@
 
 enum Sheet{WALK, RUN, IDLE, JUMP, FALL, DAMAGED};
 
+enum sideCheats{
+    NO = 0,
+    JUMPCHECK = 1,
+    DIETOTRAPS = 2,
+    SPAWNKEYHERE = 4
+
+};
+
 class SidePlayer : public QObject, public QGraphicsPixmapItem{
     Q_OBJECT
 

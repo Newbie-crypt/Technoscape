@@ -7,6 +7,7 @@
 
 extern bool paused;
 
+
 SidePlayer::SidePlayer()
 {
     // Initializing all the sprite sheets (to preload them)
@@ -198,6 +199,9 @@ void SidePlayer::playerDied(int type){
 
 void SidePlayer::keyPressEvent(QKeyEvent* event)
 {
+    /*
+
+    */
     if (event->isAutoRepeat()) return;
 
     if (event->key() == Qt::Key_A || event->key() == Qt::Key_Left) isMovingLeft = true;

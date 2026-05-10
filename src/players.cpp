@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 #include <QCoreApplication>
 #include <QUrl>
 #include <QMediaPlayer>
@@ -255,7 +256,7 @@ void Player::processMovement()
         return;
     }
     int moveDirection = getInputMask();    //for direction calculation, to be used in switch-case.
-    int speedMultiplier = isSprinting ? 1.5 : 1;
+    double speedMultiplier = isSprinting ? 1.5 : 1;
 
     applyPhysics(moveDirection, speedMultiplier); // Move character
     updateSprite(moveDirection, speedMultiplier); // Animate character
@@ -278,7 +279,7 @@ int Player::getInputMask() // Get the direction in which the player is moving.
     return inputSum;
 }
 
-void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the player.
+void Player::applyPhysics(int moveDirection, double speedMultiplier) // Moves the player.
 {
     switch(moveDirection)
     {
@@ -342,11 +343,11 @@ void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the p
     }
     else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
 
-    if(moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 || moveDirection == 6 || moveDirection == 8 || moveDirection == 10) //check for a valid direction. In cases like 3, 15, 12, the player shouldn't move, so neither should the gun.
+    if(moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 || moveDirection == 6 || moveDirection == 8 || moveDirection == 10 || moveDirection == 9) //check for a valid direction. In cases like 3, 15, 12, the player shouldn't move, so neither should the gun.
         gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
 }
 
-void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet checker and animator.
+void Player::updateSprite(int moveDirection, double speedMultiplier) // Sheet checker and animator.
 {
     QPixmap* activeSheet = &walkSheet; // Assume walking.
 
@@ -364,7 +365,8 @@ void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet check
     }
 
     currentFrameIndex = animationTicker / 10; // Variable used to switch between the 8 available images
-    animationTicker = (animationTicker + speedMultiplier) % 80; // Ticker.
+    animationTicker = (animationTicker + (int)speedMultiplier) % 80; // Ticker.
+
 
     setPixmap(activeSheet->copy(currentFrameIndex * 48, targetRow * 64, 48, 64)); // Updating Pixmap to current animation
 }
@@ -635,7 +637,12 @@ void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = true;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
+
+    // Cheats
+    gunCheat active = NONE;
     if (event->key() == Qt::Key_L) {fireInAllDirections = fireInAllDirections ? 0 : 1;}
+    if (event->key() == Qt::Key_K) {noCooldown = noCooldown ? 0 : 1;}
+
 
     event->accept();
 }
@@ -649,8 +656,10 @@ void Player::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = false;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = false;}
     if (event->key() == Qt::Key_Space) {
-        gunCheat cheat = fireInAllDirections ? ALLDIRECTIONS : NONE;
-        gun->shoot(cheat);
+        gunCheat active = NONE;
+        if(fireInAllDirections) {active = (gunCheat) (active | ALLDIRECTIONS);}
+        if(noCooldown) {active = (gunCheat) (active | NOCOOLDOWN);}
+        gun->shoot(active);
     }
 }
 
