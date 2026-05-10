@@ -4,6 +4,8 @@
 #include <QGraphicsPixmapItem>
 #include <QLabel>
 #include <QPointer>
+#include <QShortcut>
+#include <QGraphicsTextItem>
 #include "classes.hpp"
 #include "suicide_drone.hpp"
 #include "brute.hpp"
@@ -49,6 +51,11 @@ class bossFight : public gameLevel {
         // const int number_of_drones;
         // const int number_of_brutes;
         QPointer<brute> boss;
+        QGraphicsPixmapItem* cup;
+        QGraphicsTextItem* cupText;
+        QShortcut* cupShortcut;
+        bool bossDeathHandled;
+        bool cupCollected;
         void letsGetReadytoRumble();
     protected:
         void setupWalls() override;

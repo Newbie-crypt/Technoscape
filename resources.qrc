@@ -37,5 +37,7 @@
         <file>assets/bruteSpecial.png</file>
         <file>assets/sounds/kaboom.wav</file>
         <file>assets/intro.mp4</file>
+        <file>assets/cup.png</file>
+        <file>assets/outro.mp4</file>
     </qresource>
 </RCC>

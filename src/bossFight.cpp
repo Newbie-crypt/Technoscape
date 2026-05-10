@@ -6,10 +6,21 @@
 
 
  
-bossFight::bossFight() : gameLevel(nullptr) {}
+bossFight::bossFight()
+    : gameLevel(nullptr),
+      bossHitbox(nullptr),
+      cup(nullptr),
+      cupText(nullptr),
+      cupShortcut(nullptr),
+      bossDeathHandled(false),
+      cupCollected(false) {}
+
 bossFight::~bossFight() {
     bossHitbox = nullptr;
     boss = nullptr;
+    cup = nullptr;
+    cupText = nullptr;
+    cupShortcut = nullptr;
 }
 
 void bossFight::setupScene() {
@@ -140,6 +151,22 @@ void bossFight::letsGetReadytoRumble() {
             drones[i]->setPos(boss->pos() + offset);
         }
     });
+        QObject::connect(boss_health_bar, &BossHealthBar::bossDead, [this]() {
+        if (bossDeathHandled) return;
+        bossDeathHandled = true;
+
+        if (bossHitbox && bossHitbox->scene()) {
+            scene->removeItem(bossHitbox);
+            delete bossHitbox;
+            bossHitbox = nullptr;
+        }
+
+        if (boss_health_bar) {
+            boss_health_bar->hide();
+        }
+
+        spawnCup();
+    });
 }
 
 
@@ -169,4 +196,77 @@ void bossFight::setupWalls() {
 
 }
 
+void bossFight::spawnCup()
+{
+    if (cup) return;
+
+    QPixmap cupPixmap(":/assets/cup.png");
+
+    if (cupPixmap.isNull()) {
+        qDebug() << "ERROR: IMAGE NOT FOUND: assets/cup.png";
+        return;
+    }
+
+    cup = scene->addPixmap(cupPixmap.scaled(90, 90, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    cup->setPos(672, 229);
+    cup->setZValue(3000);
+
+    cupText = scene->addText("Press C to collect");
+    cupText->setDefaultTextColor(Qt::white);
+    cupText->setFont(QFont("Arial", 18, QFont::Bold));
+    cupText->setPos(620, 200);
+    cupText->setZValue(3001);
+
+    if (!cupShortcut && view) {
+        cupShortcut = new QShortcut(QKeySequence(Qt::Key_C), view);
+        cupShortcut->setContext(Qt::ApplicationShortcut);
+
+        QObject::connect(cupShortcut, &QShortcut::activated, [this]() {
+            collectCup();
+        });
+    }
+}
+
+void bossFight::collectCup()
+{
+    if (cupCollected) return;
+    if (!cup || !player) return;
+
+    QRectF playerRect = player->sceneBoundingRect();
+    QRectF cupRect = cup->sceneBoundingRect();
+
+    bool touchingCup = playerRect.intersects(cupRect);
+
+    QPointF playerCenter = playerRect.center();
+    QPointF cupCenter = cupRect.center();
+
+    bool nearCup =
+        qAbs(playerCenter.x() - cupCenter.x()) < 120 &&
+        qAbs(playerCenter.y() - cupCenter.y()) < 120;
+
+    if (!touchingCup && !nearCup) {
+        return;
+    }
+
+    cupCollected = true;
+
+    if (cupText && cupText->scene()) {
+        scene->removeItem(cupText);
+        delete cupText;
+        cupText = nullptr;
+    }
+
+    if (cup && cup->scene()) {
+        scene->removeItem(cup);
+        delete cup;
+        cup = nullptr;
+    }
+
+    if (cupShortcut) {
+        cupShortcut->deleteLater();
+        cupShortcut = nullptr;
+    }
+
+    emit levelComplete();
+}
 

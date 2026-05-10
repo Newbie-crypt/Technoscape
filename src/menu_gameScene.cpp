@@ -654,6 +654,10 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         currentLevel = L5;
         currentLevel->setView(view);
         currentLevel->setupScene();
+    } if (bossFight* L5 = dynamic_cast<bossFight*>(currentLevel)) {
+        QObject::connect(L5, &gameLevel::levelComplete, [this]() {
+            playOutroVideo(this->view);
+        });
     }
 
     view->setScene(currentLevel->getScene());
@@ -847,6 +851,52 @@ void MenuWindow::playIntroVideo()
             QTimer::singleShot(120, this, [this]() {
             startLevel(1);
         });
+        }
+    });
+
+    videoPlayer->play();
+}
+
+void MenuWindow::playOutroVideo(QGraphicsView* gameView)
+{
+    if (!gameView) {
+        showMainMenu(nullptr, this);
+        return;
+    }
+
+    paused = true;
+
+    QVideoWidget* videoWidget = new QVideoWidget(gameView);
+    videoWidget->setGeometry(gameView->rect());
+    videoWidget->show();
+    videoWidget->raise();
+
+    QMediaPlayer* videoPlayer = new QMediaPlayer(videoWidget);
+    QAudioOutput* videoAudio = new QAudioOutput(videoWidget);
+
+    videoPlayer->setVideoOutput(videoWidget);
+    videoPlayer->setAudioOutput(videoAudio);
+
+    videoAudio->setVolume(0.8);
+
+    videoPlayer->setSource(QUrl("qrc:/assets/outro.mp4"));
+
+    gameLevel* oldLevel = currentLevel;
+
+    QObject::connect(videoPlayer, &QMediaPlayer::mediaStatusChanged,
+                     this,
+                     [=](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::EndOfMedia) {
+            videoWidget->hide();
+            videoWidget->deleteLater();
+
+            showMainMenu(gameView, this);
+
+            if (oldLevel) {
+                QTimer::singleShot(600, oldLevel, [oldLevel]() {
+                    oldLevel->deleteLater();
+                });
+            }
         }
     });
 
