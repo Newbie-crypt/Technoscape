@@ -29,10 +29,13 @@
 #include <QCoreApplication>
 #include <QEnterEvent>
 #include <QUrl>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QtMultimediaWidgets/QVideoWidget>
+#include <QSettings>
 #include <QSoundEffect>
 #include <QMediaDevices>
 #include <QAudioDevice>
-#include <QSettings>
 #include <QtGlobal>
 #include "wall.hpp"
 #include "furniture.hpp"
@@ -104,6 +107,7 @@ class MenuWindow : public QWidget {
         void saveProgress();
         void unlockLevel(int level);
         void playLevelTransition(QGraphicsView* view, int level);
+        void playIntroVideo();
 
         QGraphicsView* gameView;
         QGraphicsView* view;

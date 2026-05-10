@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia MultimediaWidgets)
 
 set(SOURCE_FILES 
     src/main.cpp
@@ -65,7 +65,7 @@ set(SOURCE_FILES
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)
 
-target_link_libraries(main PRIVATE Qt6::Widgets Qt6::Multimedia)
+target_link_libraries(main PRIVATE Qt6::Widgets Qt6::Multimedia Qt6::MultimediaWidgets)
 target_include_directories(main PRIVATE include)
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 

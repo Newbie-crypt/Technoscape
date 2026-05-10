@@ -216,11 +216,23 @@ MenuWindow::MenuWindow() {
     };
 
     QObject::connect(startButton, &QPushButton::clicked, [=]() {
-        hasStartedGame = true;
+        playClick();
+
         QSettings settings("Technoscape", "Game");
+
+        hasStartedGame = true;
         settings.setValue("hasStartedGame", true);
         continueButton->setVisible(true);
-        playClick();
+
+        bool introPlayed = settings.value("introPlayed", false).toBool();
+
+        if (introPlayed) {
+            QTimer::singleShot(120, this, [this]() {
+                startLevel(1);
+            });
+        } else {
+            playIntroVideo();
+        }
     });
 
     QObject::connect(continueButton, &QPushButton::clicked, playClick);
@@ -276,13 +288,6 @@ MenuWindow::MenuWindow() {
     panelLayout->addWidget(exitButton);
 
     // END OF MAIN MENU DESIGN SECTION
-
-    // Events when the buttons are pressed
-    QObject::connect(startButton, &QPushButton::clicked, [this]() {
-        QTimer::singleShot(120, [this]() {
-            startLevel(1);
-        });
-    });
 
     // Continue saved progress: jumps to the highest level the player unlocked.
     QObject::connect(continueButton, &QPushButton::clicked, [this]() {
@@ -810,4 +815,40 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
             currentView->deleteLater();
         });
     }
+}
+
+void MenuWindow::playIntroVideo()
+{
+    QVideoWidget* videoWidget = new QVideoWidget(this);
+    videoWidget->setGeometry(this->rect());
+    videoWidget->show();
+    videoWidget->raise();
+
+    QMediaPlayer* videoPlayer = new QMediaPlayer(videoWidget);
+    QAudioOutput* videoAudio = new QAudioOutput(videoWidget);
+
+    videoPlayer->setVideoOutput(videoWidget);
+    videoPlayer->setAudioOutput(videoAudio);
+
+    videoAudio->setVolume(0.8);
+
+    videoPlayer->setSource(QUrl("qrc:/assets/intro.mp4"));
+
+    QObject::connect(videoPlayer, &QMediaPlayer::mediaStatusChanged,
+                     this,
+                     [=](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::EndOfMedia) {
+            QSettings settings("Technoscape", "Game");
+            settings.setValue("introPlayed", true);
+
+            videoWidget->hide();
+            videoWidget->deleteLater();
+
+            QTimer::singleShot(120, this, [this]() {
+            startLevel(1);
+        });
+        }
+    });
+
+    videoPlayer->play();
 }
