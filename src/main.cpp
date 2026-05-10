@@ -61,9 +61,7 @@ int main(int argc, char* argv[]) {
           if (status == QMediaPlayer::EndOfMedia) {
               audio->setDevice(out);
               music->setAudioOutput(audio);
-              music->setSource(QUrl::fromLocalFile(
-                    QCoreApplication::applicationDirPath() + "/assets/sounds/music.mp3"
-               ));
+              music->setSource(QUrl("qrc:/assets/sounds/music.mp3"));
               music->setLoops(QMediaPlayer::Infinite);
               music->play();
 

@@ -14,7 +14,7 @@ void levelOne::setupScene() {
     // Section 1: Preparing the scene of level 1
     scene->clear();
 
-    QPixmap levelBg("assets/level1_closed.png");
+    QPixmap levelBg(":/assets/level1_closed.png");
     if (levelBg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/level1_closed.png";
     }
@@ -30,7 +30,7 @@ void levelOne::setupScene() {
 
     auto spawnAccessKey = [&](QPointF pos) {
         KeyItem* worldKey = new KeyItem(
-            QCoreApplication::applicationDirPath() + "/assets/key.gif",
+            ":/assets/key.gif",
             60, 90
         );
 
@@ -62,7 +62,7 @@ void levelOne::setupScene() {
 
     // HUD KEY (hidden until collected)
     KeyItem* hudKey = new KeyItem(
-        QCoreApplication::applicationDirPath() + "/assets/key.gif",
+        ":/assets/key.gif",
         90,140
     );
     hudKey->setPos(729, 488);
@@ -126,7 +126,7 @@ void levelOne::setupSpawnKeyEvent() {
     QObject::connect(this, &levelOne::allEnemiesDead, [this]() {
         // May the key appear!
         KeyItem* worldKey = new KeyItem(
-            QCoreApplication::applicationDirPath() + "/assets/key.gif",
+            ":/assets/key.gif",
             60, 90
             );
         worldKey->setPos(400, 100); // replace with actual position you want

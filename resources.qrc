@@ -12,11 +12,42 @@
         <file>assets/OrangeRobot_Attack1.png</file>
         <file>assets/health_symbol.png</file>
         <file>assets/collide.png</file>
-        <file>assets/sounds/fire.wav</file>
-        <file>assets/sounds/footstep.wav</file>
-        <file>assets/sounds/grunt.wav</file>
-        <file>assets/sounds/coin_sound.wav</file>
-        <file>assets/sounds/kablaw.wav</file>
+        <file>assets/boss_head.png</file>
+        <file>assets/ceiling4.png</file>
+        <file>assets/closedlevel2.png</file>
+        <file>assets/cup.png</file>
+        <file>assets/drone.png</file>
+        <file>assets/droneExplosion.png</file>
+        <file>assets/fake_floor_panel.png</file>
+        <file>assets/how_to_play.png</file>
+        <file>assets/key.gif</file>
+        <file>assets/level1_closed.png</file>
+        <file>assets/level1_open.png</file>
+        <file>assets/level4_closed.png</file>
+        <file>assets/level4fakefloor.png</file>
+        <file>assets/level4item.png</file>
+        <file>assets/level4slider.png</file>
+        <file>assets/level4turret.png</file>
+        <file>assets/level5boss.png</file>
+        <file>assets/menu_bg.png</file>
+        <file>assets/openlevel2.png</file>
+        <file>assets/spike_trap_base.png</file>
+        <file>assets/spike_trap_spikes.png</file>
+        <file>assets/spike_wall.png</file>
+        <file>assets/suicideDrone_walk.png</file>
+        <file>assets/terms_policy.png</file>
+        <file>assets/bruteAttack.png</file>
+        <file>assets/bruteAttack2.png</file>
+        <file>assets/bruteDeath.png</file>
+        <file>assets/bruteHurt.png</file>
+        <file>assets/bruteSpecial.png</file>
+        <file>assets/bruteWalk.png</file>
+        <file>assets/xmanAttack.png</file>
+        <file>assets/xmanWalk.png</file>
+        <file>assets/Technoscape_Logo.png</file>
+        <file>assets/intro.mp4</file>
+        <file>assets/outro.mp4</file>
+        <file>assets/Technoscape_Intro_AUC.mp4</file>
         <file>assets/Level2/Side_walk.png</file>
         <file>assets/Level2/Side_run.png</file>
         <file>assets/Level2/Side_idle.png</file>
@@ -24,24 +55,21 @@
         <file>assets/Level2/Side_backjump.png</file>
         <file>assets/Level2/Side_hurt.png</file>
         <file>assets/Level4/spr_coin_azu.png</file>
-	<file>assets/Level4/turret_idle.png</file>
+        <file>assets/Level4/turret_idle.png</file>
+        <file>assets/Level4/kaboom.png</file>
         <file>assets/levelThree/levelThreeScene.png</file>
-        <file>assets/droneExplosion.png</file>
-        <file>assets/suicideDrone_walk.png</file>
-        <file>assets/bruteAttack.png</file>
-        <file>assets/bruteDeath.png</file>
-        <file>assets/bruteHurt.png</file>
-        <file>assets/bruteWalk.png</file>
-        <file>assets/level5boss.png</file>
-        <file>assets/bruteAttack2.png</file>
-        <file>assets/bruteSpecial.png</file>
-        <file>assets/xmanAttack.png</file>
-        <file>assets/xmanWalk.png</file>
+        <file>assets/sounds/alarm.wav</file>
+        <file>assets/sounds/click.wav</file>
+        <file>assets/sounds/coin_sound.wav</file>
+        <file>assets/sounds/door.wav</file>
+        <file>assets/sounds/fire.wav</file>
+        <file>assets/sounds/footstep.wav</file>
+        <file>assets/sounds/grunt.wav</file>
+        <file>assets/sounds/houver.wav</file>
+        <file>assets/sounds/kablaw.wav</file>
         <file>assets/sounds/kaboom.wav</file>
-        <file>assets/intro.mp4</file>
-        <file>assets/cup.png</file>
-        <file>assets/outro.mp4</file>
-        <file>assets/Technoscape_Intro_AUC.mp4</file>
-        <file>assets/Technoscape_Logo.png</file>
+        <file>assets/sounds/music.mp3</file>
+        <file>assets/sounds/trap_trigger.wav</file>
+        <file>assets/sounds/walk.wav</file>
     </qresource>
 </RCC>

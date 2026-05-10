@@ -15,18 +15,14 @@ Player::Player(double x, double y) {
     trapAudio = new QAudioOutput();
 
     trapPlayer->setAudioOutput(trapAudio);
-    trapPlayer->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
-        ));
+    trapPlayer->setSource(QUrl("qrc:/assets/sounds/trap_trigger.wav"));
     trapAudio->setVolume(sfxVolume);
 
      doorPlayer = new QMediaPlayer();
     doorAudio = new QAudioOutput();
 
     doorPlayer->setAudioOutput(doorAudio);
-    doorPlayer->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/door.wav"
-        ));
+    doorPlayer->setSource(QUrl("qrc:/assets/sounds/door.wav"));
     doorAudio->setVolume(sfxVolume);
 
     footstepPool = new QSoundEffect*[8];
@@ -542,7 +538,7 @@ void Player::unlockDoor() {
 
     // After about 1 second, reveal opened door
     QTimer::singleShot(1000, [=]() {
-        QPixmap openedBg("assets/level1_open.png");
+        QPixmap openedBg(":/assets/level1_open.png");
 
         if (openedBg.isNull()) {
             qDebug() << "ERROR: IMAGE NOT FOUND: assets/level1_open.png";

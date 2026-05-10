@@ -179,7 +179,7 @@ void SidePlayer::playerDied(int type){
     if(type == 2)
     {
         QTimer* explosionAnimation= new QTimer(this);
-        QPixmap explosionPixmap = QPixmap("assets/Level4/kaboom.png");
+        QPixmap explosionPixmap = QPixmap(":/assets/Level4/kaboom.png");
         QSoundEffect* explosionSound = new QSoundEffect(this);
         explosionSound->setSource(QUrl("qrc:/assets/sounds/kablaw.wav"));
         explosionSound->setVolume(sfxVolume);

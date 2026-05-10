@@ -37,7 +37,7 @@ void levelTwo::setupScene() {
     scene->clear();
     scene->setSceneRect(0, 0, 800, 600);
 
-    QPixmap level2Bg("assets/closedlevel2.png");
+    QPixmap level2Bg(":/assets/closedlevel2.png");
     if (level2Bg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/closedlevel2.png";
     }
@@ -156,7 +156,7 @@ void levelTwo::setupScene() {
             });
 
             QTimer::singleShot(1000, this, [=]() {
-                QPixmap openBg("assets/openlevel2.png");
+                QPixmap openBg(":/assets/openlevel2.png");
 
                 if (!openBg.isNull() && level2Background) {
                     level2Background->setPixmap(openBg);
@@ -203,7 +203,7 @@ void levelTwo::setupScene() {
 }
 
 void levelTwo::setupTrap1() {
-    QPixmap fakeFloorImg("assets/fake_floor_panel.png");
+    QPixmap fakeFloorImg(":/assets/fake_floor_panel.png");
     if (fakeFloorImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/fake_floor_panel.png";
     }
@@ -247,7 +247,7 @@ void levelTwo::setupTrap1() {
 
 void levelTwo::setupTrap2AndTrap3() {
     // Bait key
-    QPixmap baitImg("assets/key.gif");
+    QPixmap baitImg(":/assets/key.gif");
     baitItem = scene->addPixmap(
         baitImg.scaled(90, 130, Qt::KeepAspectRatio, Qt::SmoothTransformation)
     );
@@ -274,7 +274,7 @@ void levelTwo::setupTrap2AndTrap3() {
     fakeKeyText->hide();
 
     realLevel2Key = new KeyItem(
-        QCoreApplication::applicationDirPath() + "/assets/key.gif",
+        ":/assets/key.gif",
         60, 90
     );
     realLevel2Key->setPos(85, 320);
@@ -322,7 +322,7 @@ void levelTwo::setupTrap2AndTrap3() {
     trap2Trigger->setZValue(10);
     scene->addItem(trap2Trigger);
 
-    QPixmap spikeImg("assets/spike_wall.png");
+    QPixmap spikeImg(":/assets/spike_wall.png");
     if (spikeImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/spike_wall.png";
     }
@@ -345,7 +345,7 @@ void levelTwo::setupTrap2AndTrap3() {
     trap2Active = new bool(false);
 
     // Trap 3 drones
-    QPixmap droneImg("assets/drone.png");
+    QPixmap droneImg(":/assets/drone.png");
     if (droneImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/drone.png";
     }
@@ -434,24 +434,20 @@ void levelTwo::setupTrap2AndTrap3() {
     hoverTrapSound = new QMediaPlayer(this);
     hoverTrapAudio = new QAudioOutput(this);
     hoverTrapSound->setAudioOutput(hoverTrapAudio);
-    hoverTrapSound->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
-    ));
+    hoverTrapSound->setSource(QUrl("qrc:/assets/sounds/houver.wav"));
     hoverTrapAudio->setVolume(sfxVolume);
 
     laserSound = new QMediaPlayer(this);
     laserAudio = new QAudioOutput(this);
     laserSound->setAudioOutput(laserAudio);
-    laserSound->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
-    ));
+    laserSound->setSource(QUrl("qrc:/assets/sounds/trap_trigger.wav"));
     laserAudio->setVolume(sfxVolume);
 }
 
 //Trap 4
 void levelTwo::setupTrap4() {
-    QPixmap baseImg("assets/spike_trap_base.png");
-    QPixmap spikesImg("assets/spike_trap_spikes.png");
+    QPixmap baseImg(":/assets/spike_trap_base.png");
+    QPixmap spikesImg(":/assets/spike_trap_spikes.png");
 
     if (baseImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/spike_trap_base.png";

@@ -47,7 +47,7 @@ void Projectile::playImpactAndDelete()
         movementTimer->stop();
     }
 
-    QPixmap collide(":assets/collide.png");
+    QPixmap collide(":/assets/collide.png");
     setPixmap(collide.copy(0, 0, 273, 375));
 
     switch(dir)
@@ -122,7 +122,7 @@ void Projectile::processMovement()
 
             movementTimer->stop();
 
-            QPixmap collide(":assets/collide.png");
+            QPixmap collide(":/assets/collide.png");
             setPixmap(collide.copy(0, 0, 273, 375));
             switch(dir) //for offsets with bullets
             {

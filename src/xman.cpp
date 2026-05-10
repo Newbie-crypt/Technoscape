@@ -14,8 +14,8 @@ Xman::Xman(Player* t) : Enemy(150, ":/assets/Standing_Robot.png", 10) {
     changeAnimationState(AnimationState::Running);
 
     // Loading all the spritesheets
-    spritesheets[AnimationState::Attacking].load(":assets/xmanAttack.png");
-    spritesheets[AnimationState::Running].load(":assets/xmanWalk.png");
+    spritesheets[AnimationState::Attacking].load(":/assets/xmanAttack.png");
+    spritesheets[AnimationState::Running].load(":/assets/xmanWalk.png");
 
     // Keeping track of the number of frames in each spritesheet
     frame_count[AnimationState::Running] = 6;

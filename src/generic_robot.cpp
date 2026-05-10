@@ -13,9 +13,9 @@ void Robot::Attack() {
 Robot::Robot(Player* t) : Enemy(100, ":/assets/Standing_Robot.png", 6) {
 
     // Loading all the spritesheets
-    spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png");
-    spritesheets[AnimationState::Attacking].load(":assets/OrangeRobot_Attack1.png");
-    spritesheets[AnimationState::Running].load(":assets/OrangeRobot_Run.png");
+    spritesheets[AnimationState::Idle].load(":/assets/OrangeRobot_Idle.png");
+    spritesheets[AnimationState::Attacking].load(":/assets/OrangeRobot_Attack1.png");
+    spritesheets[AnimationState::Running].load(":/assets/OrangeRobot_Run.png");
 
     // Keeping track of the number of frames in each spritesheet
     frame_count[AnimationState::Idle] = 5;

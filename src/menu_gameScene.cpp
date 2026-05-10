@@ -143,7 +143,7 @@ MenuWindow::MenuWindow() {
     loadProgress();
 
     background = new QLabel(this);
-    QPixmap bg("assets/menu_bg.png");
+    QPixmap bg(":/assets/menu_bg.png");
 
     if (bg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/menu_bg.png";
@@ -187,14 +187,12 @@ MenuWindow::MenuWindow() {
 
     clickAudio->setDevice(out);
     clickPlayer->setAudioOutput(clickAudio);
-    clickPlayer->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/click.wav"
-    ));
+    clickPlayer->setSource(QUrl("qrc:/assets/sounds/click.wav"));
     clickAudio->setVolume(sfxVolume);
 
     QSoundEffect* hoverPlayer = new QSoundEffect(this);
-    hoverPlayer->setSource(QUrl::fromLocalFile(
-    QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
+    hoverPlayer->setSource(QUrl(
+    "qrc:/assets/sounds/houver.wav"
     ));
     hoverPlayer->setVolume(sfxVolume);
 
@@ -374,7 +372,7 @@ MenuWindow::MenuWindow() {
             policyLayout->setAlignment(Qt::AlignCenter);
 
             QLabel* image = new QLabel(policyOverlay);
-            QPixmap policyImg("assets/terms_policy.png");
+            QPixmap policyImg(":/assets/terms_policy.png");
 
             if (policyImg.isNull()) {
                 qDebug() << "ERROR: IMAGE NOT FOUND: assets/terms_policy.png";
@@ -444,7 +442,7 @@ MenuWindow::MenuWindow() {
         layout->setAlignment(Qt::AlignCenter);
 
         QLabel* image = new QLabel(overlay);
-        QPixmap howImg("assets/how_to_play.png");
+        QPixmap howImg(":/assets/how_to_play.png");
 
         if (howImg.isNull()) {
             qDebug() << "ERROR: IMAGE NOT FOUND: assets/how_to_play.png";

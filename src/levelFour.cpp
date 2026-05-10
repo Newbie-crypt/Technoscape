@@ -41,7 +41,7 @@ void levelFour::setupScene() {
     scene->clear();
     scene->setSceneRect(0, 0, 800, 600);
 
-    QPixmap level4Bg("assets/level4_closed.png");
+    QPixmap level4Bg(":/assets/level4_closed.png");
 
     if (level4Bg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/level4_closed.png";
@@ -107,7 +107,7 @@ void levelFour::setupScene() {
 }
 
 void levelFour::setupTrap1() {
-    QPixmap fakeFloorImg("assets/level4fakefloor.png");
+    QPixmap fakeFloorImg(":/assets/level4fakefloor.png");
 
     if (fakeFloorImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/level4fakefloor.png";
@@ -153,7 +153,7 @@ void levelFour::setupTrap1() {
     trap1RightSideTrigger->setZValue(10);
     scene->addItem(trap1RightSideTrigger);
 
-    QPixmap sliderImg("assets/level4slider.png");
+    QPixmap sliderImg(":/assets/level4slider.png");
 
     if (sliderImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/level4slider.png";
@@ -187,17 +187,13 @@ void levelFour::setupTrap1() {
     trap1OpenSound = new QMediaPlayer(this);
     trap1OpenAudio = new QAudioOutput(this);
     trap1OpenSound->setAudioOutput(trap1OpenAudio);
-    trap1OpenSound->setSource(QUrl::fromLocalFile(
-    QCoreApplication::applicationDirPath() + "/assets/sounds/houver.wav"
-    ));
+    trap1OpenSound->setSource(QUrl("qrc:/assets/sounds/houver.wav"));
     trap1OpenAudio->setVolume(sfxVolume);
 
     trapDeathSound = new QMediaPlayer(this);
     trapDeathAudio = new QAudioOutput(this);
     trapDeathSound->setAudioOutput(trapDeathAudio);
-    trapDeathSound->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/trap_trigger.wav"
-    ));
+    trapDeathSound->setSource(QUrl("qrc:/assets/sounds/trap_trigger.wav"));
     trapDeathAudio->setVolume(sfxVolume);
 }
 
@@ -254,7 +250,7 @@ void levelFour::setupTrap3() {
 }
 
 void levelFour::setupTrap4() {
-    QPixmap ceilingImg("assets/ceiling4.png");
+    QPixmap ceilingImg(":/assets/ceiling4.png");
 
     if (ceilingImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/ceiling4.png";
@@ -270,7 +266,7 @@ void levelFour::setupTrap4() {
     trap4Ceiling->setZValue(3000);
     trap4Ceiling->hide();
 
-    QPixmap itemImg("assets/level4item.png");
+    QPixmap itemImg(":/assets/level4item.png");
 
     if (itemImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/level4item.png";
@@ -343,9 +339,7 @@ void levelFour::setupTrap4() {
             trap4AlarmSound = new QMediaPlayer(this);
             trap4AlarmAudio = new QAudioOutput(this);
             trap4AlarmSound->setAudioOutput(trap4AlarmAudio);
-            trap4AlarmSound->setSource(QUrl::fromLocalFile(
-                QCoreApplication::applicationDirPath() + "/assets/sounds/alarm.wav"
-            ));
+            trap4AlarmSound->setSource(QUrl("qrc:/assets/sounds/alarm.wav"));
             trap4AlarmAudio->setVolume(sfxVolume);
 }
 
@@ -610,7 +604,7 @@ void levelFour::updateTrap3() {
         turret->setZValue(20);
         scene->addItem(turret);
 
-        QPixmap turretImg("assets/level4turret.png");
+        QPixmap turretImg(":/assets/level4turret.png");
 
         if (turretImg.isNull()) {
             qDebug() << "ERROR: IMAGE NOT FOUND: assets/level4turret.png";

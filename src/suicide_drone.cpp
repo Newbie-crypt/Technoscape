@@ -9,8 +9,8 @@ suicideDrone::suicideDrone(Player* t) : Enemy(1, ":/assets/Standing_Robot.png", 
     boom->setVolume(sfxVolume);
 
     // Loading all the spritesheets
-    spritesheets[AnimationState::Running].load(":assets/suicideDrone_walk.png");
-    spritesheets[AnimationState::Attacking].load(":assets/droneExplosion.png");
+    spritesheets[AnimationState::Running].load(":/assets/suicideDrone_walk.png");
+    spritesheets[AnimationState::Attacking].load(":/assets/droneExplosion.png");
 
     // Keeping track of the number of frames in each spritesheet
     frame_count[AnimationState::Running] = 4;
