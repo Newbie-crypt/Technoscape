@@ -296,7 +296,7 @@ MenuWindow::MenuWindow() {
     // Continue saved progress: jumps to the highest level the player unlocked.
     QObject::connect(continueButton, &QPushButton::clicked, [this]() {
         QTimer::singleShot(120, [this]() {
-            startLevel(5);
+            startLevel(highestUnlockedLevel);
         });
     });
 
@@ -828,6 +828,7 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
 
 void MenuWindow::playIntroVideo()
 {
+    audio->setVolume(0);
     QVideoWidget* videoWidget = new QVideoWidget(this);
     videoWidget->setGeometry(this->rect());
     videoWidget->show();
