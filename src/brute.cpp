@@ -8,7 +8,7 @@
 extern bool paused;
 
 QRectF brute::boundingRect() const {
-    return QRectF(0, 120, frame_width, frame_height - 120);
+    return QRectF(0, 120, frame_width - 120, frame_height - 120);
 }
 
 void brute::Attack() {
@@ -27,6 +27,10 @@ void brute::setHealthBar(BossHealthBar* h) {
         secondPhaseStarted = true;
         transform = true;
     });
+    
+    QObject::connect(health,  &BossHealthBar::bossDead, [this]() {
+        isDead = true;
+    });
 }
 
 brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
@@ -38,6 +42,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     spritesheets[AnimationState::Running].load(":assets/bruteWalk.png");
     spritesheets[AnimationState::Attacking2].load(":assets/bruteAttack.png");
     spritesheets[AnimationState::bossSpecialMove].load(":assets/bruteSpecial.png");
+    spritesheets[AnimationState::bossDeath].load(":assets/bruteDeath.png");
 
     // Keeping track of the number of frames in each spritesheet
     // frame_count[AnimationState::Idle] = 5;
@@ -45,6 +50,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     frame_count[AnimationState::Attacking] = 6;
     frame_count[AnimationState::Attacking2] = 6;
     frame_count[AnimationState::bossSpecialMove] = 6;
+    frame_count[AnimationState::bossDeath] = 6;
 
     // Keeping track of the number of rows and columns for each spritesheet.
     // spritesheet_rows[AnimationState::Idle] = 2;
@@ -57,6 +63,8 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     spritesheet_columns[AnimationState::Attacking2] = 6;
     spritesheet_rows[AnimationState::bossSpecialMove] = 1;
     spritesheet_columns[AnimationState::bossSpecialMove] = 6;
+    spritesheet_rows[AnimationState::bossDeath] = 1;
+    spritesheet_columns[AnimationState::bossDeath] = 6;
 
     // All frames in the spritesheets are of the same size, independent of the object's state.
     frame_width = spritesheets[AnimationState::Running].width() / spritesheet_columns[AnimationState::Running];
@@ -75,6 +83,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     spritesheets[AnimationState::Running] = spritesheets[AnimationState::Running].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
     spritesheets[AnimationState::Attacking2] = spritesheets[AnimationState::Attacking2].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
     spritesheets[AnimationState::bossSpecialMove] = spritesheets[AnimationState::bossSpecialMove].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
+    spritesheets[AnimationState::bossDeath] = spritesheets[AnimationState::bossDeath].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
 
     legs = new LegHitbox(this);
     QRectF br = boundingRect();
@@ -140,12 +149,19 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
 
     if (target->collidesWithItem(this)) {
         this->Attack();
-    } else if (transform && count != 20) {
+    } else if (transform && countBruteTransformationsFrame  != 20) {
         changeAnimationState(AnimationState::bossSpecialMove);
         QTimer::singleShot(1000, []() {
             std::cout << "\n\n\nOne second\n\n\n";
         });
-        count++;
+        countBruteTransformationsFrame++;
+    } else if (isDead) {
+        changeAnimationState(AnimationState::bossDeath);
+        countBruteDeathsFrame++;
+        if (countBruteDeathsFrame == 10) {
+            timer->stop();
+            timer2->stop();
+        }
     }
     else {
         this->Chase();
@@ -154,7 +170,6 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
 
 
     timer2->start(50);
-
 
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
@@ -183,8 +198,8 @@ void brute::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     }
 
     // Uncomment this if you want to see the boundaries of the object
-    painter->setPen(QPen(Qt::red, 1));
-    painter->drawRect(boundingRect());
+    // painter->setPen(QPen(Qt::red, 1));
+    // painter->drawRect(boundingRect());
 }
 
 void brute::Move() {
