@@ -36,6 +36,7 @@ set(SOURCE_FILES
     src/suicide_drone.cpp
     src/brute.cpp
     src/bossFight.cpp
+    src/xman.cpp
     include/players.hpp
     include/wall.hpp
     include/furniture.hpp
@@ -61,6 +62,7 @@ set(SOURCE_FILES
     include/brute.hpp
     include/bossFight.hpp
     include/bossHealthBar.hpp
+    include/xman.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)

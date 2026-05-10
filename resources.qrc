@@ -35,6 +35,8 @@
         <file>assets/level5boss.png</file>
         <file>assets/bruteAttack2.png</file>
         <file>assets/bruteSpecial.png</file>
+        <file>assets/xmanAttack.png</file>
+        <file>assets/xmanWalk.png</file>
         <file>assets/sounds/kaboom.wav</file>
         <file>assets/intro.mp4</file>
     </qresource>

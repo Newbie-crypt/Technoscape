@@ -8,6 +8,7 @@
 #include "suicide_drone.hpp"
 #include "brute.hpp"
 #include "generic_robot.hpp"
+#include "xman.hpp"
 
 
 
@@ -29,7 +30,7 @@ class levelThree : public gameLevel  {
         // allocated object is deleted, making the deletion process easier.
         // const int number_of_drones;
         // const int number_of_brutes;
-        QPointer<brute> brutes[10];
+        QPointer<Xman> xmen[10];
         QPointer<Robot> robots[10];
         void startWaveOne();
         void startWaveTwo();

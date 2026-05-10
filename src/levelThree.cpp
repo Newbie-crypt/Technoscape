@@ -5,7 +5,11 @@
  
 levelThree::levelThree() : gameLevel(nullptr) {}
 levelThree::~levelThree() {
-    
+    for (int i = 0; i < 10; i++) {
+        delete drones[i];
+        delete robots[i];
+        delete xmen[i];
+    }
 }
 
 void levelThree::setupScene() {
@@ -43,7 +47,7 @@ void levelThree::setupScene() {
     // May the main character spawn!
     player = new Player(0, 0);
     player->setHealthBar(health_bar);
-    player->setPos(568, 300);
+    player->setPos(1095, 895);
     scene->addItem(player);
 
 
@@ -170,11 +174,11 @@ void levelThree::startWaveThree() {
             drones[i]->setPos(rand() % 1200 + 95, rand() % 890 + 40);
         }
 
-        const int number_of_brutes = 3;
-        for (int i = 0; i < number_of_brutes; i++) {
-            brutes[i] = new brute(player);
-            scene->addItem(brutes[i]);
-            brutes[i]->setPos(rand() % 304 + 523, rand() % 418 + 311);
+        const int number_of_xmen = 5;
+        for (int i = 0; i < number_of_xmen; i++) {
+            xmen[i] = new Xman(player);
+            scene->addItem(xmen[i]);
+            xmen[i]->setPos(rand() % 304 + 523, rand() % 418 + 311);
         }
 
         QTimer* waveTimer = new QTimer(this);
