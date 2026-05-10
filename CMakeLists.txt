@@ -65,10 +65,10 @@ set(SOURCE_FILES
     include/xman.hpp
     )
 
-qt_add_executable(main ${SOURCE_FILES} resources.qrc)
+qt_add_executable(Technoscape ${SOURCE_FILES} resources.qrc app.rc)
 
-target_link_libraries(main PRIVATE Qt6::Widgets Qt6::Multimedia Qt6::MultimediaWidgets)
-target_include_directories(main PRIVATE include)
+target_link_libraries(Technoscape PRIVATE Qt6::Widgets Qt6::Multimedia Qt6::MultimediaWidgets)
+target_include_directories(Technoscape PRIVATE include)
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
-qt_finalize_executable(main)
+qt_finalize_executable(Technoscape)
