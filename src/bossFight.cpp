@@ -3,6 +3,24 @@
 #include <QLinearGradient>
 #include <QFontMetrics>
 #include <QTimer>
+
+class BossDamageHitbox : public QGraphicsRectItem, public Hittable {
+private:
+    BossHealthBar* boss_health_bar;
+
+public:
+    BossDamageHitbox(BossHealthBar* bar) : boss_health_bar(bar) {
+        setPen(Qt::NoPen);
+        setBrush(Qt::NoBrush);
+        setZValue(2000);
+    }
+
+    void onHit(int damage) override {
+        if (boss_health_bar) {
+            boss_health_bar->decreaseHP(damage);
+        }
+    }
+};
  
 bossFight::bossFight() : gameLevel(nullptr) {}
 bossFight::~bossFight() {
@@ -103,12 +121,28 @@ void bossFight::setupScene() {
 
 void bossFight::setupSpawnKeyEvent() {}
 
+
 void bossFight::letsGetReadytoRumble() {
     boss = new brute(player);
+    boss->setData(0, "ignoreBullet");
+
     scene->addItem(boss);
     boss->setPos(200, 200);
-}
 
+    BossDamageHitbox* bossHitbox = new BossDamageHitbox(boss_health_bar);
+    scene->addItem(bossHitbox);
+
+    QTimer* hitboxTimer = new QTimer(this);
+    QObject::connect(hitboxTimer, &QTimer::timeout, [this, bossHitbox]() {
+        if (!boss || !bossHitbox || !scene || scene->views().isEmpty()) {
+            return;
+        }
+
+        bossHitbox->setRect(boss->getLegHitboxRect());
+    });
+
+    hitboxTimer->start(16);
+}
 
 
 void bossFight::setupWalls() {

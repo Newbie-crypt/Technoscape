@@ -101,7 +101,18 @@ void Projectile::processMovement()
 
         for (int i = 0; i < colliding_items.size(); i++) {
             auto item = colliding_items[i];
-            if (item->parentItem() != nullptr || item == Player || item->zValue() < 0) continue;
+
+            if (item == Player || item->zValue() < 0) {
+                continue;
+            }
+
+            if (item->data(0).toString() == "ignoreBullet") {
+                continue;
+            }
+
+            if (item->parentItem() != nullptr) {
+                continue;
+            }
             // qDebug() << "\nColliding with:" << typeid(*item).name(); // For debugging collisions.
             if(dynamic_cast<brute*>(item) && !(dynamic_cast<Hittable*>(item))) continue;
             Hittable* h = dynamic_cast<Hittable*>(item);

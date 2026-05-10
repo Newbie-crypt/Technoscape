@@ -1,6 +1,8 @@
 #pragma once
 #include "enemies.hpp"
+#include "bossHealthBar.hpp"
 #include <vector>
+
 
 class brute : public Enemy {
     Q_OBJECT
@@ -27,6 +29,13 @@ class brute : public Enemy {
 
     public:
         brute(Player* t);
+        QRectF getLegHitboxRect() const {
+            if (legs) {
+                return legs->sceneBoundingRect();
+            }
+
+            return sceneBoundingRect();
+        }
 
     protected:
         void changeAnimationState(AnimationState state) override;

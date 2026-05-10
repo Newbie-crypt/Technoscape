@@ -19,7 +19,7 @@ private:
 
 public:
     BossHealthBar(QWidget* parent = nullptr)
-        : QWidget(parent), maxHP(1500), currentHP(1500), halfHealthTriggered(false) {
+        : QWidget(parent), maxHP(1700), currentHP(1700), halfHealthTriggered(false) {
 
         setFixedSize(720, 70);
         setAttribute(Qt::WA_TransparentForMouseEvents);
