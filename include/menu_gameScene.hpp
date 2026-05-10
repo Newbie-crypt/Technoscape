@@ -108,6 +108,7 @@ class MenuWindow : public QWidget {
         void unlockLevel(int level);
         void playLevelTransition(QGraphicsView* view, int level);
         void playIntroVideo();
+        void playOutroVideo(QGraphicsView* gameView);
 
         QGraphicsView* gameView;
         QGraphicsView* view;

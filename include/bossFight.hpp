@@ -57,6 +57,9 @@ class bossFight : public gameLevel {
         bool bossDeathHandled;
         bool cupCollected;
         void letsGetReadytoRumble();
+        void spawnCup();
+        void collectCup();
+        
     protected:
         void setupWalls() override;
     

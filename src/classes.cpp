@@ -11,7 +11,7 @@ using namespace std;
 
 Projectile::Projectile(double x, double y, int d, QGraphicsItem* shooter) : dir(d), Player(shooter)
 {
-    damage = 34;
+    damage = 1700;
     QPixmap rawSheet(":/assets/bullet.png");
     bulletSheet = rawSheet;
     setPixmap(bulletSheet);
