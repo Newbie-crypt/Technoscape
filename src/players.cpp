@@ -1,34 +1,5 @@
 #include "../include/players.hpp"
-#include "../include/wall.hpp"
-#include "../include/furniture.hpp"
-#include "../include/door.hpp"
-#include "../include/trap.hpp"
-#include "../include/classes.hpp"
-#include "../include/weapon.hpp"
-#include "../include/keyitem.hpp"
-#include <QBrush>
-#include <QTimer>
-#include <QGraphicsScene>
-#include <QGraphicsTextItem>
-#include <QGraphicsPixmapItem>
-#include <QGraphicsRectItem>
-#include <QFont>
-#include <QList>
-#include <QPixmap>
-#include <QDebug>
-#include <cstdlib>
-#include <ctime>
-#include <QCoreApplication>
-#include <QUrl>
-#include <QMediaPlayer>
-#include <QAudioOutput>
-#include <QPropertyAnimation>
-#include <QWidget>
-#include <QGraphicsOpacityEffect>
-#include <QPen>
-#include <QColor>
-#include <QTransform>
-#include "menu_gameScene.hpp"
+
 
 
 

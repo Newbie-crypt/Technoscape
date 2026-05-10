@@ -6,7 +6,7 @@
  
 bossFight::bossFight() : gameLevel(nullptr) {}
 bossFight::~bossFight() {
-    
+    delete boss;
 }
 
 void bossFight::setupScene() {
@@ -90,7 +90,7 @@ void bossFight::setupScene() {
 
     timer->start(16);
 
-    // letsGetReadytoRumble;
+    letsGetReadytoRumble();
 
     // QObject::connect(this, &BossHealthBar::HalfHealthBossComplete, [this](){
     //     startWaveTwo();
@@ -102,6 +102,13 @@ void bossFight::setupScene() {
 }
 
 void bossFight::setupSpawnKeyEvent() {}
+
+void bossFight::letsGetReadytoRumble() {
+    boss = new brute(player);
+    scene->addItem(boss);
+    boss->setPos(200, 200);
+}
+
 
 
 void bossFight::setupWalls() {

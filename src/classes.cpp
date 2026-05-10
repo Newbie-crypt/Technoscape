@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QPainter>
 #include <QGraphicsScene>
+#include "brute.hpp"
 using namespace std;
 
 
@@ -102,6 +103,7 @@ void Projectile::processMovement()
             auto item = colliding_items[i];
             if (item->parentItem() != nullptr || item == Player || item->zValue() < 0) continue;
             // qDebug() << "\nColliding with:" << typeid(*item).name(); // For debugging collisions.
+            if(dynamic_cast<brute*>(item) && !(dynamic_cast<Hittable*>(item))) continue;
             Hittable* h = dynamic_cast<Hittable*>(item);
             if (h) {
                 h->onHit(damage);

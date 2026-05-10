@@ -8,7 +8,7 @@
 extern bool paused;
 
 QRectF brute::boundingRect() const {
-    return QRectF(0, 40, frame_width - 40, frame_height - 40);
+    return QRectF(0, 100, frame_width - 100, frame_height - 100);
 }
 
 void brute::Attack() {
@@ -16,6 +16,9 @@ void brute::Attack() {
 }
 
 brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
+
+    
+
     currentAnimationState = AnimationState::Running;
     // Loading all the spritesheets
     // spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png"); (idle is no longer neede)
@@ -39,7 +42,19 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     frame_width = spritesheets[AnimationState::Running].width() / spritesheet_columns[AnimationState::Running];
     frame_height = spritesheets[AnimationState::Running].height() / spritesheet_rows[AnimationState::Running];
 
+    double spritesheet_width = spritesheets[AnimationState::Running].width();
+    double spritesheet_height = spritesheets[AnimationState::Running].height();
+    const double factor = 3;
+    spritesheet_width *= factor;
+    spritesheet_height *= factor;
+    frame_width *= factor;
+    frame_height *= factor;
+    spritesheets[AnimationState::Attacking] = spritesheets[AnimationState::Attacking].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
+    spritesheets[AnimationState::Running] = spritesheets[AnimationState::Running].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
 
+    legs = new LegHitbox(this);
+    QRectF br = boundingRect();
+    legs->configure(br.width()/2, (br.height() / 2) + 50, br.x() + br.width()/4, br.y()+br.height()/4);
 
     int r = 0;
     int c = 0;
@@ -138,8 +153,8 @@ void brute::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     }
 
     // Uncomment this if you want to see the boundaries of the object
-    // painter->setPen(QPen(Qt::red, 1));
-    // painter->drawRect(boundingRect());
+    painter->setPen(QPen(Qt::red, 1));
+    painter->drawRect(boundingRect());
 }
 
 void brute::Move() {
