@@ -7,7 +7,7 @@
 class brute : public Enemy {
     Q_OBJECT
     private:
-        const int number_of_states = 3; // Idle=0, Running=1, Attacking=2
+        const int number_of_states = 4; // Idle=0, Running=1, Attacking=2, Attacking2 = 3.
         QPointer<QSoundEffect> metallicFootsteps;
         bool facingLeft = false;
         void Attack() override;
@@ -26,6 +26,7 @@ class brute : public Enemy {
         void buildWallGrid();
         LegHitbox* legs = nullptr;
         std::vector<QPointF> findPath(int sc, int sr, int gc, int gr);
+        bool secondPhaseStarted = false;
 
     public:
         brute(Player* t);

@@ -71,12 +71,7 @@ void bossFight::setupScene() {
     };
 
     QTimer::singleShot(0, this, centerBossHealthBar);
-    QTimer::singleShot(100, this, centerBossHealthBar);
-    QTimer::singleShot(300, this, centerBossHealthBar);
 
-    QTimer::singleShot(0, this, centerBossHealthBar);
-    QTimer::singleShot(100, this, centerBossHealthBar);
-    QTimer::singleShot(300, this, centerBossHealthBar);
 
 
     // May the main character spawn!

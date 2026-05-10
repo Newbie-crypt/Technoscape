@@ -12,23 +12,32 @@ QRectF brute::boundingRect() const {
 }
 
 void brute::Attack() {
+    if (secondPhaseStarted) {
+        // To randomly switch between attacking phases
+        changeAnimationState((AnimationState) (rand() % 2 + 2));
+        return;
+    }
     changeAnimationState(AnimationState::Attacking);
 }
 
 brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
 
+    // Used to randomly switch between attack patterns in the second phase of the boss fight.
+    srand(time(0));
     
 
     currentAnimationState = AnimationState::Running;
     // Loading all the spritesheets
     // spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png"); (idle is no longer neede)
-    spritesheets[AnimationState::Attacking].load(":assets/bruteAttack.png");
+    spritesheets[AnimationState::Attacking].load(":assets/bruteAttack2.png");
     spritesheets[AnimationState::Running].load(":assets/bruteWalk.png");
+    spritesheets[AnimationState::Attacking2].load(":assets/bruteAttack.png");
 
     // Keeping track of the number of frames in each spritesheet
     // frame_count[AnimationState::Idle] = 5;
     frame_count[AnimationState::Running] = 6;
     frame_count[AnimationState::Attacking] = 6;
+    frame_count[AnimationState::Attacking2] = 6;
 
     // Keeping track of the number of rows and columns for each spritesheet.
     // spritesheet_rows[AnimationState::Idle] = 2;
@@ -37,13 +46,17 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     spritesheet_columns[AnimationState::Running] = 6;
     spritesheet_rows[AnimationState::Attacking] = 1;
     spritesheet_columns[AnimationState::Attacking] = 6;
+    spritesheet_rows[AnimationState::Attacking2] = 1;
+    spritesheet_columns[AnimationState::Attacking2] = 6;
 
     // All frames in the spritesheets are of the same size, independent of the object's state.
     frame_width = spritesheets[AnimationState::Running].width() / spritesheet_columns[AnimationState::Running];
     frame_height = spritesheets[AnimationState::Running].height() / spritesheet_rows[AnimationState::Running];
 
+    // All widths and heights of the spritesheets are the same. So, we only need one width, and one height.
     double spritesheet_width = spritesheets[AnimationState::Running].width();
     double spritesheet_height = spritesheets[AnimationState::Running].height();
+
     const double factor = 3;
     spritesheet_width *= factor;
     spritesheet_height *= factor;
@@ -51,6 +64,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     frame_height *= factor;
     spritesheets[AnimationState::Attacking] = spritesheets[AnimationState::Attacking].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
     spritesheets[AnimationState::Running] = spritesheets[AnimationState::Running].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
+    spritesheets[AnimationState::Attacking2] = spritesheets[AnimationState::Attacking2].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
 
     legs = new LegHitbox(this);
     QRectF br = boundingRect();
@@ -130,6 +144,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
 
     // Increasing the size of the object for aesthetics.
     setScale(2);
+
 
 }
 

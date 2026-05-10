@@ -42,7 +42,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     );
     rightBar->show();
 
-    pauseOverlay = new QWidget(view->viewport());
+    pauseOverlay = new QWidget(view);
     pauseOverlay->setGeometry(view->viewport()->rect());
     pauseOverlay->setStyleSheet("background-color: rgba(0,0,0,140);");
     pauseOverlay->hide();
