@@ -17,6 +17,7 @@
 #include <QPainterPath>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QVideoWidget>
 #include <QCoreApplication>
 #include <QEnterEvent>
 #include <QUrl>
@@ -47,19 +48,35 @@ int main(int argc, char* argv[]) {
     qDebug() << "Default audio output:" << out.description();
     qDebug() << "Is default output null?" << out.isNull();
 
-    audio->setDevice(out);
-    music->setAudioOutput(audio);
-    music->setSource(QUrl::fromLocalFile(
-        QCoreApplication::applicationDirPath() + "/assets/sounds/music.mp3"
-    ));
-    music->setLoops(QMediaPlayer::Infinite);
-    audio->setVolume(musicVolume);
-    music->play();
+    QVideoWidget* videoWidget = new QVideoWidget;
+    videoWidget->showFullScreen();
 
-    srand(time(0));
+    QMediaPlayer* player = new QMediaPlayer;
+    player->setVideoOutput(videoWidget);
+    player->setAudioOutput(audio);
+    player->setSource(QUrl("qrc:/assets/Technoscape_Intro_AUC.mp4"));
+    player->play();
+    QObject::connect(player, &QMediaPlayer::mediaStatusChanged,
+                       [&](QMediaPlayer::MediaStatus status) {
+          if (status == QMediaPlayer::EndOfMedia) {
+              audio->setDevice(out);
+              music->setAudioOutput(audio);
+              music->setSource(QUrl::fromLocalFile(
+                    QCoreApplication::applicationDirPath() + "/assets/sounds/music.mp3"
+               ));
+              music->setLoops(QMediaPlayer::Infinite);
+              music->play();
 
-    MenuWindow menu;
-    menu.showFullScreen();
+              srand(time(0));
+
+              MenuWindow* menu = new MenuWindow;
+              menu->showFullScreen();
+              menu->raise();
+
+              videoWidget->hide();
+              videoWidget->deleteLater();
+          }
+      });
 
     return app.exec();
 }

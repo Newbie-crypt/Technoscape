@@ -1,4 +1,7 @@
 #include "menu_gameScene.hpp"
+#include <thread>                                                                                                                            
+#include <chrono>
+
 
 bool paused = false;
 QMediaPlayer* music;
@@ -133,6 +136,7 @@ void MenuWindow::startLevel(int level) {
 }
 
 MenuWindow::MenuWindow() {
+
 
     // MAIN MENU DESIGN SECTION
     setWindowTitle("Technoscape");
