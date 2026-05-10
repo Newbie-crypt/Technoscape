@@ -1,93 +1,37 @@
-#include "brute.hpp"
-#include "wall.hpp"
-#include <queue>
-#include <tuple>
-#include <algorithm>
-#include <limits>
+#include "xman.hpp"
 
 extern bool paused;
 
-QRectF brute::boundingRect() const {
-    return QRectF(0, 120, frame_width - 120, frame_height - 120);
+QRectF Xman::boundingRect() const {
+    return QRectF(0, 40, frame_width - 40, frame_height - 40);
 }
 
-void brute::Attack() {
-    if (secondPhaseStarted) {
-        // To randomly switch between attacking phases
-        changeAnimationState(AnimationState::Attacking2);
-        return;
-    }
+void Xman::Attack() {
     changeAnimationState(AnimationState::Attacking);
 }
 
-void brute::setHealthBar(BossHealthBar* h) {
-    health = h;  
-    QObject::connect(health, &BossHealthBar::halfHealthBoss, [this] {
-        std::cout << "\n\n\nHalf reached\n\n\n";
-        secondPhaseStarted = true;
-        transform = true;
-    });
-    
-    QObject::connect(health,  &BossHealthBar::bossDead, [this]() {
-        isDead = true;
-    });
-}
+Xman::Xman(Player* t) : Enemy(150, ":/assets/Standing_Robot.png", 10) {
+    changeAnimationState(AnimationState::Running);
 
-brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
-
-    currentAnimationState = AnimationState::Running;
     // Loading all the spritesheets
-    // spritesheets[AnimationState::Idle].load(":assets/OrangeRobot_Idle.png"); (idle is no longer neede)
-    spritesheets[AnimationState::Attacking].load(":assets/bruteAttack2.png");
-    spritesheets[AnimationState::Running].load(":assets/bruteWalk.png");
-    spritesheets[AnimationState::Attacking2].load(":assets/bruteAttack.png");
-    spritesheets[AnimationState::bossSpecialMove].load(":assets/bruteSpecial.png");
-    spritesheets[AnimationState::bossDeath].load(":assets/bruteDeath.png");
+    spritesheets[AnimationState::Attacking].load(":assets/xmanAttack.png");
+    spritesheets[AnimationState::Running].load(":assets/xmanWalk.png");
 
     // Keeping track of the number of frames in each spritesheet
-    // frame_count[AnimationState::Idle] = 5;
     frame_count[AnimationState::Running] = 6;
     frame_count[AnimationState::Attacking] = 6;
-    frame_count[AnimationState::Attacking2] = 6;
-    frame_count[AnimationState::bossSpecialMove] = 6;
-    frame_count[AnimationState::bossDeath] = 6;
+
+
 
     // Keeping track of the number of rows and columns for each spritesheet.
-    // spritesheet_rows[AnimationState::Idle] = 2;
-    // spritesheet_columns[AnimationState::Idle] = 4;
     spritesheet_rows[AnimationState::Running] = 1;
     spritesheet_columns[AnimationState::Running] = 6;
     spritesheet_rows[AnimationState::Attacking] = 1;
     spritesheet_columns[AnimationState::Attacking] = 6;
-    spritesheet_rows[AnimationState::Attacking2] = 1;
-    spritesheet_columns[AnimationState::Attacking2] = 6;
-    spritesheet_rows[AnimationState::bossSpecialMove] = 1;
-    spritesheet_columns[AnimationState::bossSpecialMove] = 6;
-    spritesheet_rows[AnimationState::bossDeath] = 1;
-    spritesheet_columns[AnimationState::bossDeath] = 6;
 
     // All frames in the spritesheets are of the same size, independent of the object's state.
-    frame_width = spritesheets[AnimationState::Running].width() / spritesheet_columns[AnimationState::Running];
-    frame_height = spritesheets[AnimationState::Running].height() / spritesheet_rows[AnimationState::Running];
-
-    // All widths and heights of the spritesheets are the same. So, we only need one width, and one height.
-    double spritesheet_width = spritesheets[AnimationState::Running].width();
-    double spritesheet_height = spritesheets[AnimationState::Running].height();
-
-    const double factor = 2.5;
-    spritesheet_width *= factor;
-    spritesheet_height *= factor;
-    frame_width *= factor;
-    frame_height *= factor;
-    spritesheets[AnimationState::Attacking] = spritesheets[AnimationState::Attacking].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
-    spritesheets[AnimationState::Running] = spritesheets[AnimationState::Running].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
-    spritesheets[AnimationState::Attacking2] = spritesheets[AnimationState::Attacking2].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
-    spritesheets[AnimationState::bossSpecialMove] = spritesheets[AnimationState::bossSpecialMove].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
-    spritesheets[AnimationState::bossDeath] = spritesheets[AnimationState::bossDeath].scaled(spritesheet_width, spritesheet_height, Qt::KeepAspectRatio);
-
-    legs = new LegHitbox(this);
-    QRectF br = boundingRect();
-    legs->configure(br.width()/2, (br.height() / 2) + 50, br.x() + br.width()/4, br.y()+br.height()/4);
+    frame_width = spritesheets[AnimationState::Attacking].width() / spritesheet_columns[AnimationState::Attacking];
+    frame_height = spritesheets[AnimationState::Attacking].height() / spritesheet_rows[AnimationState::Attacking];
 
     int r = 0;
     int c = 0;
@@ -117,8 +61,8 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
         // Calls the boundingRect() and paint() methods
         update();
 
-        if ((currentAnimationState == AnimationState::Attacking || currentAnimationState == AnimationState::Attacking2) && currentFrame == 4) {
-            target->decreaseHealth(40);
+        if (currentAnimationState == AnimationState::Attacking && currentFrame == 2) {
+            target->decreaseHealth(30);
         }
     });
 
@@ -149,21 +93,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
 
     if (target->collidesWithItem(this)) {
         this->Attack();
-    } else if (transform && countBruteTransformationsFrame  != 20) {
-        changeAnimationState(AnimationState::bossSpecialMove);
-        QTimer::singleShot(1000, []() {
-            std::cout << "\n\n\nOne second\n\n\n";
-        });
-        countBruteTransformationsFrame++;
-    } else if (isDead) {
-        changeAnimationState(AnimationState::bossDeath);
-        countBruteDeathsFrame++;
-        if (countBruteDeathsFrame == 10) {
-            timer->stop();
-            timer2->stop();
-        }
-    }
-    else {
+    } else {
         this->Chase();
     }
 });
@@ -171,14 +101,16 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
 
     timer2->start(50);
 
+
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
 
     // Increasing the size of the object for aesthetics.
     setScale(2);
+
 }
 
-void brute::changeAnimationState(AnimationState state) {
+void Xman::changeAnimationState(AnimationState state) {
     // The purpose of the if statement is to prevent the frame from being constant at zero due to how frequent we are changing
     // the animation state.
     if (currentAnimationState == state) return;
@@ -186,7 +118,7 @@ void brute::changeAnimationState(AnimationState state) {
     currentFrame = 0;
 }
 
-void brute::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+void Xman::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     if (facingLeft) {
         painter->save();
         painter->translate(frame_width / 2 + 10, 0);
@@ -201,12 +133,12 @@ void brute::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     // painter->setPen(QPen(Qt::red, 1));
     // painter->drawRect(boundingRect());
 }
-
-void brute::Move() {
+void Xman::Move() {
     // Here's an application of the changeAnimationState
     changeAnimationState(AnimationState::Running);
     moveBy(10, 0);
 }
+
 
 // FOR TRANSPARENCY: THE ENTIRE A* PATHFINDING ALGORITHM IS DEVELOPED BY CLAUDE, NOT WRITTEN BY HAND.
 
@@ -217,13 +149,12 @@ static constexpr int CELL_SIZE = 32;
 static constexpr int REPATH_INTERVAL = 10;
 
 
-
 // Build the navigation grid by scanning the scene for Wall items. Cells whose
 // centre falls inside (or near) a wall are flagged as blocked. We inflate each
 // wall's footprint by one cell on every side so the brute's body — which is
 // larger than a single cell — can't clip the corners of a wall while moving
 // along the centre-line of cells.
-void brute::buildWallGrid() {
+void Xman::buildWallGrid() {
     if (!scene()) return;
     QRectF sr = scene()->sceneRect();
     gridCols = static_cast<int>(std::ceil(sr.width()  / CELL_SIZE));
@@ -252,7 +183,7 @@ void brute::buildWallGrid() {
 // Diagonal moves cost √2; cardinal moves cost 1. Diagonal corner-cutting
 // through walls is forbidden. Returns a list of waypoints in scene coords from
 // just-after-start to goal. Empty list = no path found.
-std::vector<QPointF> brute::findPath(int sc, int sr, int gc, int gr) {
+std::vector<QPointF> Xman::findPath(int sc, int sr, int gc, int gr) {
     if (gridCols == 0 || gridRows == 0) return {};
     if (sc < 0 || sc >= gridCols || sr < 0 || sr >= gridRows) return {};
     if (gc < 0 || gc >= gridCols || gr < 0 || gr >= gridRows) return {};
@@ -329,7 +260,7 @@ std::vector<QPointF> brute::findPath(int sc, int sr, int gc, int gr) {
     return path;
 }
 
-void brute::Chase() {
+void Xman::Chase() {
     changeAnimationState(AnimationState::Running);
     if (!target) return;
 

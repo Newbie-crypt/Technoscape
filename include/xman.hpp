@@ -1,59 +1,60 @@
 #pragma once
+
+#include <QGraphicsRectItem>
+#include <QKeyEvent>
+#include <QObject>
+#include <QPainter>
+#include <QTimer>
+#include <QPointF>
+#include <QSoundEffect>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <map>
+#include "weapon.hpp"
+#include "classes.hpp"
+#include "players.hpp"
+#include <QGraphicsScene>
+#include "wall.hpp"
+#include "furniture.hpp"
+#include <queue>
+#include <unordered_map>
+#include <cmath>
+#include <QGraphicsRectItem>
+#include <cstdlib>
 #include "enemies.hpp"
-#include "bossHealthBar.hpp"
-#include <vector>
 
-
-class brute : public Enemy {
+class Xman: public Enemy {
     Q_OBJECT
     private:
-        const int number_of_states = 6; // Idle=0, Running=1, Attacking=2, Attacking2 = 3, Special Move = 4, Death = 5;
-        QPointer<QSoundEffect> metallicFootsteps;
-        bool facingLeft = false;
-        void Attack() override;
-        BossHealthBar* health = nullptr;
-        bool transform = false;
-        int countBruteTransformationsFrame = 0;
-         int countBruteDeathsFrame = 0;
+        // Consider moving this to enemy for the child classes to inherit them for less redundancy
+        const int number_of_states = 3; // Idle, attacking, running
         // A* pathfinding state. The grid is built once, lazily, on the first
         // Chase() call (because we need the scene to be set first).
         std::vector<std::vector<bool>> blockedCells;
+        bool facingLeft = false;
         int gridCols = 0;
         int gridRows = 0;
         bool gridBuilt = false;
-
         std::vector<QPointF> currentPath;
         std::size_t pathIndex = 0;
         int repathCounter = 0;
-
+        
         void buildWallGrid();
-        LegHitbox* legs = nullptr;
         std::vector<QPointF> findPath(int sc, int sr, int gc, int gr);
-        bool secondPhaseStarted = false;
-        bool isDead = false;
     public:
-        brute(Player* t);
-        QRectF getLegHitboxRect() const {
-            if (legs) {
-                return legs->sceneBoundingRect();
-            }
-
-            return sceneBoundingRect();
-        }
-        BossHealthBar* getHealthBar() {return health;}
-        void setHealthBar(BossHealthBar* h); 
-
+        Xman(Player* t);
+        void Attack() override;
     protected:
         void changeAnimationState(AnimationState state) override;
         QRectF boundingRect() const override;
-
         // Called whenever update() is called. It draws the current frame of the object.
         void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override;
+
     public slots:
 
         // Rarely used. It's only used for debugging or testing purposes.
         void Move() override;
-
+        
         // Slot used to chase the player.
         void Chase() override;
 };
