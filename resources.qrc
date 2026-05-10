@@ -34,6 +34,7 @@
         <file>assets/bruteWalk.png</file>
         <file>assets/level5boss.png</file>
         <file>assets/bruteAttack2.png</file>
+        <file>assets/bruteSpecial.png</file>
         <file>assets/sounds/kaboom.wav</file>
     </qresource>
 </RCC>

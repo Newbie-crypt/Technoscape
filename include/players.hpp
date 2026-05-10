@@ -22,7 +22,8 @@ enum class AnimationState : int {
     Idle,
     Running,
     Attacking,
-    Attacking2
+    Attacking2,
+    bossSpecialMove
 };
 
 #include "../include/leghitbox.hpp"

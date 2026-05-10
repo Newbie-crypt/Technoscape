@@ -7,11 +7,13 @@
 class brute : public Enemy {
     Q_OBJECT
     private:
-        const int number_of_states = 4; // Idle=0, Running=1, Attacking=2, Attacking2 = 3.
+        const int number_of_states = 5; // Idle=0, Running=1, Attacking=2, Attacking2 = 3, Special Move = 4;
         QPointer<QSoundEffect> metallicFootsteps;
         bool facingLeft = false;
         void Attack() override;
         BossHealthBar* health = nullptr;
+        bool transform = false;
+        int count = 0;
         // A* pathfinding state. The grid is built once, lazily, on the first
         // Chase() call (because we need the scene to be set first).
         std::vector<std::vector<bool>> blockedCells;
@@ -38,7 +40,7 @@ class brute : public Enemy {
             return sceneBoundingRect();
         }
         BossHealthBar* getHealthBar() {return health;}
-        void setHealthBar(BossHealthBar* h) {health = h;}
+        void setHealthBar(BossHealthBar* h); 
 
     protected:
         void changeAnimationState(AnimationState state) override;
