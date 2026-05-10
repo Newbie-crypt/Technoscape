@@ -28,7 +28,7 @@ void brute::setHealthBar(BossHealthBar* h) {
         transform = true;
     });
 
-    QObejct::
+
 }
 
 brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
