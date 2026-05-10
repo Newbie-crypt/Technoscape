@@ -8,6 +8,8 @@
 #include "suicide_drone.hpp"
 #include "brute.hpp"
 #include "generic_robot.hpp"
+#include "BossHealthBar.hpp"
+
 
 class bossFight : public gameLevel {
     Q_OBJECT
@@ -23,6 +25,7 @@ class bossFight : public gameLevel {
         QGraphicsPixmapItem* background;
         QLabel* health_symbol;
         HealthBar* health_bar;
+        BossHealthBar* boss_health_bar;
         QPointer<suicideDrone> drones[10]; // What made us use QPointer instead of the standard C++ pointer is that QPointer automatically becomes NULL once the dynamically
         // allocated object is deleted, making the deletion process easier.
         // const int number_of_drones;

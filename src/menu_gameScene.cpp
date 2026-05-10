@@ -97,6 +97,9 @@ void MenuWindow::startLevel(int level) {
     if (level == 4) {
         gameView = createGameView(new levelFour);
     }
+    if (level == 5) {
+        gameView = createGameView(new bossFight);
+    }
 
     if (!gameView) return;
 
@@ -742,6 +745,12 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     // Level 3 -> Level 4
     if (levelThree* L3 = dynamic_cast<levelThree*>(currentLevel)) {
         QObject::connect(L3, &gameLevel::levelComplete, [this]() {
+            playLevelTransition(this->view, currentLevelNumber);
+        });
+    }
+    // Level 4 -> Level 5
+    if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
+        QObject::connect(L4, &gameLevel::levelComplete, [this]() {
             playLevelTransition(this->view, currentLevelNumber);
         });
     }

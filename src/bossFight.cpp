@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QLinearGradient>
 #include <QFontMetrics>
+#include <QTimer>
  
 bossFight::bossFight() : gameLevel(nullptr) {}
 bossFight::~bossFight() {
@@ -36,6 +37,28 @@ void bossFight::setupScene() {
     health_bar = new HealthBar(view);
     health_bar->move(80, 800);
     health_bar->show();
+
+    boss_health_bar = new BossHealthBar(view);
+    boss_health_bar->show();
+    boss_health_bar->raise();
+
+    auto centerBossHealthBar = [this]() {
+        if (!view || !boss_health_bar) return;
+
+        int x = (view->width() - boss_health_bar->width()) / 2;
+        int y = 18;
+
+        boss_health_bar->move(x, y);
+        boss_health_bar->raise();
+    };
+
+    QTimer::singleShot(0, this, centerBossHealthBar);
+    QTimer::singleShot(100, this, centerBossHealthBar);
+    QTimer::singleShot(300, this, centerBossHealthBar);
+
+    QTimer::singleShot(0, this, centerBossHealthBar);
+    QTimer::singleShot(100, this, centerBossHealthBar);
+    QTimer::singleShot(300, this, centerBossHealthBar);
 
 
     // May the main character spawn!
@@ -99,6 +122,10 @@ void bossFight::setupWalls() {
     addWall(609, 925, 228, 43);
     addWall(143, 976, 690, 82);
     addWall(62, 880, 89, 182);
+    addWall(437, 169, 137, 53);
+    addWall(590, 170, 41, 127);
+    addWall(812, 193, 40, 101);
+    addWall(1113, 253, 121, 66);
 
 }
 

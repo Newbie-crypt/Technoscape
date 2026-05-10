@@ -60,6 +60,7 @@ set(SOURCE_FILES
     include/suicide_drone.hpp
     include/brute.hpp
     include/bossFight.hpp
+    include/bossHealthBar.hpp
     )
 
 qt_add_executable(main ${SOURCE_FILES} resources.qrc)
