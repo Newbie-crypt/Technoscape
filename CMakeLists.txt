@@ -11,7 +11,7 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Multimedia MultimediaWidgets)
 
-set(SOURCE_FILES 
+set(SOURCE_FILES
     src/main.cpp
     src/players.cpp
     src/wall.cpp

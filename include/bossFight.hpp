@@ -10,7 +10,7 @@
 #include "suicide_drone.hpp"
 #include "brute.hpp"
 #include "generic_robot.hpp"
-#include "BossHealthBar.hpp"
+#include "bossHealthBar.hpp"
 
 class BossDamageHitbox : public QGraphicsRectItem, public Hittable {
 private:
