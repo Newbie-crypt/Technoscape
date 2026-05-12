@@ -729,7 +729,7 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
     // Level 2 -> Level 3
     if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
-        QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this]() {
+        QObject::connect(L2, &gameLevel::levelComplete, [this]() {
             playLevelTransition(this->view, currentLevelNumber);
         });
     }

@@ -100,6 +100,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void died();
         void level2Requested();
         void moved();
+        void skipLevelRequested();
     public slots:
         void processMovement();
 

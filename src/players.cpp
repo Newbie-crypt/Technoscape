@@ -642,6 +642,8 @@ void Player::keyPressEvent(QKeyEvent* event){
     gunCheat active = NONE;
     if (event->key() == Qt::Key_L) {fireInAllDirections = fireInAllDirections ? 0 : 1;}
     if (event->key() == Qt::Key_K) {noCooldown = noCooldown ? 0 : 1;}
+    if (event->key() == Qt::Key_P) {emit skipLevelRequested();}
+    if (event->key() == Qt::Key_H && health) {health->setHP(100);}
 
 
     event->accept();

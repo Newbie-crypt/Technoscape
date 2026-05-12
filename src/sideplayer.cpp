@@ -208,7 +208,7 @@ void SidePlayer::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_D || event->key() == Qt::Key_Right) isMovingRight = true;
     if (event->key() == Qt::Key_Shift) isSprinting = true;
 
-    if ((event->key() == Qt::Key_W || event->key() == Qt::Key_Up || event->key() == Qt::Key_Space) && isGrounded) {
+    if ((event->key() == Qt::Key_W || event->key() == Qt::Key_Up || event->key() == Qt::Key_Space) && (isGrounded || jumpCheat)) {
         velocityY = -9.0; //Start the jump
         isJumping = true;
         isGrounded = false; // Make sure isGrounded is set to false.
@@ -217,6 +217,16 @@ void SidePlayer::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_C) emit collectKeyRequested();
     if (event->key() == Qt::Key_O) emit useKeyRequested();
     if (event->key() == Qt::Key_E) emit enterDoorRequested();
+
+    if(event->key() == Qt::Key_L){
+        jumpCheat = jumpCheat ? 0 : 1;
+    }
+    if(event->key() == Qt::Key_K){
+        invulnerable = invulnerable ? 0 : 1;
+    }
+    if(event->key() == Qt::Key_P){
+        emit skipLevelRequested();
+    }
 
 
     QGraphicsPixmapItem::keyPressEvent(event);

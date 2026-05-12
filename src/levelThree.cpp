@@ -56,6 +56,7 @@ void levelThree::setupScene() {
 
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
+    QObject::connect(player, &Player::skipLevelRequested, this, &gameLevel::levelComplete);
 
     scene->setFocusItem(player);
     player->setFocus();

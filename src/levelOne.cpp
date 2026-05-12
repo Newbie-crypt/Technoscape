@@ -67,6 +67,7 @@ void levelOne::setupScene() {
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
     QObject::connect(player, &Player::level2Requested, this, &gameLevel::levelComplete);
+    QObject::connect(player, &Player::skipLevelRequested, player, &Player::level2Requested); // Level skip
 
     // HUD KEY (hidden until collected)
     KeyItem* hudKey = new KeyItem(

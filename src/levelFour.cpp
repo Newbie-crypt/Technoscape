@@ -102,6 +102,7 @@ void levelFour::setupScene() {
             emit playerDied();
         });
     });
+    QObject::connect(sidePlayer, &SidePlayer::skipLevelRequested, this, &gameLevel::levelComplete);
 
 
 }
@@ -520,7 +521,8 @@ void levelFour::updateTrap1() {
         !(*trap1PlayerDead) &&
         !(*trap1DeathSequenceRunning) &&
         playerInsideFakeFloorX &&
-        playerLowEnough) {
+        playerLowEnough &&
+        !sidePlayer->isInvulnerable()) {
 
         qDebug() << "LEVEL 4 TRAP 1: PLAYER DIED IN FAKE FLOOR";
 
@@ -582,6 +584,9 @@ void levelFour::updateTrap2() {
         if (coins[i] == nullptr) continue;
         if(sidePlayer->collidesWithItem(coins[i])){
             if(coins[i]->getFake()) {
+                if (sidePlayer->isInvulnerable()) {
+                    continue;
+                }
                 sidePlayer->playerDied(2);
                 emit sidePlayer->died();
             } else {
@@ -662,6 +667,9 @@ void levelFour::updateTrap3() {
             // If bullet hits player, player dies
             if (sidePlayer->collidesWithItem(p)) {
                 p->playImpactAndDelete();
+                if (sidePlayer->isInvulnerable()) {
+                    break;
+                }
             if (trapDeathSound && trapDeathAudio) {
                 trapDeathSound->stop();
                 trapDeathSound->setPosition(0);
@@ -722,7 +730,7 @@ void levelFour::updateTrap4() {
 
     trap4Ceiling->moveBy(0, ceilingSpeed);
 
-    if (sidePlayer->collidesWithItem(trap4Ceiling, Qt::IntersectsItemShape)) {
+    if (sidePlayer->collidesWithItem(trap4Ceiling, Qt::IntersectsItemShape) && !sidePlayer->isInvulnerable()) {
         qDebug() << "LEVEL 4 TRAP 4: CEILING KILLED PLAYER";
 
         *trap4PlayerDead = true;
