@@ -81,10 +81,31 @@ void levelThree::setupScene() {
     startWaveOne();
 
     QObject::connect(this, &levelThree::waveOneComplete, [this](){
+        QTimer* healTimer = new QTimer(this);
+        QObject::connect(healTimer, &QTimer::timeout, [this, healTimer]() {
+            if (player->getHealth() >= 100) {
+                healTimer->stop();
+                healTimer->deleteLater();
+                return;
+            }
+            player->increaseHealth(1);
+        });
+        healTimer->start(50);
+
         startWaveTwo();
     });
 
     QObject::connect(this, &levelThree::waveTwoComplete, [this]() {
+        QTimer* healTimer = new QTimer(this);
+        QObject::connect(healTimer, &QTimer::timeout, [this, healTimer]() {
+            if (player->getHealth() >= 100) {
+                healTimer->stop();
+                healTimer->deleteLater();
+                return;
+            }
+            player->increaseHealth(1);
+        });
+        healTimer->start(50);
         startWaveThree();
     });
     QObject::connect(this, &levelThree::waveThreeComplete, [this]() {

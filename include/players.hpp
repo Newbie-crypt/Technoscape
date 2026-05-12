@@ -85,6 +85,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void setHudKey(KeyItem* key) {hudKey = key;}
         bool hasKey() const { return hasAccessKey; }
         void decreaseHealth(int h);
+        void increaseHealth(int h);
         bool isDead() { return health && health->getHP() == 0; }
         // Functions
         int getInputMask(); // Get the direction in which the player is moving.

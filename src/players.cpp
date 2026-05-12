@@ -12,6 +12,8 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsRectItem>
+#include <QGraphicsColorizeEffect>
+#include <QPointer>
 #include <QFont>
 #include <QList>
 #include <QPixmap>
@@ -110,26 +112,39 @@ void Player::decreaseHealth(int h) {
 
     health->decreaseHP(h);
 
-    // Reusing trap's flashing red to imitate damage animation.
-    QGraphicsRectItem* screenFlash = new QGraphicsRectItem(this);
-    // setRect->(boundingRect());
-    screenFlash->setBrush(QColor(255, 0, 0, 45));
-    screenFlash->setPen(Qt::NoPen);
-    screenFlash->setZValue(502);
-    QTimer::singleShot(120, [this, screenFlash]() {delete screenFlash;});
+    // Tint the player's visible (non-transparent) pixels red to imitate damage.
+    auto* hitTint = new QGraphicsColorizeEffect();
+    hitTint->setColor(QColor(255, 0, 0));
+    hitTint->setStrength(0.8);
+    setGraphicsEffect(hitTint);
+    QPointer<Player> safeSelf = this;
+    QTimer::singleShot(120, [safeSelf]() {
+        if (safeSelf) safeSelf->setGraphicsEffect(nullptr);
+    });
     // Sound to go along with it
-    gruntPool[currentGruntSound]->setVolume(sfxVolume);
-    gruntPool[currentGruntSound] -> play();
-    currentGruntSound++;
+    if(h > 0){
+        gruntPool[currentGruntSound]->setVolume(sfxVolume);
+        gruntPool[currentGruntSound] -> play();
+        currentGruntSound++;
 
-    if(currentGruntSound >= 8)
-    {
-        currentGruntSound = 0;
+        if(currentGruntSound >= 8)
+        {
+            currentGruntSound = 0;
+        }
+
     }
 
     if (health->getHP() <= 0) {
         emit died();
     }
+}
+
+void Player::increaseHealth(int h) {
+    if (!health) return;
+    if (health->getHP() <= 0) return;
+    int next = health->getHP() + h;
+    if (next > 100) next = 100;
+    health->setHP(next);
 }
 
 void Player::showInteractionText(const QString& text) {
