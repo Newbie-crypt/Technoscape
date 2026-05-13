@@ -3,6 +3,8 @@
 #include <chrono>
 
 
+// Global state shared across the menu and game scenes.
+// `paused` gates game logic; `music`/`audio` are held globally so any screen can mute or restore BGM.
 bool paused = false;
 QMediaPlayer* music;
 QAudioOutput* audio;
@@ -57,6 +59,7 @@ void TitleWidget::paintEvent(QPaintEvent*) {
     painter.drawPath(path);
 }
 
+// We are using QSettings to save the game state
 void MenuWindow::loadProgress() {
     QSettings settings("Technoscape", "Game");
     hasStartedGame = settings.value("hasStartedGame", false).toBool();
@@ -64,12 +67,14 @@ void MenuWindow::loadProgress() {
     if (highestUnlockedLevel < 1) highestUnlockedLevel = 1;
 }
 
+// Persists the current progress (highest unlocked level and game-started flag) to QSettings.
 void MenuWindow::saveProgress() {
     QSettings settings("Technoscape", "Game");
     settings.setValue("highestUnlockedLevel", highestUnlockedLevel);
     settings.setValue("hasStartedGame", hasStartedGame);
 }
 
+// Only advances highestUnlockedLevel forward — completed levels can never be re-locked.
 void MenuWindow::unlockLevel(int level) {
     if (level > highestUnlockedLevel) {
         highestUnlockedLevel = level;
@@ -77,6 +82,7 @@ void MenuWindow::unlockLevel(int level) {
     }
 }
 
+// Instantiates the requested level, shows the game view full-screen, and hands focus to the player.
 void MenuWindow::startLevel(int level) {
     paused = false;
     audio->setVolume(musicVolume);
@@ -112,6 +118,7 @@ void MenuWindow::startLevel(int level) {
     gameView->repaint();
     QApplication::processEvents();
 
+    // Defer the menu hide so the game view finishes its initial paint first.
     QTimer::singleShot(100, this, [this, gameView]() {
         this->hide();
 
@@ -210,6 +217,7 @@ MenuWindow::MenuWindow() {
     howToPlayButton->installEventFilter(hoverFilter);
     exitButton->installEventFilter(hoverFilter);
 
+    // Used in the next signal-slot connections.
     auto playClick = [=]() {
         clickAudio->setVolume(sfxVolume);
         clickPlayer->stop();
@@ -237,6 +245,8 @@ MenuWindow::MenuWindow() {
         }
     });
 
+    // Doing the signal-slot connection with the menu buttons..
+    // Once you click on the button, a sound plays.
     QObject::connect(continueButton, &QPushButton::clicked, playClick);
     QObject::connect(settingsButton, &QPushButton::clicked, playClick);
     QObject::connect(howToPlayButton, &QPushButton::clicked, playClick);
@@ -270,6 +280,7 @@ MenuWindow::MenuWindow() {
     howToPlayButton->setMinimumHeight(90);
     exitButton->setMinimumHeight(90);
 
+    // Applies a cyan drop-shadow glow effect to each menu button.
     auto applyGlow = [](QPushButton* button) {
         QGraphicsDropShadowEffect* glow = new QGraphicsDropShadowEffect;
         glow->setBlurRadius(40);
@@ -289,7 +300,7 @@ MenuWindow::MenuWindow() {
     panelLayout->addWidget(howToPlayButton);
     panelLayout->addWidget(exitButton);
 
-    // END OF MAIN MENU DESIGN SECTION
+    // End of main menu design section
 
     // Continue saved progress: jumps to the highest level the player unlocked.
     QObject::connect(continueButton, &QPushButton::clicked, [this]() {
@@ -298,6 +309,7 @@ MenuWindow::MenuWindow() {
         });
     });
 
+    // Displaying the settings after clicking on the settings button
     QObject::connect(settingsButton, &QPushButton::clicked, [=]() {
         QWidget* settingsOverlay = new QWidget(this);
         settingsOverlay->setGeometry(this->rect());
@@ -361,6 +373,7 @@ MenuWindow::MenuWindow() {
         resetButton->setStyleSheet(btnStyle);
         closeButton->setStyleSheet(btnStyle);
 
+        // Showing the policy after clicking on the policy button..
         QObject::connect(policyButton, &QPushButton::clicked, [=]() {
             QWidget* policyOverlay = new QWidget(settingsOverlay);
             policyOverlay->setGeometry(settingsOverlay->rect());
@@ -397,6 +410,7 @@ MenuWindow::MenuWindow() {
             });
         });
 
+        // Same thing with the reset button
         QObject::connect(resetButton, &QPushButton::clicked, [=]() {
             QMessageBox::StandardButton reply = QMessageBox::question(
                 settingsOverlay,
@@ -478,6 +492,9 @@ MenuWindow::MenuWindow() {
     showFullScreen();
 }
 
+
+// Function is called when a level ends. You have to pass in the view for the transition to pop up.
+// The level is passed to show the number of the upcoming level in the transition screen
 void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
     paused = true;
 
@@ -551,6 +568,7 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
         glitchLines.push_back(line);
     }
 
+    // Fade the overlay from transparent to fully black, then trigger the glitch animation.
     QTimer* fadeTimer = new QTimer(transitionOverlay);
     int* alpha = new int(0);
 
@@ -572,6 +590,7 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
 
             for (QFrame* line : glitchLines) line->show();
 
+            // Alternates the cyan/magenta text offsets to produce a chromatic-aberration glitch effect.
             QTimer* glitchTimer = new QTimer(introContainer);
             QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
                 static bool flip = false;
@@ -629,7 +648,7 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     view->setBackgroundBrush(Qt::black);
     view->setAlignment(Qt::AlignCenter);
 
-    // ORIGINAL LEVEL SELECTION STRUCTURE
+    // Checking the level using the magic of polymorphism and dynamic casting
     if (levelOne* L1 = dynamic_cast<levelOne*>(inputLevel)) {
         currentLevel = L1;
         currentLevel->setView(view);
@@ -656,6 +675,8 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         currentLevel = L5;
         currentLevel->setView(view);
         currentLevel->setupScene();
+
+        // Hides the health bar and pause button for a more cinematic credits scene
         QObject::connect(L5, &gameLevel::levelComplete, [this, L5]() {
             audio->setVolume(0);
             for (QWidget* child : view->findChildren<QWidget*>()) child->hide();
@@ -668,9 +689,12 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
     view->fitInView(200, 200, 800, 600);
 
+    // Setting focus on the player
     QTimer::singleShot(0, [this]() {
         this->view->setFocus();
 
+        // Of course, since we have 2 players, (side player and top-view player), we need to determine
+        // which type of player we need to focus on.
         if (Player* p = currentLevel->getPlayer()) {
             currentLevel->getScene()->setFocusItem(p);
             p->setFocus();
@@ -685,7 +709,11 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         }
     });
 
+    // Creating the pause menu..
     pauseMenu* pause = new pauseMenu(view, currentLevel);
+
+    // When the user clicks on leave game...
+    // Of course, we have to deconstruct the old level for some memory management.
     QObject::connect(pause, &pauseMenu::leaveRequested, [this]() {
         gameLevel* oldLevel = currentLevel;
 
@@ -700,6 +728,8 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
     gameOver* death_screen = new gameOver(view, currentLevel);
 
+    // Clicking on try again means that the old level object will be destructed, and a new level object of same
+    // type will be constructed
     QObject::connect(death_screen, &gameOver::tryAgainRequested, [this]() {
         int restartTo = currentLevelNumber;
 
@@ -783,6 +813,7 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     return this->view;
 }
 
+// Keeps the background, panel, and title widget correctly positioned whenever the window is resized.
 void MenuWindow::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
 
@@ -804,6 +835,7 @@ void MenuWindow::resizeEvent(QResizeEvent* event) {
     }
 }
 
+// Brings the main menu back to the foreground and safely destroys the game view after a short delay.
 void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
     paused = true;
 
@@ -824,6 +856,7 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
     }
 }
 
+// Used to play the AUC intro
 void MenuWindow::playIntroVideo()
 {
     audio->setVolume(0);
@@ -861,6 +894,7 @@ void MenuWindow::playIntroVideo()
     videoPlayer->play();
 }
 
+// Used to show the credits scene
 void MenuWindow::playOutroVideo(QGraphicsView* gameView)
 {
     if (!gameView) {
