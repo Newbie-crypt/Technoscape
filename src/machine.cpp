@@ -4,6 +4,7 @@
 #include <QPen>
 #include <QColor>
 
+//invisible machine used for collisions but eventually we didn't use it 
 Machine::Machine(int x, int y) {
 
     QGraphicsRectItem* body = new QGraphicsRectItem(0, 0, 140, 130);

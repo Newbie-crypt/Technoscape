@@ -2,13 +2,13 @@
 
 extern bool paused;
 
+// Builds the pause button and overlay menu on top of the active game view.
 pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
 
     level = currentLevel;
     view = inputView;
     
-    // ===== WORKING PAUSE UI ON TOP OF GAME =====
-
+    // Small pause button displayed during gameplay.
     pauseButton = new QPushButton(view);
     pauseButton->setGeometry(20, 20, 56, 56);
     pauseButton->setText("");
@@ -26,6 +26,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     pauseButton->raise();
     pauseButton->show();
 
+    // Two white bars create the pause icon inside the button.
     leftBar = new QFrame(pauseButton);
     leftBar->setGeometry(16, 12, 8, 32);
     leftBar->setStyleSheet(
@@ -42,6 +43,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     );
     rightBar->show();
 
+    // Full-screen dark overlay that appears when the game is paused.
     pauseOverlay = new QWidget(view);
     pauseOverlay->setGeometry(view->viewport()->rect());
     pauseOverlay->setStyleSheet("background-color: rgba(0,0,0,140);");
@@ -52,6 +54,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     overlayLayout->setContentsMargins(0, 0, 0, 0);
     overlayLayout->setAlignment(Qt::AlignCenter);
 
+    // Central pause panel containing the title and action buttons.
     pausePanel = new QFrame;
     pausePanel->setFixedSize(420, 260);
     overlayLayout->addWidget(pausePanel, 0, Qt::AlignCenter);
@@ -104,6 +107,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     pauseLayout->addWidget(continueButton);
     pauseLayout->addWidget(leaveButton);
 
+    // Connects both the pause button and ESC key to the pause menu behavior.
     QObject::connect(pauseButton, &QPushButton::clicked, [=]() {
         openPauseMenu();
     });
@@ -123,6 +127,7 @@ pauseMenu::pauseMenu(QGraphicsView* inputView, gameLevel* currentLevel) {
     });
 }
 
+// Opens the pause overlay and removes focus from the player so gameplay input stops.
 void pauseMenu::openPauseMenu() {
     Player* player = level->getPlayer();
     if (player && player->isDead()) {
@@ -146,11 +151,10 @@ void pauseMenu::openPauseMenu() {
     pauseOverlay->setFocus();
 }
 
+// Hides the pause overlay and returns focus back to the game/player.
 void pauseMenu::closePauseMenu() {
     paused = false;
     pauseOverlay->hide();
-
-    // give control back to player
     view->setFocus();
     Player* player = level->getPlayer();
     if (player) {
@@ -159,6 +163,7 @@ void pauseMenu::closePauseMenu() {
     }
 }
 
+// Uses the current paused state to decide whether ESC should open or close the menu.
 void pauseMenu::togglePauseMenu() {
     if (!paused) {
         openPauseMenu();

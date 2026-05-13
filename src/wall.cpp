@@ -3,6 +3,8 @@
 #include <QPen>
 #include <QColor>
 
+// Creates an invisible wall used for collision detection.
+// Debug mode can be enabled to show the wall as a red rectangle while testing.
 Wall::Wall(int x, int y, int w, int h)
     : QGraphicsRectItem(0, 0, w, h)
 {

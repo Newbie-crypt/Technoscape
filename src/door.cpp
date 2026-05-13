@@ -3,6 +3,7 @@
 #include <QPen>
 #include <QColor>
 
+//Door obstacle with debugging option so we can see exactly its location
 Door::Door(int x, int y, int w, int h) : locked(true) {
     body = new QGraphicsRectItem(0, 0, w, h);
 
@@ -21,10 +22,12 @@ Door::Door(int x, int y, int w, int h) : locked(true) {
     setPos(x, y);
 }
 
+//function that checks if the door is locked or not
 bool Door::isLocked() const {
     return locked;
 }
 
+//function that allows to unlock the door if it is locked
 void Door::unlock() {
     locked = false;
 

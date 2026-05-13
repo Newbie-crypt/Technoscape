@@ -3,7 +3,7 @@
 #include <QBrush>
 #include <QPen>
 #include <QColor>
-
+//unused obstacles we chose to use walls only insteadd
 Furniture::Furniture(int x, int y, int w, int h) {
 
     QGraphicsRectItem* body = new QGraphicsRectItem(0, 0, w, h);

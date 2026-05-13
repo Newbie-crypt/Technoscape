@@ -7,6 +7,7 @@
 #include <QGraphicsScene>
 #include <QTimer>
 
+// Creates an invisible trap hitbox that can also optionally be shown in debug mode.
 Trap::Trap(int x, int y, int w, int h)
     : QGraphicsRectItem(0, 0, w, h), ready(true)
 {
@@ -23,10 +24,12 @@ Trap::Trap(int x, int y, int w, int h)
     setPos(x, y);
 }
 
+// Returns whether the trap is currently able to damage the player.
 bool Trap::canDamage() const {
     return ready;
 }
 
+// Triggers the trap once, plays a short visual effect, then starts a cooldown.
 void Trap::trigger() {
     if (!ready) {
         return;
@@ -69,11 +72,13 @@ void Trap::trigger() {
         });
     }
 
+    // Prevents the trap from damaging repeatedly in the same moment.
     QTimer::singleShot(500, [this]() {
         resetCooldown();
     });
 }
 
+// Makes the trap ready to damage again after its cooldown ends.
 void Trap::resetCooldown() {
     ready = true;
 }

@@ -11,8 +11,10 @@
 extern double sfxVolume;
 extern bool paused;
 
+// Initializes Level 2. Most gameplay objects are created later in setupScene().
 levelTwo::levelTwo() : gameLevel(nullptr) {}
 
+// Cleans up dynamically allocated flags and timers used by the Level 2 trap logic.
 levelTwo::~levelTwo() {
     delete fakeFloorCollision;
     delete trap1Triggered;
@@ -33,6 +35,7 @@ levelTwo::~levelTwo() {
     for (bool* b : spikeTrapCoolingDown) delete b;
 }
 
+// Builds the Level 2 scene, including the background, collision walls, player spawn, traps, door, and main player signal connections.
 void levelTwo::setupScene() {
     scene->clear();
     scene->setSceneRect(0, 0, 800, 600);
@@ -52,19 +55,21 @@ void levelTwo::setupScene() {
         return wall;
     };
 
-    // LEVEL 2 COLLISION SHELL
+    // LEVEL 2 Collision System
     addWall(0,   417, 167, 183);   // left ground
     addWall(260, 417, 540, 183);   // right ground
     addWall(0,   0, 20, 600);      // left wall
     addWall(780, 0, 20, 600);      // right wall
     addWall(0,   0, 800, 20);      // ceiling
 
+    // Creates the side-view player and gives it keyboard focus for movement
     sidePlayer = new SidePlayer();
     sidePlayer->setPos(90, 340);
     scene->addItem(sidePlayer);
     scene->setFocusItem(sidePlayer);
     sidePlayer->setFocus();
 
+    // Sets up all trap systems before starting the main Level 2 logic timer
     setupTrap1();
     setupTrap2AndTrap3();
     setupTrap4();
@@ -73,6 +78,7 @@ void levelTwo::setupScene() {
     Door* level2Door = new Door(57, 320, 58, 96);
     scene->addItem(level2Door);
 
+    // Handles player death by freezing movement, showing the death animation, then notifying the main game system to display the game over screen
     QObject::connect(sidePlayer, &SidePlayer::died, [this]() {
         qDebug() << "Trap 1 death triggered";
 
@@ -86,6 +92,8 @@ void levelTwo::setupScene() {
         });
     });
     QObject::connect(sidePlayer, &SidePlayer::skipLevelRequested, this, &gameLevel::levelComplete);
+    
+    // Opens the Level 2 door and the player is standing close enough to the door.
     QObject::connect(sidePlayer, &SidePlayer::useKeyRequested, [this]() {
         if (paused) return;
         if (!(*realKeyCollected) || *level2DoorOpened) return;
@@ -95,6 +103,7 @@ void levelTwo::setupScene() {
 
             if (doorUseText) doorUseText->hide();
 
+            // Coordinates used to place the door opening effect directly over the door.
             int doorX = 48;
             int doorY = 311;
             int doorW = 57;
@@ -136,6 +145,7 @@ void levelTwo::setupScene() {
             rightEnergy->setZValue(303);
             scene->addItem(rightEnergy);
             
+            // Timed visual sequence that makes the door look like it is opening.
             QTimer::singleShot(120, this, [=]() {
                 glowFrame->setPen(QPen(QColor(255, 80, 80, 220), 4));
                 innerFrame->setPen(QPen(QColor(255, 180, 180, 180), 2));
@@ -156,6 +166,7 @@ void levelTwo::setupScene() {
                 rightEnergy->setBrush(QColor(0, 255, 255, 255));
             });
 
+            // Swaps the background image to the open-door version after the effect finishes.
             QTimer::singleShot(1000, this, [=]() {
                 QPixmap openBg(":/assets/openlevel2.png");
 
@@ -193,6 +204,7 @@ void levelTwo::setupScene() {
                 enterDoorText->setZValue(1000);
             });}
     });   
+                //Allows the player to complete Level 2 
                 QObject::connect(sidePlayer, &SidePlayer::enterDoorRequested, [this]() {
                         if (paused) return;
                         if (!level2DoorOpened || !(*level2DoorOpened)) return;
@@ -202,33 +214,38 @@ void levelTwo::setupScene() {
                         }
                     });
 }
-
+// Sets up Trap 1: a fake floor that opens when the player steps on it
 void levelTwo::setupTrap1() {
     QPixmap fakeFloorImg(":/assets/fake_floor_panel.png");
     if (fakeFloorImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/fake_floor_panel.png";
     }
 
+    // Visual fake floor panel that hides the gap from the player.
     fakeFloorSprite = scene->addPixmap(fakeFloorImg);
     fakeFloorSprite->setPos(167, 416);
     fakeFloorSprite->setZValue(20);
 
+    // Temporary collision wall that is removed when the fake floor opens.
     fakeFloorCollision = new Wall*(nullptr);
     *fakeFloorCollision = new Wall(167, 417, 93, 20);
     scene->addItem(*fakeFloorCollision);
 
+    // Invisible area that triggers the fake floor when the player steps on it.
     triggerZone = new QGraphicsRectItem(169, 414, 93, 35);
     triggerZone->setPen(Qt::NoPen);
     triggerZone->setBrush(Qt::NoBrush);
     triggerZone->setZValue(10);
     scene->addItem(triggerZone);
 
+    // Invisible death zone placed below the fake floor.
     killZone = new QGraphicsRectItem(167, 573, 88, 13);
     killZone->setPen(Qt::NoPen);
     killZone->setBrush(Qt::NoBrush);
     killZone->setZValue(5);
     scene->addItem(killZone);
 
+    //Some effects to enhance death animations
     laserEffect = new QGraphicsRectItem(170, 501, 110, 120);
     laserEffect->setPen(Qt::NoPen);
     laserEffect->setBrush(QColor(255, 0, 0, 0));
@@ -239,6 +256,7 @@ void levelTwo::setupTrap1() {
     glow->setBlurRadius(25);
     laserEffect->setGraphicsEffect(glow);
 
+    // State flags used to control Trap 1 timing, cooldown, and death handling
     trap1Triggered = new bool(false);
     trap1Open = new bool(false);
     trap1CoolingDown = new bool(false);
@@ -246,8 +264,9 @@ void levelTwo::setupTrap1() {
     trap1DeathSequenceRunning = new bool(false);
 }
 
+// Sets up the bait key trap, the moving spike wall, the drone laser trap, and the real key that appears after the player survives the sequence.
 void levelTwo::setupTrap2AndTrap3() {
-    // Bait key
+    // Fake key that lures the player into the next trap
     QPixmap baitImg(":/assets/key.gif");
     baitItem = scene->addPixmap(
         baitImg.scaled(90, 130, Qt::KeepAspectRatio, Qt::SmoothTransformation)
@@ -255,18 +274,21 @@ void levelTwo::setupTrap2AndTrap3() {
     baitItem->setPos(650, 350);
     baitItem->setZValue(100);
 
+    //Some Glow to make the key appearence clear and make the player wanting it as much as possible :)
     QGraphicsDropShadowEffect* keyGlow = new QGraphicsDropShadowEffect;
     keyGlow->setBlurRadius(45);
     keyGlow->setColor(QColor(255, 220, 60, 220));
     keyGlow->setOffset(0, 0);
     baitItem->setGraphicsEffect(keyGlow);
 
+    //Invisible Zone where you can collect fake key
     fakeKeyCollectZone = new QGraphicsRectItem(610, 300, 150, 140);
     fakeKeyCollectZone->setPen(Qt::NoPen);
     fakeKeyCollectZone->setBrush(Qt::NoBrush);
     fakeKeyCollectZone->setZValue(99);
     scene->addItem(fakeKeyCollectZone);
 
+    //interaction text when closee to fake key
     fakeKeyText = scene->addText("Press C to collect");
     fakeKeyText->setDefaultTextColor(Qt::white);
     fakeKeyText->setFont(QFont("Arial", 16, QFont::Bold));
@@ -274,6 +296,7 @@ void levelTwo::setupTrap2AndTrap3() {
     fakeKeyText->setZValue(1000);
     fakeKeyText->hide();
 
+    //Real key
     realLevel2Key = new KeyItem(
         ":/assets/key.gif",
         60, 90
@@ -286,6 +309,7 @@ void levelTwo::setupTrap2AndTrap3() {
     realKeyCollected = new bool(false);
     level2DoorOpened = new bool(false);
 
+    //real key interaction text
     realKeyText = scene->addText("Press C to collect");
     realKeyText->setDefaultTextColor(Qt::white);
     realKeyText->setFont(QFont("Arial", 16, QFont::Bold));
@@ -293,13 +317,15 @@ void levelTwo::setupTrap2AndTrap3() {
     realKeyText->setZValue(1000);
     realKeyText->hide();
 
+    //door interaction text 
     doorUseText = scene->addText("Press O to use key");
     doorUseText->setDefaultTextColor(Qt::white);
     doorUseText->setFont(QFont("Arial", 16, QFont::Bold));
     doorUseText->setPos(285, 479);
     doorUseText->setZValue(1000);
     doorUseText->hide();
-
+    
+    // State flags for the fake key sequence and drone trap timers.
     fakeKeyCollected = new bool(false);
     trap3Finished = new bool(false);
     droneTimers = new QVector<QTimer*>();
@@ -307,6 +333,7 @@ void levelTwo::setupTrap2AndTrap3() {
     QTimer* keyFloatTimer = new QTimer(this);
     int* keyFloatStep = new int(0);
 
+    // Creates a small floating animation for the bait key to make it look even more interactive :)
     QObject::connect(keyFloatTimer, &QTimer::timeout, [this, keyFloatStep]() mutable {
         (*keyFloatStep)++;
         qreal offset = qSin((*keyFloatStep) * 0.15) * 2.5;
@@ -316,13 +343,14 @@ void levelTwo::setupTrap2AndTrap3() {
     });
     keyFloatTimer->start(30);
 
-    // Trap 2 trigger
+    // Invisible trigger that starts the moving spike wall trap
     trap2Trigger = new QGraphicsRectItem(580, 320, 50, 60);
     trap2Trigger->setPen(Qt::NoPen);
     trap2Trigger->setBrush(Qt::NoBrush);
     trap2Trigger->setZValue(10);
     scene->addItem(trap2Trigger);
 
+    //spike image
     QPixmap spikeImg(":/assets/spike_wall.png");
     if (spikeImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/spike_wall.png";
@@ -335,6 +363,7 @@ void levelTwo::setupTrap2AndTrap3() {
     spikeWall->setZValue(400);
     spikeWall->hide();
 
+    //a hitbox, invisible one, that moves with the spike image and will be responsible to kill player
     spikeHitbox = new QGraphicsRectItem(880, 252, 55, 165);
     spikeHitbox->setPen(Qt::NoPen);
     spikeHitbox->setBrush(Qt::NoBrush);
@@ -345,12 +374,13 @@ void levelTwo::setupTrap2AndTrap3() {
     trap2Triggered = new bool(false);
     trap2Active = new bool(false);
 
-    // Trap 3 drones
+    // Drones and laser hitboxes used for the timed laser pattern after Trap 2
     QPixmap droneImg(":/assets/drone.png");
     if (droneImg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/drone.png";
     }
 
+    //make drone animations + laser setup 
     QVector<int> droneX = {275, 375, 475, 575};
     for (int i = 0; i < 4; i++) {
         QGraphicsPixmapItem* drone = scene->addPixmap(
@@ -384,6 +414,7 @@ void levelTwo::setupTrap2AndTrap3() {
 
     trap3Started = new bool(false);
 
+    // Handles both fake key collection and real key collection depending on the current trap state.
     QObject::connect(sidePlayer, &SidePlayer::collectKeyRequested, [this]() {
         if (paused) return;
         if (!scene || scene->views().isEmpty()) return;
@@ -403,6 +434,7 @@ void levelTwo::setupTrap2AndTrap3() {
             return;
         }
 
+        // Collecting the fake key ends the drone phase and reveals the real key.
         *fakeKeyCollected = true;
         *trap3Finished = true;
 
@@ -432,6 +464,7 @@ void levelTwo::setupTrap2AndTrap3() {
         }
     });
 
+    // Sound effects used by the traps in this level.
     hoverTrapSound = new QMediaPlayer(this);
     hoverTrapAudio = new QAudioOutput(this);
     hoverTrapSound->setAudioOutput(hoverTrapAudio);
@@ -445,7 +478,7 @@ void levelTwo::setupTrap2AndTrap3() {
     laserAudio->setVolume(sfxVolume);
 }
 
-//Trap 4
+// Sets up the final spike traps that appear after the fake key sequence is completed
 void levelTwo::setupTrap4() {
     QPixmap baseImg(":/assets/spike_trap_base.png");
     QPixmap spikesImg(":/assets/spike_trap_spikes.png");
@@ -458,12 +491,14 @@ void levelTwo::setupTrap4() {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/spike_trap_spikes.png";
     }
 
+    // Positions of the spike traps placed across the floor.
     QVector<QPointF> positions = {
     QPointF(510, 375),
     QPointF(390, 375),
     QPointF(270, 375)
 };
 
+    // Creates each spike trap with a base, animated spikes, trigger zone, and kill zone
     for (int i = 0; i < positions.size(); i++) {
         QGraphicsPixmapItem* base = scene->addPixmap(
             baseImg.scaled(135, 90, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
@@ -512,7 +547,8 @@ void levelTwo::setupTrap4() {
     }
 }
 
-
+// Starts the main gameplay loop for Level 2, this function is responsible for making the traps already set up work the way they do.
+// This timer constantly checks player collisions, trap triggers, animations,key prompts, door prompts, and death conditions.
 void levelTwo::setupLogicTimer() {
     QVector<int> laserIntervals = {750, 950, 650, 850};
 
@@ -523,7 +559,7 @@ void levelTwo::setupLogicTimer() {
         if (*trap1PlayerDead) return;
         if (!sidePlayer || !sidePlayer->scene() || paused) return;
 
-        // TRAP 1
+        // When the player steps on the hidden trigger zone, the fake floor opens by removing its collision wall and playing the falling floor animation.
         if (!(*trap1Triggered) && !(*trap1Open) && !(*trap1CoolingDown) &&
             sidePlayer->collidesWithItem(triggerZone)) {
 
@@ -531,17 +567,18 @@ void levelTwo::setupLogicTimer() {
             hoverTrapSound->stop();
             hoverTrapSound->setPosition(0);
             hoverTrapAudio->setVolume(sfxVolume); hoverTrapSound->play();
-
+                 // Small delay before opening the floor, giving the trap a more natural timing
             QTimer::singleShot(250, this, [this]() {
                 if (!sidePlayer || !sidePlayer->scene() || paused) return;
                 *trap1Open = true;
-
+                // Removes the invisible collision wall so the player can fall through
                 if (*fakeFloorCollision && (*fakeFloorCollision)->scene()) {
                     scene->removeItem(*fakeFloorCollision);
                     delete *fakeFloorCollision;
                     *fakeFloorCollision = nullptr;
                 }
 
+                // Animates the fake floor falling down after the collision wall is removed.
                 QTimer* fallAnim = new QTimer(this);
                 QObject::connect(fallAnim, &QTimer::timeout, [this, fallAnim]() {
                     if (paused || !scene || !scene->views().size()) return;
@@ -560,6 +597,7 @@ void levelTwo::setupLogicTimer() {
                 });
                 fallAnim->start(16);
 
+                // Resets the fake floor after a short delay so the trap can be reused.
                 QTimer::singleShot(2500, this, [this]() {
                     if (!sidePlayer || !sidePlayer->scene() || paused) return;
                     *trap1CoolingDown = true;
@@ -577,14 +615,14 @@ void levelTwo::setupLogicTimer() {
                 });
             });
         }
-
+        // If the player falls into the kill zone, freeze them and trigger the death effect
         if (*trap1Open && !(*trap1PlayerDead) && !(*trap1DeathSequenceRunning) &&
             sidePlayer->collidesWithItem(killZone) && !sidePlayer->isInvulnerable()) {
 
             *trap1PlayerDead = true;
             *trap1DeathSequenceRunning = true;
             sidePlayer->setFrozen(true);
-
+                // Short laser flash effect before sending the death signal
             QTimer::singleShot(250, this, [this]() {
                 if (paused || !sidePlayer || !sidePlayer->scene()) return;
                 laserSound->stop();
@@ -619,14 +657,14 @@ void levelTwo::setupLogicTimer() {
             return;
         }
 
-        // TRAP 2
+        // Trap 2: launches a spike wall from the right side after the player reaches the bait key area
         if (!(*trap2Triggered) && sidePlayer->collidesWithItem(trap2Trigger)) {
             *trap2Triggered = true;
 
             hoverTrapSound->stop();
             hoverTrapSound->setPosition(0);
             hoverTrapAudio->setVolume(sfxVolume); hoverTrapSound->play();
-
+            // Short warning delay before the spike wall becomes active
             QTimer::singleShot(200, this, [this, laserIntervals]() {
                 if (paused || !sidePlayer || !sidePlayer->scene()) return;
                 *trap2Active = true;
@@ -635,14 +673,14 @@ void levelTwo::setupLogicTimer() {
                 spikeHitbox->setRect(880, 252, 55, 165);
                 spikeWall->show();
                 spikeHitbox->show();
-
+                // Moves the spike wall left every frame and gradually increases its speed
                 QTimer* spikeMoveTimer = new QTimer(this);
                 int* spikeStep = new int(0);
 
                 QObject::connect(spikeMoveTimer, &QTimer::timeout, [this, spikeMoveTimer, spikeStep, laserIntervals]() mutable {
                     if (paused || !scene || !scene->views().size()) return;
                     (*spikeStep)++;
-
+                    // The spike wall becomes faster the longer it stays active
                     int speed = 5;
                     if (*spikeStep > 30) speed = 6;
                     if (*spikeStep > 60) speed = 7;
@@ -651,6 +689,9 @@ void levelTwo::setupLogicTimer() {
                     spikeHitbox->moveBy(-speed, 0);
 
                     if (!(*trap1PlayerDead) && sidePlayer->collidesWithItem(spikeHitbox) && !sidePlayer->isInvulnerable()) {
+                        
+                    // If the player touches the spike wall, trigger death immediately
+                    if (!(*trap1PlayerDead) && sidePlayer->collidesWithItem(spikeHitbox)) {
                         *trap1PlayerDead = true;
                         sidePlayer->setFrozen(true);
 
@@ -668,10 +709,10 @@ void levelTwo::setupLogicTimer() {
                         spikeMoveTimer->deleteLater();
                         return;
                     }
-
+                    // Once the spike wall reaches the left side, it disappears and starts the drone phase.
                     if (spikeWall->x() <= 260) {
                         spikeHitbox->hide();
-
+                        // Small disappearance animation so the spike wall does not vanish suddenly.
                         QTimer* vanishTimer = new QTimer(this);
                         int* vanishStep = new int(0);
 
@@ -694,13 +735,13 @@ void levelTwo::setupLogicTimer() {
                         vanishTimer->start(30);
 
                         *trap2Active = false;
-
+                        // Starts Trap 3 only once, after the spike wall sequence finishes.
                         if (!(*trap3Started)) {
                             *trap3Started = true;
-
+                            // Drops each drone from above the screen into its final position
                             for (int i = 0; i < drones.size(); i++) {
                                 drones[i]->show();
-
+                                // Controls the laser pattern for each drone. Each laser cycles between warning, active, and off states
                                 QTimer* dropTimer = new QTimer(this);
                                 QObject::connect(dropTimer, &QTimer::timeout, [this, dropTimer, i, laserIntervals]() {
                                     if (paused || !scene || !scene->views().size()) return;
@@ -723,6 +764,7 @@ void levelTwo::setupLogicTimer() {
                                         *droneLaserOn[i] = true;
 
                                         QObject::connect(droneTimer, &QTimer::timeout, [this, droneTimer, phase, i]() mutable {
+                                            // Stops the drone laser pattern once the fake key sequence is completed
                                             if (*trap3Finished) {
                                                 droneLasers[i]->setBrush(QColor(255, 0, 0, 0));
                                                 *droneLaserOn[i] = false;
@@ -733,7 +775,7 @@ void levelTwo::setupLogicTimer() {
                                             if (!sidePlayer || !sidePlayer->scene()) return;
 
                                             (*phase)++;
-
+                                            // Laser cycle: phase 1 = weak warning laser, phase 2 = active deadly laser, phase 3 = laser off
                                             if (*phase % 3 == 1) {
                                                 droneLasers[i]->setBrush(QColor(255, 80, 80, 40));
                                                 *droneLaserOn[i] = false;
@@ -762,7 +804,7 @@ void levelTwo::setupLogicTimer() {
             });
         }
 
-        // TRAP 3 KILL
+        // Trap 3 death check: The player dies only when touching a laser that is currently active.
         if (*trap3Started && !(*trap1PlayerDead)) {
             for (int i = 0; i < droneLasers.size(); i++) {
                 if (*droneLaserOn[i] && sidePlayer->collidesWithItem(droneLasers[i]) && !sidePlayer->isInvulnerable()) {
@@ -781,9 +823,10 @@ void levelTwo::setupLogicTimer() {
                 }
             }
         }
-
+        // Final spike traps. These traps become available only after the fake key has been collected. Each trap has its own trigger, animation state, kill zone, and cooldown.
         if (*fakeKeyCollected && !(*trap1PlayerDead)) {
             for (int i = 0; i < spikeTrapBases.size(); i++) {
+                // Activates a spike trap when the player enters its trigger zone, as long as that trap is not already active or cooling down.
                 if (!(*spikeTrapActive[i]) &&
                     !(*spikeTrapCoolingDown[i]) &&
                     sidePlayer->collidesWithItem(spikeTrapTriggers[i])) {
@@ -795,9 +838,10 @@ void levelTwo::setupLogicTimer() {
                     hoverTrapSound->setPosition(0);
                     hoverTrapAudio->setVolume(sfxVolume);
                     hoverTrapSound->play();
+                    // Brief visual warning before the spikes extend.
+                    spikeTrapBases[i]->setOpacity(0.45);
 
-                        spikeTrapBases[i]->setOpacity(0.45);
-
+                    // Extends the spikes upward after the warning delay
                     QTimer::singleShot(220, this, [this, i]() {
                         if (!scene || !scene->views().size()) return;
                         spikeTrapBases[i]->setOpacity(1.0);
@@ -814,7 +858,7 @@ void levelTwo::setupLogicTimer() {
 
                         QTimer* extendTimer = new QTimer(this);
                         int* step = new int(0);
-
+                        // Animates the spikes moving upward until they reach their final height
                         QObject::connect(extendTimer, &QTimer::timeout, [this, extendTimer, step, i, finalY]() mutable {
                             if (paused || !scene || !scene->views().size()) return;
 
@@ -832,7 +876,7 @@ void levelTwo::setupLogicTimer() {
                         });
 
                         extendTimer->start(16);
-
+                    // Keeps the spikes active briefly, then hides them and starts cooldown
                     QTimer::singleShot(700, this, [this, i]() {
                         QTimer* waitTimer = new QTimer(this);
 
@@ -843,7 +887,7 @@ void levelTwo::setupLogicTimer() {
                             spikeTrapKillZones[i]->hide();
 
                             *spikeTrapActive[i] = false;
-
+                            // Cooldown prevents the same spike trap from immediately triggering again
                             QTimer::singleShot(1850, this, [this, i]() {
                                 if (paused || !scene || !scene->views().size()) return;
                                 *spikeTrapCoolingDown[i] = false;
@@ -856,6 +900,7 @@ void levelTwo::setupLogicTimer() {
                         waitTimer->start(50); 
                     });
     });}
+                // Death check for the final spike traps. The player only dies if the spike trap is active, visible, and being touched 
                 if (*spikeTrapActive[i] &&
                     !(*trap1PlayerDead) &&
                     spikeTrapKillZones[i]->isVisible() &&
@@ -897,7 +942,7 @@ void levelTwo::setupLogicTimer() {
                 doorUseText->hide();
             }
         }
-
+        // Fake key Interaction
         if (!(*fakeKeyCollected) && baitItem->isVisible()) {
             if (sidePlayer->sceneBoundingRect().intersects(fakeKeyCollectZone->sceneBoundingRect())) {
                 fakeKeyText->show();
@@ -906,5 +951,6 @@ void levelTwo::setupLogicTimer() {
             }
         }
     });
+    // Runs the Level 2 logic timer
     trap1LogicTimer->start(16);
 }
