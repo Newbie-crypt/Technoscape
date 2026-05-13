@@ -71,12 +71,31 @@ void Weapon::aimAt(int direction) {
     // setRotation(angle* 180 / M_PI); // Set the gun's rotation to the angle, Might bring back if I try to bring mouse aiming back.
 }
 
-void Weapon::shoot() {
+void Weapon::shoot(gunCheat cheat) {
     if (!canShoot) return;
 
     // Spawn the projectile.
-    Projectile* bullet = new Projectile(mapToScene(boundingRect().center()).x(), mapToScene(boundingRect().center()).y(), currentAimDirection, parentItem());
-    scene()->addItem(bullet);
+
+    /*
+    ALLDIRECTIONS = 1,
+    NOCOOLDOWN,
+    AUTOAIM //BONUS
+    NONE
+*/
+    int arrDir[8] = {1, 2, 4, 8, 9, 10, 6, 5};
+    if(cheat & ALLDIRECTIONS)
+    {
+        for(int i : arrDir){
+            Projectile* bullet = new Projectile(mapToScene(boundingRect().center()).x(), mapToScene(boundingRect().center()).y(), i, parentItem());
+            scene()->addItem(bullet);
+        }
+    }
+    else
+    {
+        Projectile* bullet = new Projectile(mapToScene(boundingRect().center()).x(), mapToScene(boundingRect().center()).y(), currentAimDirection, parentItem());
+        scene()->addItem(bullet);
+    }
+
 
     // Audio
     shotPool[currentShotSound]->setVolume(sfxVolume / 3);
@@ -84,8 +103,11 @@ void Weapon::shoot() {
     currentShotSound++;
     if(currentShotSound >= 5) {currentShotSound = 0;}
 
-    canShoot = false;
-    QTimer::singleShot(300, this, [this]() { canShoot = true; }); // Single shot only resets cooldown, since we only fire on space.
+    if(!(cheat & NOCOOLDOWN)){
+        canShoot = false;
+        QTimer::singleShot(300, this, [this]() { canShoot = true; }); // Single shot only resets cooldown, since we only fire on space.
+    }
+
 
     // QGraphicsRectItem* dot = new QGraphicsRectItem; // for debugging fire directions
     // dot->setRect(0, 0, 5, 5);

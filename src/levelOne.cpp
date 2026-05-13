@@ -14,7 +14,7 @@ void levelOne::setupScene() {
     // Section 1: Preparing the scene of level 1
     scene->clear();
 
-    QPixmap levelBg(":/assets/level1_closed.png");
+    QPixmap levelBg("assets/level1_closed.png");
     if (levelBg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/level1_closed.png";
     }
@@ -30,7 +30,7 @@ void levelOne::setupScene() {
 
     auto spawnAccessKey = [&](QPointF pos) {
         KeyItem* worldKey = new KeyItem(
-            ":/assets/key.gif",
+            QCoreApplication::applicationDirPath() + "/assets/key.gif",
             60, 90
         );
 
@@ -44,12 +44,20 @@ void levelOne::setupScene() {
     QLabel* health_symbol = new QLabel(view);
     health_symbol->setPixmap(health_symbol_image);
     health_symbol->setAttribute(Qt::WA_TransparentForMouseEvents);
-    health_symbol->move(15, 800);
     health_symbol->show();
 
     HealthBar* health_bar = new HealthBar(view);
-    health_bar->move(80, 800);
     health_bar->show();
+
+    auto layoutHud = [this, health_symbol, health_bar]() {
+        int y = view->height() - 100;
+        health_symbol->move(15, y);
+        health_bar->move(80, y);
+    };
+    layoutHud();
+    if (auto* fv = qobject_cast<FittedView*>(view)) {
+        QObject::connect(fv, &FittedView::resized, this, layoutHud);
+    }
 
     // May the main character spawn!
     player = new Player(0, 0);
@@ -59,10 +67,11 @@ void levelOne::setupScene() {
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
     QObject::connect(player, &Player::level2Requested, this, &gameLevel::levelComplete);
+    QObject::connect(player, &Player::skipLevelRequested, player, &Player::level2Requested); // Level skip
 
     // HUD KEY (hidden until collected)
     KeyItem* hudKey = new KeyItem(
-        ":/assets/key.gif",
+        QCoreApplication::applicationDirPath() + "/assets/key.gif",
         90,140
     );
     hudKey->setPos(729, 488);
@@ -126,7 +135,7 @@ void levelOne::setupSpawnKeyEvent() {
     QObject::connect(this, &levelOne::allEnemiesDead, [this]() {
         // May the key appear!
         KeyItem* worldKey = new KeyItem(
-            ":/assets/key.gif",
+            QCoreApplication::applicationDirPath() + "/assets/key.gif",
             60, 90
             );
         worldKey->setPos(400, 100); // replace with actual position you want

@@ -63,12 +63,13 @@ class Player : public QObject, public QGraphicsPixmapItem {
         QPixmap walkSheet;
         QPixmap idleSheet;
         // Variables
-        bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Bools
+        bool isMovingUp = 0, isMovingDown = 0, isMovingLeft = 0, isMovingRight = 0, isSprinting = 0; // Movement Bools
+        bool fireInAllDirections = 0, noCooldown = 0;
         int targetRow = 0;
         int lastSpriteRow = 0;
         int currentShotSound = 0, currentFootSound = 0, currentGruntSound = 0; // For the pool of sounds to cycle.
         int lastAimDirection = 2;       // Defaults to 2 (down)
-        int animationTicker = 0;        // Ticker that resets every 80 ticks
+        int animationTicker = 0;     // Ticker that resets every 80 ticks
         int currentFrameIndex = 0;      // Ticker / 10 (to decide on animation)
         int previousFrameIndex = -1;    // Tracker for last frame index
         int diagonalBuffer = 0;
@@ -87,11 +88,12 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void setHudKey(KeyItem* key) {hudKey = key;}
         bool hasKey() const { return hasAccessKey; }
         void decreaseHealth(int h);
+        void increaseHealth(int h);
         bool isDead() { return health && health->getHP() == 0; }
         // Functions
         int getInputMask(); // Get the direction in which the player is moving.
-        void applyPhysics(int moveDirection, int speedMultiplier); // Moves the player.
-        void updateSprite(int moveDirection, int speedMultiplier); // Sheet checker and animator.
+        void applyPhysics(int moveDirection, double speedMultiplier); // Moves the player.
+        void updateSprite(int moveDirection, double speedMultiplier); // Sheet checker and animator.
         void handleFootsteps(int moveDirection); // Footsteps sound
         Player(double x, double y);
         int getHealth() {return health ? health->getHP() : 0;}
@@ -102,6 +104,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
         void died();
         void level2Requested();
         void moved();
+        void skipLevelRequested();
     public slots:
         void processMovement();
 

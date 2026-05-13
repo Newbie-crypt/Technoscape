@@ -1,5 +1,37 @@
 #include "../include/players.hpp"
-
+#include "../include/wall.hpp"
+#include "../include/furniture.hpp"
+#include "../include/door.hpp"
+#include "../include/trap.hpp"
+#include "../include/classes.hpp"
+#include "../include/weapon.hpp"
+#include "../include/keyitem.hpp"
+#include <QBrush>
+#include <QTimer>
+#include <QGraphicsScene>
+#include <QGraphicsTextItem>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsColorizeEffect>
+#include <QPointer>
+#include <QFont>
+#include <QList>
+#include <QPixmap>
+#include <QDebug>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <QCoreApplication>
+#include <QUrl>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QPropertyAnimation>
+#include <QWidget>
+#include <QGraphicsOpacityEffect>
+#include <QPen>
+#include <QColor>
+#include <QTransform>
+#include "menu_gameScene.hpp"
 
 
 
@@ -76,26 +108,39 @@ void Player::decreaseHealth(int h) {
 
     health->decreaseHP(h);
 
-    // Reusing trap's flashing red to imitate damage animation.
-    QGraphicsRectItem* screenFlash = new QGraphicsRectItem(this);
-    // setRect->(boundingRect());
-    screenFlash->setBrush(QColor(255, 0, 0, 45));
-    screenFlash->setPen(Qt::NoPen);
-    screenFlash->setZValue(502);
-    QTimer::singleShot(120, [this, screenFlash]() {delete screenFlash;});
+    // Tint the player's visible (non-transparent) pixels red to imitate damage.
+    auto* hitTint = new QGraphicsColorizeEffect();
+    hitTint->setColor(QColor(255, 0, 0));
+    hitTint->setStrength(0.8);
+    setGraphicsEffect(hitTint);
+    QPointer<Player> safeSelf = this;
+    QTimer::singleShot(120, [safeSelf]() {
+        if (safeSelf) safeSelf->setGraphicsEffect(nullptr);
+    });
     // Sound to go along with it
-    gruntPool[currentGruntSound]->setVolume(sfxVolume);
-    gruntPool[currentGruntSound] -> play();
-    currentGruntSound++;
+    if(h > 0){
+        gruntPool[currentGruntSound]->setVolume(sfxVolume);
+        gruntPool[currentGruntSound] -> play();
+        currentGruntSound++;
 
-    if(currentGruntSound >= 8)
-    {
-        currentGruntSound = 0;
+        if(currentGruntSound >= 8)
+        {
+            currentGruntSound = 0;
+        }
+
     }
 
     if (health->getHP() <= 0) {
         emit died();
     }
+}
+
+void Player::increaseHealth(int h) {
+    if (!health) return;
+    if (health->getHP() <= 0) return;
+    int next = health->getHP() + h;
+    if (next > 100) next = 100;
+    health->setHP(next);
 }
 
 void Player::showInteractionText(const QString& text) {
@@ -222,7 +267,7 @@ void Player::processMovement()
         return;
     }
     int moveDirection = getInputMask();    //for direction calculation, to be used in switch-case.
-    int speedMultiplier = isSprinting ? 1.5 : 1;
+    double speedMultiplier = isSprinting ? 1.5 : 1;
 
     applyPhysics(moveDirection, speedMultiplier); // Move character
     updateSprite(moveDirection, speedMultiplier); // Animate character
@@ -245,7 +290,7 @@ int Player::getInputMask() // Get the direction in which the player is moving.
     return inputSum;
 }
 
-void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the player.
+void Player::applyPhysics(int moveDirection, double speedMultiplier) // Moves the player.
 {
     switch(moveDirection)
     {
@@ -309,11 +354,11 @@ void Player::applyPhysics(int moveDirection, int speedMultiplier) // Moves the p
     }
     else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
 
-    if(moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 || moveDirection == 6 || moveDirection == 8 || moveDirection == 10) //check for a valid direction. In cases like 3, 15, 12, the player shouldn't move, so neither should the gun.
+    if(moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 || moveDirection == 6 || moveDirection == 8 || moveDirection == 10 || moveDirection == 9) //check for a valid direction. In cases like 3, 15, 12, the player shouldn't move, so neither should the gun.
         gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
 }
 
-void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet checker and animator.
+void Player::updateSprite(int moveDirection, double speedMultiplier) // Sheet checker and animator.
 {
     QPixmap* activeSheet = &walkSheet; // Assume walking.
 
@@ -331,7 +376,8 @@ void Player::updateSprite(int moveDirection, int speedMultiplier) // Sheet check
     }
 
     currentFrameIndex = animationTicker / 10; // Variable used to switch between the 8 available images
-    animationTicker = (animationTicker + speedMultiplier) % 80; // Ticker.
+    animationTicker = (animationTicker + (int)speedMultiplier) % 80; // Ticker.
+
 
     setPixmap(activeSheet->copy(currentFrameIndex * 48, targetRow * 64, 48, 64)); // Updating Pixmap to current animation
 }
@@ -603,6 +649,14 @@ void Player::keyPressEvent(QKeyEvent* event){
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
 
+    // Cheats
+    gunCheat active = NONE;
+    if (event->key() == Qt::Key_L) {fireInAllDirections = fireInAllDirections ? 0 : 1;}
+    if (event->key() == Qt::Key_K) {noCooldown = noCooldown ? 0 : 1;}
+    if (event->key() == Qt::Key_P) {emit skipLevelRequested();}
+    if (event->key() == Qt::Key_H && health) {health->setHP(100);}
+
+
     event->accept();
 }
 
@@ -614,7 +668,12 @@ void Player::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = false;}
     if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = false;}
     if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = false;}
-    if (event->key() == Qt::Key_Space) {gun->shoot();}
+    if (event->key() == Qt::Key_Space) {
+        gunCheat active = NONE;
+        if(fireInAllDirections) {active = (gunCheat) (active | ALLDIRECTIONS);}
+        if(noCooldown) {active = (gunCheat) (active | NOCOOLDOWN);}
+        gun->shoot(active);
+    }
 }
 
 Player::~Player() {

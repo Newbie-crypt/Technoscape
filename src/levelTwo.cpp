@@ -85,6 +85,7 @@ void levelTwo::setupScene() {
             emit playerDied();
         });
     });
+    QObject::connect(sidePlayer, &SidePlayer::skipLevelRequested, this, &gameLevel::levelComplete);
     QObject::connect(sidePlayer, &SidePlayer::useKeyRequested, [this]() {
         if (paused) return;
         if (!(*realKeyCollected) || *level2DoorOpened) return;
@@ -578,7 +579,7 @@ void levelTwo::setupLogicTimer() {
         }
 
         if (*trap1Open && !(*trap1PlayerDead) && !(*trap1DeathSequenceRunning) &&
-            sidePlayer->collidesWithItem(killZone)) {
+            sidePlayer->collidesWithItem(killZone) && !sidePlayer->isInvulnerable()) {
 
             *trap1PlayerDead = true;
             *trap1DeathSequenceRunning = true;
@@ -649,7 +650,7 @@ void levelTwo::setupLogicTimer() {
                     spikeWall->moveBy(-speed, 0);
                     spikeHitbox->moveBy(-speed, 0);
 
-                    if (!(*trap1PlayerDead) && sidePlayer->collidesWithItem(spikeHitbox)) {
+                    if (!(*trap1PlayerDead) && sidePlayer->collidesWithItem(spikeHitbox) && !sidePlayer->isInvulnerable()) {
                         *trap1PlayerDead = true;
                         sidePlayer->setFrozen(true);
 
@@ -764,7 +765,7 @@ void levelTwo::setupLogicTimer() {
         // TRAP 3 KILL
         if (*trap3Started && !(*trap1PlayerDead)) {
             for (int i = 0; i < droneLasers.size(); i++) {
-                if (*droneLaserOn[i] && sidePlayer->collidesWithItem(droneLasers[i])) {
+                if (*droneLaserOn[i] && sidePlayer->collidesWithItem(droneLasers[i]) && !sidePlayer->isInvulnerable()) {
                     *trap1PlayerDead = true;
                     sidePlayer->setFrozen(true);
 
@@ -858,7 +859,8 @@ void levelTwo::setupLogicTimer() {
                 if (*spikeTrapActive[i] &&
                     !(*trap1PlayerDead) &&
                     spikeTrapKillZones[i]->isVisible() &&
-                    sidePlayer->collidesWithItem(spikeTrapKillZones[i])) {
+                    sidePlayer->collidesWithItem(spikeTrapKillZones[i]) &&
+                    !sidePlayer->isInvulnerable()) {
 
                     *trap1PlayerDead = true;
                     sidePlayer->setFrozen(true);

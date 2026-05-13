@@ -113,6 +113,8 @@ void Projectile::processMovement()
             if (item->parentItem() != nullptr) {
                 continue;
             }
+            if (item->parentItem() != nullptr || item == Player || item->zValue() < 0) continue;
+            if(dynamic_cast<Projectile*>(item)) continue; // Added for the ALLDIRECTIONS cheat, since the bullets collided with themselves.
             // qDebug() << "\nColliding with:" << typeid(*item).name(); // For debugging collisions.
             if(dynamic_cast<brute*>(item) && !(dynamic_cast<Hittable*>(item))) continue;
             Hittable* h = dynamic_cast<Hittable*>(item);

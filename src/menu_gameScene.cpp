@@ -621,7 +621,7 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
 
 // The function's purpose is to set up the scene
 QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
-    view = new QGraphicsView;
+    view = new FittedView;
     view->setRenderHint(QPainter::Antialiasing);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -762,7 +762,7 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
 
     // Level 2 -> Level 3
     if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
-        QObject::connect(L2->getSidePlayer(), &SidePlayer::enterDoorRequested, [this]() {
+        QObject::connect(L2, &gameLevel::levelComplete, [this]() {
             playLevelTransition(this->view, currentLevelNumber);
         });
     }

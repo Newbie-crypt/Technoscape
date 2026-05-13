@@ -36,12 +36,20 @@ void levelThree::setupScene() {
     health_symbol = new QLabel(view);
     health_symbol->setPixmap(health_symbol_image);
     health_symbol->setAttribute(Qt::WA_TransparentForMouseEvents);
-    health_symbol->move(15, 800);
     health_symbol->show();
 
     health_bar = new HealthBar(view);
-    health_bar->move(80, 800);
     health_bar->show();
+
+    auto layoutHud = [this]() {
+        int y = view->height() - 100;
+        health_symbol->move(15, y);
+        health_bar->move(80, y);
+    };
+    layoutHud();
+    if (auto* fv = qobject_cast<FittedView*>(view)) {
+        QObject::connect(fv, &FittedView::resized, this, layoutHud);
+    }
 
 
     // May the main character spawn!
@@ -52,6 +60,7 @@ void levelThree::setupScene() {
 
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
+    QObject::connect(player, &Player::skipLevelRequested, this, &gameLevel::levelComplete);
 
     scene->setFocusItem(player);
     player->setFocus();
@@ -76,10 +85,31 @@ void levelThree::setupScene() {
     startWaveOne();
 
     QObject::connect(this, &levelThree::waveOneComplete, [this](){
+        QTimer* healTimer = new QTimer(this);
+        QObject::connect(healTimer, &QTimer::timeout, [this, healTimer]() {
+            if (player->getHealth() >= 100) {
+                healTimer->stop();
+                healTimer->deleteLater();
+                return;
+            }
+            player->increaseHealth(1);
+        });
+        healTimer->start(50);
+
         startWaveTwo();
     });
 
     QObject::connect(this, &levelThree::waveTwoComplete, [this]() {
+        QTimer* healTimer = new QTimer(this);
+        QObject::connect(healTimer, &QTimer::timeout, [this, healTimer]() {
+            if (player->getHealth() >= 100) {
+                healTimer->stop();
+                healTimer->deleteLater();
+                return;
+            }
+            player->increaseHealth(1);
+        });
+        healTimer->start(50);
         startWaveThree();
     });
     QObject::connect(this, &levelThree::waveThreeComplete, [this]() {

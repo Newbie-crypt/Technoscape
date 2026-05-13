@@ -22,6 +22,8 @@ private:
     // Normal data types + our Data types
     bool isMovingRight = false, isMovingLeft = false, isSprinting = false, isJumping= false, isGrounded = false;
     bool isFrozen = false;
+    bool jumpCheat = 0;
+    bool invulnerable = 0;
     double velocityY = 0.0; // For tracking jump progress.
     double speedMultiplier = 1; //Speed for sprinting
     int currentFrame = 0;
@@ -40,12 +42,14 @@ public:
     SidePlayer();
     void setFrozen(bool value) { isFrozen = value; }
     void playerDied(int type);
+    bool isInvulnerable() { return invulnerable; }
 
 signals:
     void died();
     void collectKeyRequested();
     void useKeyRequested();
     void enterDoorRequested();
+    void skipLevelRequested();
 
 public slots:
     void processMovement();
