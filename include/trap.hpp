@@ -4,14 +4,14 @@
 #include <QGraphicsRectItem>
 
 class Trap : public QGraphicsRectItem {
-public:
+    public:
     Trap(int x, int y, int w, int h);
 
     bool canDamage() const;
     void trigger();
     void resetCooldown();
 
-private:
+    private:
     bool ready;
 };
 

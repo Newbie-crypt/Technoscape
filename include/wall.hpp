@@ -5,7 +5,7 @@
 #include "../include/classes.hpp"
 
 class Wall : public QGraphicsRectItem {
-public:
+    public:
     Wall(int x, int y, int w, int h);
 };
 

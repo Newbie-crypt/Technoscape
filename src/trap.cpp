@@ -8,9 +8,7 @@
 #include <QTimer>
 
 // Creates an invisible trap hitbox that can also optionally be shown in debug mode.
-Trap::Trap(int x, int y, int w, int h)
-    : QGraphicsRectItem(0, 0, w, h), ready(true)
-{
+Trap::Trap(int x, int y, int w, int h) : QGraphicsRectItem(0, 0, w, h), ready(true) {
     bool debug = false;
 
     if (debug) {
@@ -39,14 +37,16 @@ void Trap::trigger() {
 
     // Some cool animation when the player touches the laser
     if (scene() != nullptr) {
-        QGraphicsEllipseItem* outerBlast = new QGraphicsEllipseItem(-30, -30, rect().width() + 60, rect().height() + 60);
+        QGraphicsEllipseItem* outerBlast =
+            new QGraphicsEllipseItem(-30, -30, rect().width() + 60, rect().height() + 60);
         outerBlast->setBrush(QColor(255, 80, 0, 140));
         outerBlast->setPen(QPen(QColor(255, 220, 0), 4));
         outerBlast->setPos(pos());
         outerBlast->setZValue(500);
         scene()->addItem(outerBlast);
 
-        QGraphicsEllipseItem* innerBlast = new QGraphicsEllipseItem(-12, -12, rect().width() + 24, rect().height() + 24);
+        QGraphicsEllipseItem* innerBlast =
+            new QGraphicsEllipseItem(-12, -12, rect().width() + 24, rect().height() + 24);
         innerBlast->setBrush(QColor(255, 255, 180, 220));
         innerBlast->setPen(Qt::NoPen);
         innerBlast->setPos(pos());
@@ -73,9 +73,7 @@ void Trap::trigger() {
     }
 
     // Prevents the trap from damaging repeatedly in the same moment.
-    QTimer::singleShot(500, [this]() {
-        resetCooldown();
-    });
+    QTimer::singleShot(500, [this]() { resetCooldown(); });
 }
 
 // Makes the trap ready to damage again after its cooldown ends.

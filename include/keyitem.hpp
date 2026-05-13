@@ -9,12 +9,12 @@
 class KeyItem : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
 
-private:
+    private:
     QMovie* movie;
     int targetW;
     int targetH;
 
-public:
+    public:
     KeyItem(const QString& gifPath, int w, int h, QGraphicsItem* parent = nullptr);
     ~KeyItem();
 };

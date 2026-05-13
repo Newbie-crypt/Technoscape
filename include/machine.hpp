@@ -4,7 +4,7 @@
 #include <QGraphicsItemGroup>
 
 class Machine : public QGraphicsItemGroup {
-public:
+    public:
     Machine(int x, int y);
 };
 

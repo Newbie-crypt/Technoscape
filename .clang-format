@@ -1,0 +1,52 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+# ---------- Indentation ----------
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+# Access modifiers (private:/protected:/public:) sit at the same indent level
+# as the class body — matching the existing style in enemies.hpp, players.hpp, etc.
+AccessModifierOffset: 0
+ContinuationIndentWidth: 4
+
+# ---------- Line length ----------
+# 100 cols accommodates the longer Qt method chains without forcing unnecessary wrapping.
+ColumnLimit: 100
+
+# ---------- Braces ----------
+# K&R / "attach" style: opening brace on the same line as the statement.
+# Matches every function, class, and control-flow block in the codebase.
+BreakBeforeBraces: Attach
+
+# ---------- Pointers & references ----------
+# int* p  /  QTimer* t  — pointer sigil attaches to the type, not the variable.
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# ---------- Spacing ----------
+# Space before ( only for control-flow keywords (if / for / while / switch),
+# not for function or constructor calls.
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpacesInParentheses: false
+SpaceInEmptyParentheses: false
+
+# ---------- Short constructs ----------
+# Keep function bodies on separate lines (matching the existing out-of-line style).
+AllowShortFunctionsOnASingleLine: None
+# Allow single-line if without else: e.g. "if (x < 0) x = 0;"
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: false
+# Allow trivial lambdas like [=]() { return x; } to stay on one line.
+AllowShortLambdasOnASingleLine: Inline
+
+# ---------- Includes ----------
+# Do NOT sort or merge #include blocks. Include order is intentional in this
+# Qt project (forward declarations interleaved with headers, e.g. in enemies.hpp).
+SortIncludes: Never
+IncludeBlocks: Preserve
+
+# ---------- Standard ----------
+Standard: c++17

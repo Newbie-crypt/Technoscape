@@ -13,10 +13,10 @@
 #include "bossHealthBar.hpp"
 
 class BossDamageHitbox : public QGraphicsRectItem, public Hittable {
-private:
+    private:
     BossHealthBar* boss_health_bar;
 
-public:
+    public:
     BossDamageHitbox(BossHealthBar* bar) : boss_health_bar(bar) {
         setPen(Qt::NoPen);
         setBrush(Qt::NoBrush);
@@ -33,34 +33,38 @@ public:
 class bossFight : public gameLevel {
     Q_OBJECT
     public:
-        bossFight(); // view must be set via setView() before calling setupScene()
-        ~bossFight();
-        void setupScene() override;
-        void spawnEnemies();
-        void setupSpawnKeyEvent() override;
-        Player* getPlayer() {return player;}
+    bossFight(); // view must be set via setView() before calling setupScene()
+    ~bossFight();
+    void setupScene() override;
+    void spawnEnemies();
+    void setupSpawnKeyEvent() override;
+    Player* getPlayer() {
+        return player;
+    }
+
     private:
-        QPixmap levelBg;
-        QGraphicsPixmapItem* background;
-        QLabel* health_symbol;
-        HealthBar* health_bar;
-        BossHealthBar* boss_health_bar;
-        BossDamageHitbox* bossHitbox;
-        QPointer<suicideDrone> drones[25]; // What made us use QPointer instead of the standard C++ pointer is that QPointer automatically becomes NULL once the dynamically
-        // allocated object is deleted, making the deletion process easier.
-        // const int number_of_drones;
-        // const int number_of_brutes;
-        QPointer<brute> boss;
-        QGraphicsPixmapItem* cup;
-        QGraphicsTextItem* cupText;
-        QShortcut* cupShortcut;
-        bool bossDeathHandled;
-        bool cupCollected;
-        void letsGetReadytoRumble();
-        void spawnCup();
-        void collectCup();
-        
+    QPixmap levelBg;
+    QGraphicsPixmapItem* background;
+    QLabel* health_symbol;
+    HealthBar* health_bar;
+    BossHealthBar* boss_health_bar;
+    BossDamageHitbox* bossHitbox;
+    QPointer<suicideDrone>
+        drones[25]; // What made us use QPointer instead of the standard C++ pointer is that
+                    // QPointer automatically becomes NULL once the dynamically
+    // allocated object is deleted, making the deletion process easier.
+    // const int number_of_drones;
+    // const int number_of_brutes;
+    QPointer<brute> boss;
+    QGraphicsPixmapItem* cup;
+    QGraphicsTextItem* cupText;
+    QShortcut* cupShortcut;
+    bool bossDeathHandled;
+    bool cupCollected;
+    void letsGetReadytoRumble();
+    void spawnCup();
+    void collectCup();
+
     protected:
-        void setupWalls() override;
-    
+    void setupWalls() override;
 };

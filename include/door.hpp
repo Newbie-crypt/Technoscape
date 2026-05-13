@@ -5,11 +5,11 @@
 #include <QGraphicsRectItem>
 
 class Door : public QGraphicsItemGroup {
-private:
+    private:
     bool locked;
     QGraphicsRectItem* body;
 
-public:
+    public:
     Door(int x, int y, int w, int h);
 
     bool isLocked() const;

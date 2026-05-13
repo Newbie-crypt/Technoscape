@@ -55,7 +55,6 @@
 #include "levelThree.hpp"
 #include "bossFight.hpp"
 
-
 extern bool paused;
 extern QMediaPlayer* music;
 extern QAudioOutput* audio;
@@ -64,18 +63,20 @@ extern double musicVolume;
 
 class TitleWidget : public QWidget {
     public:
-        TitleWidget(QWidget* parent = nullptr) : QWidget(parent) {}
+    TitleWidget(QWidget* parent = nullptr) : QWidget(parent) {
+    }
 
     protected:
-        void paintEvent(QPaintEvent*) override;
+    void paintEvent(QPaintEvent*) override;
 };
 
 class HoverSoundFilter : public QObject {
-public:
+    public:
     HoverSoundFilter(QSoundEffect* player, QObject* parent = nullptr)
-        : QObject(parent), hoverPlayer(player) {}
+        : QObject(parent), hoverPlayer(player) {
+    }
 
-protected:
+    protected:
     bool eventFilter(QObject* watched, QEvent* event) override {
         if (event->type() == QEvent::Enter) {
             if (hoverPlayer) {
@@ -87,41 +88,41 @@ protected:
         return QObject::eventFilter(watched, event);
     }
 
-private:
+    private:
     QSoundEffect* hoverPlayer;
 };
 
 class MenuWindow : public QWidget {
-        Q_OBJECT
+    Q_OBJECT
     public:
-        QLabel* background;
-        TitleWidget* title;
-        QFrame* panel;
+    QLabel* background;
+    TitleWidget* title;
+    QFrame* panel;
 
-        MenuWindow();
+    MenuWindow();
 
     private:
-        QGraphicsView* createGameView(gameLevel*);
-        void startLevel(int level);
-        void loadProgress();
-        void saveProgress();
-        void unlockLevel(int level);
-        void playLevelTransition(QGraphicsView* view, int level);
-        void playIntroVideo();
-        void playOutroVideo(QGraphicsView* gameView);
+    QGraphicsView* createGameView(gameLevel*);
+    void startLevel(int level);
+    void loadProgress();
+    void saveProgress();
+    void unlockLevel(int level);
+    void playLevelTransition(QGraphicsView* view, int level);
+    void playIntroVideo();
+    void playOutroVideo(QGraphicsView* gameView);
 
-        QGraphicsView* gameView;
-        QGraphicsView* view;
-        gameLevel* currentLevel;
-        QPushButton* continueButton = nullptr;
-        int highestUnlockedLevel = 1;
-        int currentLevelNumber = 1;
-        bool hasStartedGame = false;
+    QGraphicsView* gameView;
+    QGraphicsView* view;
+    gameLevel* currentLevel;
+    QPushButton* continueButton = nullptr;
+    int highestUnlockedLevel = 1;
+    int currentLevelNumber = 1;
+    bool hasStartedGame = false;
 
     protected:
-        void resizeEvent(QResizeEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
     signals:
-        void gameStarted();
+    void gameStarted();
 };
 
 void showMainMenu(QGraphicsView* currentView, MenuWindow* menu);

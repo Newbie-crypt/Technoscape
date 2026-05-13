@@ -9,17 +9,17 @@
 extern double sfxVolume;
 
 // For gun cheats:
-enum gunCheat{
+enum gunCheat {
     NONE = 0,
     ALLDIRECTIONS = 1,
     NOCOOLDOWN = 2,
-    AUTOAIM = 4 //BONUS
+    AUTOAIM = 4 // BONUS
 };
 
 // Inherit QObject for timers/slots, and QGraphicsPixmapItem for visuals
 class Weapon : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
-private:
+    private:
     int damage;
     int fireRate; // Cooldown in milliseconds
     int currentAimDirection = 0;
@@ -31,15 +31,17 @@ private:
     QSoundEffect** shotPool;
     int currentShotSound;
 
-public:
+    public:
     Weapon(QGraphicsItem* parent = nullptr); // Passing player as parent to keep them stuck.
-    double getAngle() {return angle;}
+    double getAngle() {
+        return angle;
+    }
     ~Weapon();
 
     void aimAt(int lastAimDirection);
     void shoot(gunCheat type);
 
-public slots:
+    public slots:
     void resetCooldown();
 };
 

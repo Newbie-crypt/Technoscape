@@ -14,26 +14,26 @@
 class gameOver : public QObject {
     Q_OBJECT
     public:
-        gameOver(QGraphicsView*, gameLevel*);
+    gameOver(QGraphicsView*, gameLevel*);
+
     private:
-        QWidget* deathFadeOverlay;
-        QWidget* gameOverOverlay;
-        QVBoxLayout* gameOverLayout;
-        QWidget* gameOverContainer;
-        QVBoxLayout* gameOverContainerLayout;
-        QWidget* titleWrap;
-        QLabel* cyanText;
-        QLabel* magentaText;
-        QLabel* mainText;
-        QFrame* glitch1;
-        QFrame* glitch2;
-        QFrame* glitch3;
-        QFrame* glitch4;
-        QPushButton* tryAgainButton;
-        QPushButton* gameOverMenuButton;
-        QTimer* glitchTimer;
+    QWidget* deathFadeOverlay;
+    QWidget* gameOverOverlay;
+    QVBoxLayout* gameOverLayout;
+    QWidget* gameOverContainer;
+    QVBoxLayout* gameOverContainerLayout;
+    QWidget* titleWrap;
+    QLabel* cyanText;
+    QLabel* magentaText;
+    QLabel* mainText;
+    QFrame* glitch1;
+    QFrame* glitch2;
+    QFrame* glitch3;
+    QFrame* glitch4;
+    QPushButton* tryAgainButton;
+    QPushButton* gameOverMenuButton;
+    QTimer* glitchTimer;
     signals:
-        void tryAgainRequested();
-        void mainMenuRequested();
-    
+    void tryAgainRequested();
+    void mainMenuRequested();
 };

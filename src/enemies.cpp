@@ -6,15 +6,13 @@ Enemy::Enemy(int h, const QString& asset, double s) : health(h), speed(s) {
     sprite.load(asset);
 }
 
+void Enemy::setTarget(Player* t) {
+    target = t;
+}
 
-
-void Enemy::setTarget(Player* t) {target = t;}
-
-void Enemy::onHit(int damage)
-{
+void Enemy::onHit(int damage) {
     health -= damage;
-    if (health <= 0)
-    {
+    if (health <= 0) {
         died = true;
         emit isDead();
     }
@@ -42,12 +40,11 @@ void Enemy::checkCollision(double dx, double dy) { // Needs to be implemented.
             door = dynamic_cast<Door*>(colliding_items[i]->group());
         }
 
-
-        // Obviously, the scenario will change if the door is unlocked. That's why we need the isLocked() method
+        // Obviously, the scenario will change if the door is unlocked. That's why we need the
+        // isLocked() method
         if (door && door->isLocked()) {
             moveBy(-dx, -dy);
             return;
         }
     }
 }
-

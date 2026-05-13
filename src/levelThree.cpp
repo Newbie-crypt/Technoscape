@@ -2,8 +2,9 @@
 #include <QPainter>
 #include <QLinearGradient>
 #include <QFontMetrics>
- 
-levelThree::levelThree() : gameLevel(nullptr) {}
+
+levelThree::levelThree() : gameLevel(nullptr) {
+}
 levelThree::~levelThree() {
     for (int i = 0; i < 10; i++) {
         delete drones[i];
@@ -19,8 +20,6 @@ void levelThree::setupScene() {
     if (levelBg.isNull()) {
         qDebug() << "ERROR: IMAGE NOT FOUND: assets/level1_closed.png";
     }
-    
-
 
     background = scene->addPixmap(levelBg);
     background->setZValue(-100);
@@ -29,9 +28,9 @@ void levelThree::setupScene() {
 
     setupWalls();
 
-    QPixmap health_symbol_image (":/assets/health_symbol.png");
-    health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
+    QPixmap health_symbol_image(":/assets/health_symbol.png");
+    health_symbol_image =
+        health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     health_symbol = new QLabel(view);
     health_symbol->setPixmap(health_symbol_image);
@@ -51,13 +50,11 @@ void levelThree::setupScene() {
         QObject::connect(fv, &FittedView::resized, this, layoutHud);
     }
 
-
     // May the main character spawn!
     player = new Player(0, 0);
     player->setHealthBar(health_bar);
     player->setPos(1095, 895);
     scene->addItem(player);
-
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
     QObject::connect(player, &Player::skipLevelRequested, this, &gameLevel::levelComplete);
@@ -67,16 +64,16 @@ void levelThree::setupScene() {
 
     QTimer* timer = new QTimer(this);
     QPointer<Player> safePlayer = player;
-    QObject::connect(timer, &QTimer::timeout, [this, safePlayer] () {
+    QObject::connect(timer, &QTimer::timeout, [this, safePlayer]() {
         if (!safePlayer) return;
         if (!view) return;
         if (!scene || scene->views().isEmpty()) return;
 
-        // Here, we are using the magic of lerp, a mathematical function which uses linear interpolation for the 
-        // view to smoothly follow the player.
+        // Here, we are using the magic of lerp, a mathematical function which uses linear
+        // interpolation for the view to smoothly follow the player.
         QPointF current = this->view->mapToScene(this->view->viewport()->rect().center());
-        QPointF target  = safePlayer->pos();
-        QPointF next    = current + (target - current) * 0.1;
+        QPointF target = safePlayer->pos();
+        QPointF next = current + (target - current) * 0.1;
         this->view->centerOn(next);
     });
 
@@ -84,7 +81,7 @@ void levelThree::setupScene() {
 
     startWaveOne();
 
-    QObject::connect(this, &levelThree::waveOneComplete, [this](){
+    QObject::connect(this, &levelThree::waveOneComplete, [this]() {
         QTimer* healTimer = new QTimer(this);
         QObject::connect(healTimer, &QTimer::timeout, [this, healTimer]() {
             if (player->getHealth() >= 100) {
@@ -112,12 +109,11 @@ void levelThree::setupScene() {
         healTimer->start(50);
         startWaveThree();
     });
-    QObject::connect(this, &levelThree::waveThreeComplete, [this]() {
-        emit levelComplete();
-    });
+    QObject::connect(this, &levelThree::waveThreeComplete, [this]() { emit levelComplete(); });
 }
 
-void levelThree::setupSpawnKeyEvent() {}
+void levelThree::setupSpawnKeyEvent() {
+}
 
 void levelThree::startWaveOne() {
     new WaveBanner(view, 1);
@@ -151,7 +147,6 @@ void levelThree::startWaveOne() {
 void levelThree::startWaveTwo() {
     new WaveBanner(view, 2); // check memory management for this plz
 
-
     // Spawn enemies once the banner has finished — 2200ms lands while the
     // banner is fading out so there's no dead gap between announcement and action.
     QTimer::singleShot(2200, this, [this]() {
@@ -181,7 +176,6 @@ void levelThree::startWaveTwo() {
             // Quick cleanup for the array to be reused in the upcoming wave (recycling)
             waveTimer->stop();
             waveTimer->deleteLater();
-
         });
         waveTimer->setInterval(20);
         waveTimer->start();
@@ -190,7 +184,6 @@ void levelThree::startWaveTwo() {
 
 void levelThree::startWaveThree() {
     new WaveBanner(view, 3); // check memory management for this plz
-
 
     // Spawn enemies once the banner has finished — 2200ms lands while the
     // banner is fading out so there's no dead gap between announcement and action.
@@ -217,7 +210,7 @@ void levelThree::startWaveThree() {
             for (auto& o : presentObjects)
                 if (dynamic_cast<Enemy*>(o)) return;
             emit waveThreeComplete();
-            
+
             waveTimer->stop();
             waveTimer->deleteLater();
         });
@@ -263,5 +256,3 @@ void levelThree::setupWalls() {
     addWall(1274, 51, 49, 124);
     addWall(1293, 173, 31, 22);
 }
-
-

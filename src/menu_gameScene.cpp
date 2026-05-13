@@ -1,10 +1,10 @@
 #include "menu_gameScene.hpp"
-#include <thread>                                                                                                                            
+#include <thread>
 #include <chrono>
 
-
 // Global state shared across the menu and game scenes.
-// `paused` gates game logic; `music`/`audio` are held globally so any screen can mute or restore BGM.
+// `paused` gates game logic; `music`/`audio` are held globally so any screen can mute or restore
+// BGM.
 bool paused = false;
 QMediaPlayer* music;
 QAudioOutput* audio;
@@ -138,12 +138,9 @@ void MenuWindow::startLevel(int level) {
     });
 
     emit gameStarted();
-    
-
 }
 
 MenuWindow::MenuWindow() {
-
 
     // MAIN MENU DESIGN SECTION
     setWindowTitle("Technoscape");
@@ -163,14 +160,11 @@ MenuWindow::MenuWindow() {
 
     panel = new QFrame(this);
     panel->setGeometry(0, 0, 450, 540);
-    panel->setStyleSheet(
-        "QFrame {"
-        "   background-color: rgba(10, 20, 45, 145);"
-        "   border: 2px solid #36e0ff;"
-        "   border-radius: 16px;"
-        "}"
-    );
-
+    panel->setStyleSheet("QFrame {"
+                         "   background-color: rgba(10, 20, 45, 145);"
+                         "   border: 2px solid #36e0ff;"
+                         "   border-radius: 16px;"
+                         "}");
 
     title = new TitleWidget(this);
     title->setGeometry(0, 0, 630, 229);
@@ -198,9 +192,7 @@ MenuWindow::MenuWindow() {
     clickAudio->setVolume(sfxVolume);
 
     QSoundEffect* hoverPlayer = new QSoundEffect(this);
-    hoverPlayer->setSource(QUrl(
-    "qrc:/assets/sounds/houver.wav"
-    ));
+    hoverPlayer->setSource(QUrl("qrc:/assets/sounds/houver.wav"));
     hoverPlayer->setVolume(sfxVolume);
 
     // Adding the buttons..
@@ -237,9 +229,7 @@ MenuWindow::MenuWindow() {
         bool introPlayed = settings.value("introPlayed", false).toBool();
 
         if (introPlayed) {
-            QTimer::singleShot(120, this, [this]() {
-                startLevel(1);
-            });
+            QTimer::singleShot(120, this, [this]() { startLevel(1); });
         } else {
             playIntroVideo();
         }
@@ -252,21 +242,20 @@ MenuWindow::MenuWindow() {
     QObject::connect(howToPlayButton, &QPushButton::clicked, playClick);
     QObject::connect(exitButton, &QPushButton::clicked, playClick);
 
-    QString btnStyle =
-        "QPushButton {"
-        "   background-color: rgba(0,0,0,155);"
-        "   color: white;"
-        "   border: 3px solid #36e0ff;"
-        "   border-radius: 12px;"
-        "   font-size: 24px;"
-        "   font-weight: bold;"
-        "   padding: 18px;"
-        "}"
-        "QPushButton:hover {"
-        "   border: 3px solid #36e0ff;"
-        "   color: #7ef9ff;"
-        "   background-color: rgba(20,40,90,210);"
-        "}";
+    QString btnStyle = "QPushButton {"
+                       "   background-color: rgba(0,0,0,155);"
+                       "   color: white;"
+                       "   border: 3px solid #36e0ff;"
+                       "   border-radius: 12px;"
+                       "   font-size: 24px;"
+                       "   font-weight: bold;"
+                       "   padding: 18px;"
+                       "}"
+                       "QPushButton:hover {"
+                       "   border: 3px solid #36e0ff;"
+                       "   color: #7ef9ff;"
+                       "   background-color: rgba(20,40,90,210);"
+                       "}";
 
     startButton->setStyleSheet(btnStyle);
     continueButton->setStyleSheet(btnStyle);
@@ -304,9 +293,7 @@ MenuWindow::MenuWindow() {
 
     // Continue saved progress: jumps to the highest level the player unlocked.
     QObject::connect(continueButton, &QPushButton::clicked, [this]() {
-        QTimer::singleShot(120, [this]() {
-            startLevel(highestUnlockedLevel);
-        });
+        QTimer::singleShot(120, [this]() { startLevel(highestUnlockedLevel); });
     });
 
     // Displaying the settings after clicking on the settings button
@@ -322,11 +309,9 @@ MenuWindow::MenuWindow() {
 
         QFrame* box = new QFrame(settingsOverlay);
         box->setFixedSize(560, 520);
-        box->setStyleSheet(
-            "QFrame { background-color: rgba(10,20,45,245);"
-            "border: 3px solid #36e0ff;"
-            "border-radius: 18px; }"
-        );
+        box->setStyleSheet("QFrame { background-color: rgba(10,20,45,245);"
+                           "border: 3px solid #36e0ff;"
+                           "border-radius: 18px; }");
 
         overlayLayout->addWidget(box);
 
@@ -336,12 +321,14 @@ MenuWindow::MenuWindow() {
 
         QLabel* settingsTitle = new QLabel("SETTINGS");
         settingsTitle->setAlignment(Qt::AlignCenter);
-        settingsTitle->setStyleSheet("color:white; font-size:32px; font-weight:bold; background: transparent;");
+        settingsTitle->setStyleSheet(
+            "color:white; font-size:32px; font-weight:bold; background: transparent;");
 
         QLabel* musicLabel = new QLabel("Music Volume");
         QLabel* sfxLabel = new QLabel("Sound Effects");
 
-        QString labelStyle = "color:white; font-size:20px; font-weight:bold; background: transparent;";
+        QString labelStyle =
+            "color:white; font-size:20px; font-weight:bold; background: transparent;";
         musicLabel->setStyleSheet(labelStyle);
         sfxLabel->setStyleSheet(labelStyle);
 
@@ -361,9 +348,8 @@ MenuWindow::MenuWindow() {
         // Just update the global; play sites apply sfxVolume each time, so
         // we don't hammer setVolume on every drag tick (which crashed the
         // QSoundEffect backend on first game start).
-        QObject::connect(sfxSlider, &QSlider::valueChanged, [](int value) {
-            sfxVolume = value / 100.0;
-        });
+        QObject::connect(sfxSlider, &QSlider::valueChanged,
+                         [](int value) { sfxVolume = value / 100.0; });
 
         QPushButton* policyButton = new QPushButton("TERMS & POLICY");
         QPushButton* resetButton = new QPushButton("RESET PROGRESS");
@@ -392,7 +378,8 @@ MenuWindow::MenuWindow() {
                 image->setText("ERROR: terms_policy.png not found");
                 image->setStyleSheet("color:white; font-size:28px; background: transparent;");
             } else {
-                image->setPixmap(policyImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                image->setPixmap(
+                    policyImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             }
 
             image->setAlignment(Qt::AlignCenter);
@@ -405,19 +392,15 @@ MenuWindow::MenuWindow() {
             policyLayout->addWidget(image, 0, Qt::AlignCenter);
             policyLayout->addWidget(backButton, 0, Qt::AlignCenter);
 
-            QObject::connect(backButton, &QPushButton::clicked, [=]() {
-                policyOverlay->deleteLater();
-            });
+            QObject::connect(backButton, &QPushButton::clicked,
+                             [=]() { policyOverlay->deleteLater(); });
         });
 
         // Same thing with the reset button
         QObject::connect(resetButton, &QPushButton::clicked, [=]() {
             QMessageBox::StandardButton reply = QMessageBox::question(
-                settingsOverlay,
-                "Reset Progress",
-                "Are you sure you want to reset your progress?",
-                QMessageBox::Yes | QMessageBox::No
-            );
+                settingsOverlay, "Reset Progress", "Are you sure you want to reset your progress?",
+                QMessageBox::Yes | QMessageBox::No);
 
             if (reply == QMessageBox::Yes) {
                 QSettings settings("Technoscape", "Game");
@@ -429,9 +412,8 @@ MenuWindow::MenuWindow() {
             }
         });
 
-        QObject::connect(closeButton, &QPushButton::clicked, [=]() {
-            settingsOverlay->deleteLater();
-        }); 
+        QObject::connect(closeButton, &QPushButton::clicked,
+                         [=]() { settingsOverlay->deleteLater(); });
 
         layout->addWidget(settingsTitle);
         layout->addWidget(musicLabel);
@@ -463,7 +445,8 @@ MenuWindow::MenuWindow() {
             image->setText("ERROR: how_to_play.png not found");
             image->setStyleSheet("color:white; font-size:28px;");
         } else {
-            image->setPixmap(howImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            image->setPixmap(
+                howImg.scaled(1000, 620, Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
 
         image->setAlignment(Qt::AlignCenter);
@@ -476,22 +459,16 @@ MenuWindow::MenuWindow() {
         layout->addWidget(image, 0, Qt::AlignCenter);
         layout->addWidget(closeButton, 0, Qt::AlignCenter);
 
-        QObject::connect(closeButton, &QPushButton::clicked, [=]() {
-            overlay->deleteLater();
-        });
+        QObject::connect(closeButton, &QPushButton::clicked, [=]() { overlay->deleteLater(); });
 
         overlay->raise();
     });
 
-    QObject::connect(exitButton, &QPushButton::clicked, []() {
-        QTimer::singleShot(120, []() {
-            QApplication::quit();
-        });
-    });
+    QObject::connect(exitButton, &QPushButton::clicked,
+                     []() { QTimer::singleShot(120, []() { QApplication::quit(); }); });
 
     showFullScreen();
 }
-
 
 // Function is called when a level ends. You have to pass in the view for the transition to pop up.
 // The level is passed to show the number of the upcoming level in the transition screen
@@ -513,39 +490,33 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
     cyanText->setAlignment(Qt::AlignCenter);
     cyanText->setGeometry(0, 0, introContainer->width(), introContainer->height());
     cyanText->move(-4, 0);
-    cyanText->setStyleSheet(
-        "color: rgb(0,255,255);"
-        "background: transparent;"
-        "font-size: 54px;"
-        "font-weight: 900;"
-        "font-family: Impact, Arial Black, sans-serif;"
-        "letter-spacing: 4px;"
-    );
+    cyanText->setStyleSheet("color: rgb(0,255,255);"
+                            "background: transparent;"
+                            "font-size: 54px;"
+                            "font-weight: 900;"
+                            "font-family: Impact, Arial Black, sans-serif;"
+                            "letter-spacing: 4px;");
 
     QLabel* magentaText = new QLabel(text, introContainer);
     magentaText->setAlignment(Qt::AlignCenter);
     magentaText->setGeometry(0, 0, introContainer->width(), introContainer->height());
     magentaText->move(4, 0);
-    magentaText->setStyleSheet(
-        "color: rgb(255,0,200);"
-        "background: transparent;"
-        "font-size: 54px;"
-        "font-weight: 900;"
-        "font-family: Impact, Arial Black, sans-serif;"
-        "letter-spacing: 4px;"
-    );
+    magentaText->setStyleSheet("color: rgb(255,0,200);"
+                               "background: transparent;"
+                               "font-size: 54px;"
+                               "font-weight: 900;"
+                               "font-family: Impact, Arial Black, sans-serif;"
+                               "letter-spacing: 4px;");
 
     QLabel* mainText = new QLabel(text, introContainer);
     mainText->setAlignment(Qt::AlignCenter);
     mainText->setGeometry(0, 0, introContainer->width(), introContainer->height());
-    mainText->setStyleSheet(
-        "color: white;"
-        "background: transparent;"
-        "font-size: 54px;"
-        "font-weight: 900;"
-        "font-family: Impact, Arial Black, sans-serif;"
-        "letter-spacing: 4px;"
-    );
+    mainText->setStyleSheet("color: white;"
+                            "background: transparent;"
+                            "font-size: 54px;"
+                            "font-weight: 900;"
+                            "font-family: Impact, Arial Black, sans-serif;"
+                            "letter-spacing: 4px;");
 
     QVector<QFrame*> glitchLines;
     for (int i = 0; i < 18; i++) {
@@ -576,9 +547,7 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
         *alpha += 20;
         if (*alpha > 255) *alpha = 255;
 
-        transitionOverlay->setStyleSheet(
-            QString("background-color: rgba(0,0,0,%1);").arg(*alpha)
-        );
+        transitionOverlay->setStyleSheet(QString("background-color: rgba(0,0,0,%1);").arg(*alpha));
 
         if (*alpha >= 255) {
             fadeTimer->stop();
@@ -588,9 +557,11 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
             introContainer->show();
             introContainer->raise();
 
-            for (QFrame* line : glitchLines) line->show();
+            for (QFrame* line : glitchLines)
+                line->show();
 
-            // Alternates the cyan/magenta text offsets to produce a chromatic-aberration glitch effect.
+            // Alternates the cyan/magenta text offsets to produce a chromatic-aberration glitch
+            // effect.
             QTimer* glitchTimer = new QTimer(introContainer);
             QObject::connect(glitchTimer, &QTimer::timeout, [=]() {
                 static bool flip = false;
@@ -622,11 +593,11 @@ void MenuWindow::playLevelTransition(QGraphicsView* gameView, int level) {
 
                 oldView->lower();
 
-               QTimer::singleShot(150, oldView, [oldView]() {
-               oldView->hide();
-               oldView->close();
-               oldView->deleteLater();
-              });
+                QTimer::singleShot(150, oldView, [oldView]() {
+                    oldView->hide();
+                    oldView->close();
+                    oldView->deleteLater();
+                });
                 if (oldLevel) oldLevel->deleteLater();
 
                 transitionOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
@@ -655,23 +626,19 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         currentLevel->setupScene();
         L1->spawnEnemies();
         currentLevel->setupSpawnKeyEvent();
-    } 
-    else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
+    } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(inputLevel)) {
         currentLevel = L2;
         currentLevel->setView(view);
         currentLevel->setupScene();
-    } 
-    else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
+    } else if (levelThree* L3 = dynamic_cast<levelThree*>(inputLevel)) {
         currentLevel = L3;
         currentLevel->setView(view);
         currentLevel->setupScene();
-    }
-    else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
+    } else if (levelFour* L4 = dynamic_cast<levelFour*>(inputLevel)) {
         currentLevel = L4;
         currentLevel->setView(view);
         currentLevel->setupScene();
-    }
-    else if (bossFight* L5 = dynamic_cast<bossFight*>(inputLevel)) {
+    } else if (bossFight* L5 = dynamic_cast<bossFight*>(inputLevel)) {
         currentLevel = L5;
         currentLevel->setView(view);
         currentLevel->setupScene();
@@ -679,7 +646,8 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         // Hides the health bar and pause button for a more cinematic credits scene
         QObject::connect(L5, &gameLevel::levelComplete, [this, L5]() {
             audio->setVolume(0);
-            for (QWidget* child : view->findChildren<QWidget*>()) child->hide();
+            for (QWidget* child : view->findChildren<QWidget*>())
+                child->hide();
             playOutroVideo(this->view);
         });
     }
@@ -693,17 +661,15 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
     QTimer::singleShot(0, [this]() {
         this->view->setFocus();
 
-        // Of course, since we have 2 players, (side player and top-view player), we need to determine
-        // which type of player we need to focus on.
+        // Of course, since we have 2 players, (side player and top-view player), we need to
+        // determine which type of player we need to focus on.
         if (Player* p = currentLevel->getPlayer()) {
             currentLevel->getScene()->setFocusItem(p);
             p->setFocus();
-        } 
-        else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
+        } else if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
             currentLevel->getScene()->setFocusItem(L2->getSidePlayer());
             L2->getSidePlayer()->setFocus();
-        } 
-        else if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
+        } else if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
             currentLevel->getScene()->setFocusItem(L4->getSidePlayer());
             L4->getSidePlayer()->setFocus();
         }
@@ -720,16 +686,14 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         showMainMenu(this->view, this);
 
         if (oldLevel) {
-            QTimer::singleShot(600, oldLevel, [oldLevel]() {
-                oldLevel->deleteLater();
-            });
+            QTimer::singleShot(600, oldLevel, [oldLevel]() { oldLevel->deleteLater(); });
         }
     });
 
     gameOver* death_screen = new gameOver(view, currentLevel);
 
-    // Clicking on try again means that the old level object will be destructed, and a new level object of same
-    // type will be constructed
+    // Clicking on try again means that the old level object will be destructed, and a new level
+    // object of same type will be constructed
     QObject::connect(death_screen, &gameOver::tryAgainRequested, [this]() {
         int restartTo = currentLevelNumber;
 
@@ -776,44 +740,39 @@ QGraphicsView* MenuWindow::createGameView(gameLevel* inputLevel) {
         showMainMenu(this->view, this);
 
         if (oldLevel) {
-            QTimer::singleShot(600, oldLevel, [oldLevel]() {
-                oldLevel->deleteLater();
-            });
+            QTimer::singleShot(600, oldLevel, [oldLevel]() { oldLevel->deleteLater(); });
         }
     });
 
     // add a transition here when adding a level
     // Level 1 -> Level 2
     if (Player* player = currentLevel->getPlayer()) {
-        QObject::connect(player, &Player::level2Requested, [this]() {
-            playLevelTransition(this->view, currentLevelNumber);
-        });
+        QObject::connect(player, &Player::level2Requested,
+                         [this]() { playLevelTransition(this->view, currentLevelNumber); });
     }
 
     // Level 2 -> Level 3
     if (levelTwo* L2 = dynamic_cast<levelTwo*>(currentLevel)) {
-        QObject::connect(L2, &gameLevel::levelComplete, [this]() {
-            playLevelTransition(this->view, currentLevelNumber);
-        });
+        QObject::connect(L2, &gameLevel::levelComplete,
+                         [this]() { playLevelTransition(this->view, currentLevelNumber); });
     }
 
     // Level 3 -> Level 4
     if (levelThree* L3 = dynamic_cast<levelThree*>(currentLevel)) {
-        QObject::connect(L3, &gameLevel::levelComplete, [this]() {
-            playLevelTransition(this->view, currentLevelNumber);
-        });
+        QObject::connect(L3, &gameLevel::levelComplete,
+                         [this]() { playLevelTransition(this->view, currentLevelNumber); });
     }
     // Level 4 -> Level 5
     if (levelFour* L4 = dynamic_cast<levelFour*>(currentLevel)) {
-        QObject::connect(L4, &gameLevel::levelComplete, [this]() {
-            playLevelTransition(this->view, currentLevelNumber);
-        });
+        QObject::connect(L4, &gameLevel::levelComplete,
+                         [this]() { playLevelTransition(this->view, currentLevelNumber); });
     }
 
     return this->view;
 }
 
-// Keeps the background, panel, and title widget correctly positioned whenever the window is resized.
+// Keeps the background, panel, and title widget correctly positioned whenever the window is
+// resized.
 void MenuWindow::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
 
@@ -835,7 +794,8 @@ void MenuWindow::resizeEvent(QResizeEvent* event) {
     }
 }
 
-// Brings the main menu back to the foreground and safely destroys the game view after a short delay.
+// Brings the main menu back to the foreground and safely destroys the game view after a short
+// delay.
 void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
     paused = true;
 
@@ -857,8 +817,7 @@ void showMainMenu(QGraphicsView* currentView, MenuWindow* menu) {
 }
 
 // Used to play the AUC intro
-void MenuWindow::playIntroVideo()
-{
+void MenuWindow::playIntroVideo() {
     audio->setVolume(0);
     QVideoWidget* videoWidget = new QVideoWidget(this);
     videoWidget->setGeometry(this->rect());
@@ -875,28 +834,24 @@ void MenuWindow::playIntroVideo()
 
     videoPlayer->setSource(QUrl("qrc:/assets/intro.mp4"));
 
-    QObject::connect(videoPlayer, &QMediaPlayer::mediaStatusChanged,
-                     this,
+    QObject::connect(videoPlayer, &QMediaPlayer::mediaStatusChanged, this,
                      [=](QMediaPlayer::MediaStatus status) {
-        if (status == QMediaPlayer::EndOfMedia) {
-            QSettings settings("Technoscape", "Game");
-            settings.setValue("introPlayed", true);
+                         if (status == QMediaPlayer::EndOfMedia) {
+                             QSettings settings("Technoscape", "Game");
+                             settings.setValue("introPlayed", true);
 
-            videoWidget->hide();
-            videoWidget->deleteLater();
+                             videoWidget->hide();
+                             videoWidget->deleteLater();
 
-            QTimer::singleShot(120, this, [this]() {
-            startLevel(1);
-        });
-        }
-    });
+                             QTimer::singleShot(120, this, [this]() { startLevel(1); });
+                         }
+                     });
 
     videoPlayer->play();
 }
 
 // Used to show the credits scene
-void MenuWindow::playOutroVideo(QGraphicsView* gameView)
-{
+void MenuWindow::playOutroVideo(QGraphicsView* gameView) {
     if (!gameView) {
         showMainMenu(nullptr, this);
         return;
@@ -921,22 +876,20 @@ void MenuWindow::playOutroVideo(QGraphicsView* gameView)
 
     gameLevel* oldLevel = currentLevel;
 
-    QObject::connect(videoPlayer, &QMediaPlayer::mediaStatusChanged,
-                     this,
+    QObject::connect(videoPlayer, &QMediaPlayer::mediaStatusChanged, this,
                      [=](QMediaPlayer::MediaStatus status) {
-        if (status == QMediaPlayer::EndOfMedia) {
-            videoWidget->hide();
-            videoWidget->deleteLater();
+                         if (status == QMediaPlayer::EndOfMedia) {
+                             videoWidget->hide();
+                             videoWidget->deleteLater();
 
-            showMainMenu(gameView, this);
+                             showMainMenu(gameView, this);
 
-            if (oldLevel) {
-                QTimer::singleShot(600, oldLevel, [oldLevel]() {
-                    oldLevel->deleteLater();
-                });
-            }
-        }
-    });
+                             if (oldLevel) {
+                                 QTimer::singleShot(600, oldLevel,
+                                                    [oldLevel]() { oldLevel->deleteLater(); });
+                             }
+                         }
+                     });
 
     videoPlayer->play();
 }

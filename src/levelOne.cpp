@@ -1,12 +1,12 @@
 #include "levelOne.hpp"
 #include <QLabel>
 
-levelOne::levelOne(QGraphicsView* view) : gameLevel(view) {}
+levelOne::levelOne(QGraphicsView* view) : gameLevel(view) {
+}
 
 levelOne::~levelOne() {
     delete[] robots;
 }
-
 
 void levelOne::setupScene() {
     fitScene();
@@ -29,18 +29,17 @@ void levelOne::setupScene() {
     };
 
     auto spawnAccessKey = [&](QPointF pos) {
-        KeyItem* worldKey = new KeyItem(
-            QCoreApplication::applicationDirPath() + "/assets/key.gif",
-            60, 90
-        );
+        KeyItem* worldKey =
+            new KeyItem(QCoreApplication::applicationDirPath() + "/assets/key.gif", 60, 90);
 
         worldKey->setPos(pos.x(), pos.y());
         worldKey->setZValue(300);
         scene->addItem(worldKey);
     };
 
-    QPixmap health_symbol_image (":/assets/health_symbol.png");
-    health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QPixmap health_symbol_image(":/assets/health_symbol.png");
+    health_symbol_image =
+        health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     QLabel* health_symbol = new QLabel(view);
     health_symbol->setPixmap(health_symbol_image);
     health_symbol->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -67,13 +66,12 @@ void levelOne::setupScene() {
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
     QObject::connect(player, &Player::level2Requested, this, &gameLevel::levelComplete);
-    QObject::connect(player, &Player::skipLevelRequested, player, &Player::level2Requested); // Level skip
+    QObject::connect(player, &Player::skipLevelRequested, player,
+                     &Player::level2Requested); // Level skip
 
     // HUD KEY (hidden until collected)
-    KeyItem* hudKey = new KeyItem(
-        QCoreApplication::applicationDirPath() + "/assets/key.gif",
-        90,140
-    );
+    KeyItem* hudKey =
+        new KeyItem(QCoreApplication::applicationDirPath() + "/assets/key.gif", 90, 140);
     hudKey->setPos(729, 488);
     hudKey->setZValue(1500);
     hudKey->hide();
@@ -94,7 +92,6 @@ void levelOne::setupScene() {
     // TRAP
     addTrap(176, 47, 124, 14);
 
-  
     QApplication::processEvents();
     scene->setFocusItem(player);
     player->setFocus();
@@ -107,7 +104,7 @@ void levelOne::spawnEnemies() {
     // Adding in the robots...
     for (int i = 0; i < number_of_robots; i++) {
         robots[i] = new Robot(player);
-        
+
         // So that the robot appears over the background..
         robots[i]->setZValue(10);
         scene->addItem(robots[i]);
@@ -119,31 +116,24 @@ void levelOne::spawnEnemies() {
     robots[3]->setPos(246, 450);
     robots[4]->setPos(453, 450);
 
-
-
-
     for (int i = 0; i < number_of_robots; i++) {
         QObject::connect(robots[i], &Enemy::isDead, [this]() {
             number_of_robots--;
             if (number_of_robots == 0) emit allEnemiesDead();
         });
     }
-
 }
 
 void levelOne::setupSpawnKeyEvent() {
     QObject::connect(this, &levelOne::allEnemiesDead, [this]() {
         // May the key appear!
-        KeyItem* worldKey = new KeyItem(
-            QCoreApplication::applicationDirPath() + "/assets/key.gif",
-            60, 90
-            );
+        KeyItem* worldKey =
+            new KeyItem(QCoreApplication::applicationDirPath() + "/assets/key.gif", 60, 90);
         worldKey->setPos(400, 100); // replace with actual position you want
         worldKey->setZValue(300);
         scene->addItem(worldKey);
     });
-} 
-
+}
 
 void levelOne::setupWalls() {
     addWall(48, 0, 723, 46);

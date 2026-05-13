@@ -4,20 +4,20 @@
 #include <QPen>
 #include <QColor>
 
-//invisible machine used for collisions but eventually we didn't use it 
+// invisible machine used for collisions but eventually we didn't use it
 Machine::Machine(int x, int y) {
 
     QGraphicsRectItem* body = new QGraphicsRectItem(0, 0, 140, 130);
 
     bool debug = false;
 
-if (debug) {
-    body->setBrush(QColor(255,0,0,90));
-    body->setPen(QPen(Qt::red,2));
-} else {
-    body->setBrush(Qt::NoBrush);
-    body->setPen(Qt::NoPen);
-}
+    if (debug) {
+        body->setBrush(QColor(255, 0, 0, 90));
+        body->setPen(QPen(Qt::red, 2));
+    } else {
+        body->setBrush(Qt::NoBrush);
+        body->setPen(Qt::NoPen);
+    }
     addToGroup(body);
 
     setPos(x, y);

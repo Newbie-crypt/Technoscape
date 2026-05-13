@@ -21,8 +21,6 @@ Xman::Xman(Player* t) : Enemy(150, ":/assets/Standing_Robot.png", 10) {
     frame_count[AnimationState::Running] = 6;
     frame_count[AnimationState::Attacking] = 6;
 
-
-
     // Keeping track of the number of rows and columns for each spritesheet.
     spritesheet_rows[AnimationState::Running] = 1;
     spritesheet_columns[AnimationState::Running] = 6;
@@ -30,8 +28,10 @@ Xman::Xman(Player* t) : Enemy(150, ":/assets/Standing_Robot.png", 10) {
     spritesheet_columns[AnimationState::Attacking] = 6;
 
     // All frames in the spritesheets are of the same size, independent of the object's state.
-    frame_width = spritesheets[AnimationState::Attacking].width() / spritesheet_columns[AnimationState::Attacking];
-    frame_height = spritesheets[AnimationState::Attacking].height() / spritesheet_rows[AnimationState::Attacking];
+    frame_width = spritesheets[AnimationState::Attacking].width() /
+                  spritesheet_columns[AnimationState::Attacking];
+    frame_height = spritesheets[AnimationState::Attacking].height() /
+                   spritesheet_rows[AnimationState::Attacking];
 
     int r = 0;
     int c = 0;
@@ -39,7 +39,8 @@ Xman::Xman(Player* t) : Enemy(150, ":/assets/Standing_Robot.png", 10) {
     for (int i = 1; i < number_of_states; i++) {
         for (int j = 0; j < frame_count[(AnimationState)i]; j++) {
             AnimationState state = (AnimationState)i;
-            animations[state].push_back(spritesheets[state].copy(c * frame_width, r * frame_height, frame_width, frame_height));
+            animations[state].push_back(spritesheets[state].copy(c * frame_width, r * frame_height,
+                                                                 frame_width, frame_height));
             c = (c + 1) % spritesheet_columns[state];
             if (c == 0) r++;
         }
@@ -47,10 +48,10 @@ Xman::Xman(Player* t) : Enemy(150, ":/assets/Standing_Robot.png", 10) {
         c = 0;
     }
 
-
     QTimer* timer = new QTimer(this);
-    
-    // Every 100ms, we are changing the frame, depending on the currentAnimationState which changes via the other functions in this class
+
+    // Every 100ms, we are changing the frame, depending on the currentAnimationState which changes
+    // via the other functions in this class
     connect(timer, &QTimer::timeout, [this]() {
         if (paused) {
             return;
@@ -70,49 +71,44 @@ Xman::Xman(Player* t) : Enemy(150, ":/assets/Standing_Robot.png", 10) {
 
     setTarget(t);
 
-   QTimer* timer2 = new QTimer(this);
+    QTimer* timer2 = new QTimer(this);
 
     // The "Chase & Attack" Algorithm
     // Every 50ms, we are checking whether the player is colliding with the robot
     // If they are colliding, the robot will attack.
     // Otherwise, the robot will chase the player!
 
-   QObject::connect(timer2, &QTimer::timeout, [this, timer, timer2]() {
+    QObject::connect(timer2, &QTimer::timeout, [this, timer, timer2]() {
+        // When the game is paused, we want the enemies to stop what they're doing!
+        if (paused) {
+            return;
+        }
+        if (died) {
+            timer->stop();
+            timer2->stop();
+            scene()->removeItem(this);
+            return;
+        }
 
-    // When the game is paused, we want the enemies to stop what they're doing!
-    if (paused) {
-        return;
-    }
-    if (died)
-        {
-        timer->stop();
-        timer2->stop();
-        scene()->removeItem(this);
-        return;
-    }
-
-    if (target->collidesWithItem(this)) {
-        this->Attack();
-    } else {
-        this->Chase();
-    }
-});
-
+        if (target->collidesWithItem(this)) {
+            this->Attack();
+        } else {
+            this->Chase();
+        }
+    });
 
     timer2->start(50);
-
 
     // This is useful for when we flip the sprite horizontally in the Chase() function
     setTransformOriginPoint(boundingRect().center());
 
     // Increasing the size of the object for aesthetics.
     setScale(2);
-
 }
 
 void Xman::changeAnimationState(AnimationState state) {
-    // The purpose of the if statement is to prevent the frame from being constant at zero due to how frequent we are changing
-    // the animation state.
+    // The purpose of the if statement is to prevent the frame from being constant at zero due to
+    // how frequent we are changing the animation state.
     if (currentAnimationState == state) return;
     currentAnimationState = state;
     currentFrame = 0;
@@ -139,13 +135,11 @@ void Xman::Move() {
     moveBy(10, 0);
 }
 
-
 // A* tuning. CELL_SIZE is the side of a grid cell in scene pixels.
 // REPATH_INTERVAL is how many Chase() ticks pass before recomputing the path
 // (Chase fires every 50ms, so 10 ≈ 0.5s).
 static constexpr int CELL_SIZE = 32;
 static constexpr int REPATH_INTERVAL = 10;
-
 
 // Build the navigation grid by scanning the scene for Wall items. Cells whose
 // centre falls inside (or near) a wall are flagged as blocked. We inflate each
@@ -155,7 +149,7 @@ static constexpr int REPATH_INTERVAL = 10;
 void Xman::buildWallGrid() {
     if (!scene()) return;
     QRectF sr = scene()->sceneRect();
-    gridCols = static_cast<int>(std::ceil(sr.width()  / CELL_SIZE));
+    gridCols = static_cast<int>(std::ceil(sr.width() / CELL_SIZE));
     gridRows = static_cast<int>(std::ceil(sr.height() / CELL_SIZE));
     blockedCells.assign(gridCols, std::vector<bool>(gridRows, false));
 
@@ -164,9 +158,9 @@ void Xman::buildWallGrid() {
         QRectF wr = item->sceneBoundingRect();
 
         // Calculate the cell coordinates the "Wall" object occupies
-        int c0 = std::max(0,            static_cast<int>(std::floor(wr.left()   / CELL_SIZE)));
-        int c1 = std::min(gridCols - 1, static_cast<int>(std::floor(wr.right()  / CELL_SIZE)));
-        int r0 = std::max(0,            static_cast<int>(std::floor(wr.top()    / CELL_SIZE)));
+        int c0 = std::max(0, static_cast<int>(std::floor(wr.left() / CELL_SIZE)));
+        int c1 = std::min(gridCols - 1, static_cast<int>(std::floor(wr.right() / CELL_SIZE)));
+        int r0 = std::max(0, static_cast<int>(std::floor(wr.top() / CELL_SIZE)));
         int r1 = std::min(gridRows - 1, static_cast<int>(std::floor(wr.bottom() / CELL_SIZE)));
 
         // Then block these coordinates
@@ -186,7 +180,7 @@ std::vector<QPointF> Xman::findPath(int sc, int sr, int gc, int gr) {
     if (gridCols == 0 || gridRows == 0) return {};
     if (sc < 0 || sc >= gridCols || sr < 0 || sr >= gridRows) return {};
     if (gc < 0 || gc >= gridCols || gr < 0 || gr >= gridRows) return {};
- 
+
     // The brute may overlap a "blocked" cell when standing right next to a
     // wall (because of the inflation). Treat the start cell as walkable so the
     // search can begin; same for the goal cell.
@@ -201,8 +195,8 @@ std::vector<QPointF> Xman::findPath(int sc, int sr, int gc, int gr) {
     // closed[c][r]  — true once the cell's optimal cost is finalised (popped from the open set).
     const double INF = std::numeric_limits<double>::infinity();
     std::vector<std::vector<double>> gScore(gridCols, std::vector<double>(gridRows, INF));
-    std::vector<std::vector<std::pair<int,int>>> parent(gridCols,
-        std::vector<std::pair<int,int>>(gridRows, {-1, -1}));
+    std::vector<std::vector<std::pair<int, int>>> parent(
+        gridCols, std::vector<std::pair<int, int>>(gridRows, {-1, -1}));
     std::vector<std::vector<bool>> closed(gridCols, std::vector<bool>(gridRows, false));
 
     auto heuristic = [&](int c, int r) {
@@ -219,8 +213,8 @@ std::vector<QPointF> Xman::findPath(int sc, int sr, int gc, int gr) {
 
     // Column and row deltas for all 8 neighbours, ordered: NW N NE W E SW S SE.
     // DIAG[i] is true for the four diagonal directions, which cost √2 instead of 1.
-    static const int DC[8] = {-1,  0,  1, -1, 1, -1, 0, 1};
-    static const int DR[8] = {-1, -1, -1,  0, 0,  1, 1, 1};
+    static const int DC[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+    static const int DR[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
     static const bool DIAG[8] = {true, false, true, false, false, true, false, true};
 
     // Main A* loop: always expand the node with the lowest f = g + h.
@@ -250,15 +244,16 @@ std::vector<QPointF> Xman::findPath(int sc, int sr, int gc, int gr) {
         }
     }
 
-    // No path exists if the goal was never reached (parent still sentinel) and it differs from start.
+    // No path exists if the goal was never reached (parent still sentinel) and it differs from
+    // start.
     if (parent[gc][gr].first == -1 && (gc != sc || gr != sr)) return {};
 
-    // Walk the parent chain from goal back to start, convert cells to scene-space centres, then reverse.
+    // Walk the parent chain from goal back to start, convert cells to scene-space centres, then
+    // reverse.
     std::vector<QPointF> path;
     int cc = gc, cr = gr;
     while (cc != sc || cr != sr) {
-        path.emplace_back(cc * CELL_SIZE + CELL_SIZE / 2.0,
-                          cr * CELL_SIZE + CELL_SIZE / 2.0);
+        path.emplace_back(cc * CELL_SIZE + CELL_SIZE / 2.0, cr * CELL_SIZE + CELL_SIZE / 2.0);
         auto [pc, pr] = parent[cc][cr];
         if (pc == -1) return {};
         cc = pc;
@@ -274,18 +269,18 @@ void Xman::Chase() {
 
     if (!gridBuilt) buildWallGrid();
 
-    QPointF myCenter     = sceneBoundingRect().center();
+    QPointF myCenter = sceneBoundingRect().center();
     QPointF playerCenter = target->sceneBoundingRect().center();
 
     // Recompute the path on a timer, when we run out of waypoints, or on the
     // first call. Cheap enough at ~0.5s intervals; the player has moved by
     // then anyway.
-    bool needsRepath = currentPath.empty() || pathIndex >= currentPath.size()
-                       || repathCounter++ >= REPATH_INTERVAL;
+    bool needsRepath = currentPath.empty() || pathIndex >= currentPath.size() ||
+                       repathCounter++ >= REPATH_INTERVAL;
     if (needsRepath) {
         repathCounter = 0;
-        int sc = std::clamp(static_cast<int>(myCenter.x()     / CELL_SIZE), 0, gridCols - 1);
-        int sr = std::clamp(static_cast<int>(myCenter.y()     / CELL_SIZE), 0, gridRows - 1);
+        int sc = std::clamp(static_cast<int>(myCenter.x() / CELL_SIZE), 0, gridCols - 1);
+        int sr = std::clamp(static_cast<int>(myCenter.y() / CELL_SIZE), 0, gridRows - 1);
         int gc = std::clamp(static_cast<int>(playerCenter.x() / CELL_SIZE), 0, gridCols - 1);
         int gr = std::clamp(static_cast<int>(playerCenter.y() / CELL_SIZE), 0, gridRows - 1);
         currentPath = findPath(sc, sr, gc, gr);
@@ -301,8 +296,7 @@ void Xman::Chase() {
         waypoint = currentPath[pathIndex];
         if (QLineF(myCenter, waypoint).length() < CELL_SIZE * 0.5) {
             pathIndex++;
-            waypoint = (pathIndex < currentPath.size()) ? currentPath[pathIndex]
-                                                        : playerCenter;
+            waypoint = (pathIndex < currentPath.size()) ? currentPath[pathIndex] : playerCenter;
         }
     } else {
         waypoint = playerCenter;
@@ -340,5 +334,4 @@ void Xman::Chase() {
         moveBy(extra, 0);
         checkCollision(extra, 0);
     }
-
 }

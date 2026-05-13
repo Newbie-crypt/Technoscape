@@ -10,29 +10,29 @@
 #include <QGraphicsView>
 #include "gameLevel.hpp"
 
-
 class pauseMenu : public QObject {
-    Q_OBJECT   
+    Q_OBJECT
     public:
-        pauseMenu(QGraphicsView*, gameLevel*);
-        void openPauseMenu();
-        void togglePauseMenu();
-        void closePauseMenu();
+    pauseMenu(QGraphicsView*, gameLevel*);
+    void openPauseMenu();
+    void togglePauseMenu();
+    void closePauseMenu();
 
     signals:
-        void leaveRequested();
+    void leaveRequested();
+
     private:
-        gameLevel* level;
-        QGraphicsView* view;
-        QWidget* pauseOverlay;
-        QPushButton* pauseButton;
-        QFrame* leftBar;
-        QFrame* rightBar;
-        QVBoxLayout* overlayLayout;
-        QFrame* pausePanel;
-        QVBoxLayout* pauseLayout;
-        QLabel* pauseTitle;
-        QPushButton* continueButton;
-        QPushButton* leaveButton;
-        QShortcut* escShortcut;
+    gameLevel* level;
+    QGraphicsView* view;
+    QWidget* pauseOverlay;
+    QPushButton* pauseButton;
+    QFrame* leftBar;
+    QFrame* rightBar;
+    QVBoxLayout* overlayLayout;
+    QFrame* pausePanel;
+    QVBoxLayout* pauseLayout;
+    QLabel* pauseTitle;
+    QPushButton* continueButton;
+    QPushButton* leaveButton;
+    QShortcut* escShortcut;
 };

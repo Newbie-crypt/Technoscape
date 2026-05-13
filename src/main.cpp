@@ -35,7 +35,6 @@
 #include "../include/menu_gameScene.hpp"
 #include "../include/enemies.hpp"
 
-
 // Purpose of this CPP file: Contain all of the main logic of the game itself.
 
 int main(int argc, char* argv[]) {
@@ -57,24 +56,24 @@ int main(int argc, char* argv[]) {
     player->setSource(QUrl("qrc:/assets/Technoscape_Intro_AUC.mp4"));
     player->play();
     QObject::connect(player, &QMediaPlayer::mediaStatusChanged,
-                       [&](QMediaPlayer::MediaStatus status) {
-          if (status == QMediaPlayer::EndOfMedia) {
-              audio->setDevice(out);
-              music->setAudioOutput(audio);
-              music->setSource(QUrl("qrc:/assets/sounds/music.mp3"));
-              music->setLoops(QMediaPlayer::Infinite);
-              music->play();
+                     [&](QMediaPlayer::MediaStatus status) {
+                         if (status == QMediaPlayer::EndOfMedia) {
+                             audio->setDevice(out);
+                             music->setAudioOutput(audio);
+                             music->setSource(QUrl("qrc:/assets/sounds/music.mp3"));
+                             music->setLoops(QMediaPlayer::Infinite);
+                             music->play();
 
-              srand(time(0));
+                             srand(time(0));
 
-              MenuWindow* menu = new MenuWindow;
-              menu->showFullScreen();
-              menu->raise();
+                             MenuWindow* menu = new MenuWindow;
+                             menu->showFullScreen();
+                             menu->raise();
 
-              videoWidget->hide();
-              videoWidget->deleteLater();
-          }
-      });
+                             videoWidget->hide();
+                             videoWidget->deleteLater();
+                         }
+                     });
 
     return app.exec();
 }

@@ -4,16 +4,10 @@
 #include <QFontMetrics>
 #include <QTimer>
 
-
- 
 bossFight::bossFight()
-    : gameLevel(nullptr),
-      bossHitbox(nullptr),
-      cup(nullptr),
-      cupText(nullptr),
-      cupShortcut(nullptr),
-      bossDeathHandled(false),
-      cupCollected(false) {}
+    : gameLevel(nullptr), bossHitbox(nullptr), cup(nullptr), cupText(nullptr), cupShortcut(nullptr),
+      bossDeathHandled(false), cupCollected(false) {
+}
 
 bossFight::~bossFight() {
     bossHitbox = nullptr;
@@ -38,9 +32,9 @@ void bossFight::setupScene() {
 
     setupWalls();
 
-    QPixmap health_symbol_image (":/assets/health_symbol.png");
-    health_symbol_image = health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
+    QPixmap health_symbol_image(":/assets/health_symbol.png");
+    health_symbol_image =
+        health_symbol_image.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     health_symbol = new QLabel(view);
     health_symbol->setPixmap(health_symbol_image);
@@ -52,13 +46,11 @@ void bossFight::setupScene() {
     health_bar->move(80, 800);
     health_bar->show();
 
-
     // May the main character spawn!
     player = new Player(0, 0);
     player->setHealthBar(health_bar);
     player->setPos(568, 300);
     scene->addItem(player);
-
 
     QObject::connect(player, &Player::died, this, &gameLevel::playerDied);
 
@@ -67,27 +59,26 @@ void bossFight::setupScene() {
 
     QTimer* timer = new QTimer(this);
     QPointer<Player> safePlayer = player;
-    QObject::connect(timer, &QTimer::timeout, [this, safePlayer] () {
+    QObject::connect(timer, &QTimer::timeout, [this, safePlayer]() {
         if (!safePlayer) return;
         if (!view) return;
         if (!scene || scene->views().isEmpty()) return;
 
-        // Here, we are using the magic of lerp, a mathematical function which uses linear interpolation for the 
-        // view to smoothly follow the player.
+        // Here, we are using the magic of lerp, a mathematical function which uses linear
+        // interpolation for the view to smoothly follow the player.
         QPointF current = this->view->mapToScene(this->view->viewport()->rect().center());
-        QPointF target  = safePlayer->pos();
-        QPointF next    = current + (target - current) * 0.1;
+        QPointF target = safePlayer->pos();
+        QPointF next = current + (target - current) * 0.1;
         this->view->centerOn(next);
     });
 
     timer->start(16);
 
     letsGetReadytoRumble();
-
 }
 
-void bossFight::setupSpawnKeyEvent() {}
-
+void bossFight::setupSpawnKeyEvent() {
+}
 
 void bossFight::letsGetReadytoRumble() {
     boss = new brute(player);
@@ -144,7 +135,7 @@ void bossFight::letsGetReadytoRumble() {
             drones[i]->setPos(boss->pos() + offset);
         }
     });
-        QObject::connect(boss_health_bar, &BossHealthBar::bossDead, [this]() {
+    QObject::connect(boss_health_bar, &BossHealthBar::bossDead, [this]() {
         if (bossDeathHandled) return;
         bossDeathHandled = true;
 
@@ -161,7 +152,6 @@ void bossFight::letsGetReadytoRumble() {
         spawnCup();
     });
 }
-
 
 void bossFight::setupWalls() {
     addWall(27, 9, 159, 1039);
@@ -186,11 +176,9 @@ void bossFight::setupWalls() {
     addWall(812, 193, 40, 101);
     addWall(1113, 253, 121, 66);
     addWall(624, 223, 210, 70);
-
 }
 
-void bossFight::spawnCup()
-{
+void bossFight::spawnCup() {
     if (cup) return;
 
     QPixmap cupPixmap(":/assets/cup.png");
@@ -214,14 +202,11 @@ void bossFight::spawnCup()
         cupShortcut = new QShortcut(QKeySequence(Qt::Key_C), view);
         cupShortcut->setContext(Qt::ApplicationShortcut);
 
-        QObject::connect(cupShortcut, &QShortcut::activated, [this]() {
-            collectCup();
-        });
+        QObject::connect(cupShortcut, &QShortcut::activated, [this]() { collectCup(); });
     }
 }
 
-void bossFight::collectCup()
-{
+void bossFight::collectCup() {
     if (cupCollected) return;
     if (!cup || !player) return;
 
@@ -233,9 +218,8 @@ void bossFight::collectCup()
     QPointF playerCenter = playerRect.center();
     QPointF cupCenter = cupRect.center();
 
-    bool nearCup =
-        qAbs(playerCenter.x() - cupCenter.x()) < 120 &&
-        qAbs(playerCenter.y() - cupCenter.y()) < 120;
+    bool nearCup = qAbs(playerCenter.x() - cupCenter.x()) < 120 &&
+                   qAbs(playerCenter.y() - cupCenter.y()) < 120;
 
     if (!touchingCup && !nearCup) {
         return;
@@ -262,4 +246,3 @@ void bossFight::collectCup()
 
     emit levelComplete();
 }
-

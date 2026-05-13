@@ -4,7 +4,7 @@
 #include <QGraphicsItemGroup>
 
 class Furniture : public QGraphicsItemGroup {
-public:
+    public:
     Furniture(int x, int y, int w, int h);
 };
 

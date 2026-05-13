@@ -18,20 +18,23 @@
 class levelFour : public gameLevel {
     Q_OBJECT
 
-public:
+    public:
     levelFour();
     ~levelFour();
 
     void setupScene() override;
-    void setupSpawnKeyEvent() override {} 
+    void setupSpawnKeyEvent() override {
+    }
 
-    SidePlayer* getSidePlayer() { return sidePlayer; }
+    SidePlayer* getSidePlayer() {
+        return sidePlayer;
+    }
 
-private:
+    private:
     SidePlayer* sidePlayer = nullptr;
     QGraphicsPixmapItem* level4Background = nullptr;
     QGraphicsPixmapItem* turretVisual = nullptr;
-    
+
     void setupLogicTimer();
 
     void setupTrap1();
@@ -44,7 +47,7 @@ private:
     void updateTrap3();
     void updateTrap4();
 
-    //Trap 1
+    // Trap 1
     QGraphicsPixmapItem* fakeFloorSprite = nullptr;
     Wall** fakeFloorCollision = nullptr;
     QGraphicsRectItem* trap1TriggerZone = nullptr;
@@ -70,10 +73,7 @@ private:
     QMediaPlayer* trap4AlarmSound = nullptr;
     QAudioOutput* trap4AlarmAudio = nullptr;
 
-
-
-
-    // Trap 4 
+    // Trap 4
     QGraphicsPixmapItem* trap4Ceiling = nullptr;
 
     QGraphicsPixmapItem* trap4Item = nullptr;
@@ -86,7 +86,6 @@ private:
     bool* trap4PlayerDead = nullptr;
     bool* trap4NextLevelRequested = nullptr;
 
-    
     bool* playerDead = nullptr;
 
     QTimer* logicTimer = nullptr;
@@ -97,11 +96,15 @@ private:
     int moving = 3;
     QSoundEffect** coinPool;
 
-    //Turret Trap (3)
+    // Turret Trap (3)
     Turret* turret = nullptr;
-    int realCoinsRemaining = 0; // Decrements when a real coin is picked up, turret spawns when it hits 0.
-    bool turretDestroyed = false; // Once the player rams the turret, prevents the spawn condition from re-triggering. Fixes bug where turret kept reappearing after player walked away.
+    int realCoinsRemaining =
+        0; // Decrements when a real coin is picked up, turret spawns when it hits 0.
+    bool turretDestroyed =
+        false; // Once the player rams the turret, prevents the spawn condition from re-triggering.
+               // Fixes bug where turret kept reappearing after player walked away.
 
     protected:
-        void setupWalls() override {}
+    void setupWalls() override {
+    }
 };

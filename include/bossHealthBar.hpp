@@ -11,13 +11,13 @@
 class BossHealthBar : public QWidget {
     Q_OBJECT
 
-private:
+    private:
     int maxHP;
     int currentHP;
     bool halfHealthTriggered;
     QPixmap bossHead;
 
-public:
+    public:
     BossHealthBar(QWidget* parent = nullptr)
         : QWidget(parent), maxHP(1700), currentHP(1700), halfHealthTriggered(false) {
 
@@ -67,16 +67,16 @@ public:
         return maxHP;
     }
 
-signals:
+    signals:
     void halfHealthBoss();
     void bossDead();
 
-protected:
+    protected:
     void paintEvent(QPaintEvent*) override {
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
 
-        double ratio = (double) currentHP / maxHP;
+        double ratio = (double)currentHP / maxHP;
 
         int iconSize = 60;
         int iconX = 0;
@@ -124,8 +124,7 @@ protected:
         painter.drawLine(middleX, barY + 4, middleX, barY + barH - 4);
     }
 
-
-private:
+    private:
     void checkHalfHealth() {
         if (!halfHealthTriggered && currentHP <= maxHP / 2) {
             halfHealthTriggered = true;

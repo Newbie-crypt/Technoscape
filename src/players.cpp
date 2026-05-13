@@ -33,15 +33,12 @@
 #include <QTransform>
 #include "menu_gameScene.hpp"
 
-
-
 extern bool paused;
 
 Player::Player(double x, double y) {
 
     trapCooldown = false;
     isSprinting = false; // Renamed to isSprinting instead of isRunning
-
 
     trapPlayer = new QMediaPlayer();
     trapAudio = new QAudioOutput();
@@ -50,7 +47,7 @@ Player::Player(double x, double y) {
     trapPlayer->setSource(QUrl("qrc:/assets/sounds/trap_trigger.wav"));
     trapAudio->setVolume(sfxVolume);
 
-     doorPlayer = new QMediaPlayer();
+    doorPlayer = new QMediaPlayer();
     doorAudio = new QAudioOutput();
 
     doorPlayer->setAudioOutput(doorAudio);
@@ -59,18 +56,19 @@ Player::Player(double x, double y) {
 
     footstepPool = new QSoundEffect*[8];
 
-
     for (int i = 0; i < 8; i++) {
         footstepPool[i] = new QSoundEffect(this);
-        footstepPool[i]->setSource(QUrl("qrc:/assets/sounds/footstep.wav"));  // Preload footstep sound for whole pool.
+        footstepPool[i]->setSource(
+            QUrl("qrc:/assets/sounds/footstep.wav")); // Preload footstep sound for whole pool.
         footstepPool[i]->setVolume(sfxVolume);
     }
 
-    gruntPool = new QSoundEffect* [8];
+    gruntPool = new QSoundEffect*[8];
 
-    for (int i = 0; i < 8; i++){
+    for (int i = 0; i < 8; i++) {
         gruntPool[i] = new QSoundEffect(this);
-        gruntPool[i]->setSource(QUrl("qrc:/assets/sounds/grunt.wav"));  // Preload grunt sound for whole pool.
+        gruntPool[i]->setSource(
+            QUrl("qrc:/assets/sounds/grunt.wav")); // Preload grunt sound for whole pool.
         gruntPool[i]->setVolume(sfxVolume);
     }
 
@@ -79,22 +77,20 @@ Player::Player(double x, double y) {
     gun->aimAt(lastAimDirection); // Position gun correctly before first move
     legs = new LegHitbox(this);
 
-
-    walkSheet = QPixmap(":/assets/walk.png");   // Preload walk and idle sprite sheets
-    idleSheet = QPixmap (":/assets/idle.png");
+    walkSheet = QPixmap(":/assets/walk.png"); // Preload walk and idle sprite sheets
+    idleSheet = QPixmap(":/assets/idle.png");
     setPixmap(walkSheet.copy(0, 0, 48, 64));
     this->setScale(2.0);
 
-    setPos(x,y);   
-    setZValue(500);  
+    setPos(x, y);
+    setZValue(500);
 
     movementTimer = new QTimer(this);
     QObject::connect(movementTimer, &QTimer::timeout, this, &Player::processMovement);
-    movementTimer->start(16);   //start processing player actions.
+    movementTimer->start(16); // start processing player actions.
 
     setFlag(QGraphicsItem::ItemIsFocusable);
     setFocus();
-
 }
 
 void Player::decreaseHealth(int h) {
@@ -118,16 +114,14 @@ void Player::decreaseHealth(int h) {
         if (safeSelf) safeSelf->setGraphicsEffect(nullptr);
     });
     // Sound to go along with it
-    if(h > 0){
+    if (h > 0) {
         gruntPool[currentGruntSound]->setVolume(sfxVolume);
-        gruntPool[currentGruntSound] -> play();
+        gruntPool[currentGruntSound]->play();
         currentGruntSound++;
 
-        if(currentGruntSound >= 8)
-        {
+        if (currentGruntSound >= 8) {
             currentGruntSound = 0;
         }
-
     }
 
     if (health->getHP() <= 0) {
@@ -256,17 +250,15 @@ void Player::useKeyOnDoor() {
     unlockDoor();
 }
 
-
-void Player::processMovement()
-{
-   if (paused) {
+void Player::processMovement() {
+    if (paused) {
         return;
     }
-   if (health && health->getHP() <= 0) {
+    if (health && health->getHP() <= 0) {
         movementTimer->stop();
         return;
     }
-    int moveDirection = getInputMask();    //for direction calculation, to be used in switch-case.
+    int moveDirection = getInputMask(); // for direction calculation, to be used in switch-case.
     double speedMultiplier = isSprinting ? 1.5 : 1;
 
     applyPhysics(moveDirection, speedMultiplier); // Move character
@@ -283,78 +275,89 @@ void Player::processMovement()
 int Player::getInputMask() // Get the direction in which the player is moving.
 {
     int inputSum = 0;
-    if(isMovingUp)    {inputSum += 1;}
-    if(isMovingDown)  {inputSum += 2;}
-    if(isMovingLeft)  {inputSum += 4;}
-    if(isMovingRight) {inputSum += 8;}
+    if (isMovingUp) {
+        inputSum += 1;
+    }
+    if (isMovingDown) {
+        inputSum += 2;
+    }
+    if (isMovingLeft) {
+        inputSum += 4;
+    }
+    if (isMovingRight) {
+        inputSum += 8;
+    }
     return inputSum;
 }
 
 void Player::applyPhysics(int moveDirection, double speedMultiplier) // Moves the player.
 {
-    switch(moveDirection)
-    {
-        case 1: { // Up
-            moveBy(0, speedMultiplier * -2.5);
-            targetRow = 3;
-            checkCollision(0, speedMultiplier * -2.5);
-            break;
-        }
-        case 2: { // Down
-            moveBy(0, speedMultiplier * 2.5);
-            targetRow = 0;
-            checkCollision(0, speedMultiplier * 2.5);
-            break;
-        }
-        case 4: {  // Left
-            moveBy(speedMultiplier * -2.5, 0);
-            targetRow = 1;
-            checkCollision(speedMultiplier * -2.5, 0);
-            break;
-        }
-        case 8: { //Right
-            moveBy(speedMultiplier * 2.5, 0);
-            targetRow = 5;
-            checkCollision(speedMultiplier * 2.5, 0);
-            break;
-        }
-        case 9: { // Top-Right
-            moveBy(speedMultiplier * 2.236, speedMultiplier * -2.236);
-            checkCollision(speedMultiplier * 2.236, speedMultiplier * -2.236);
-            diagonalBuffer = 3;
-            targetRow = 4;
-            break;
-        }
-        case 10: { // Bottom-Left
-            moveBy(speedMultiplier * 2.236, speedMultiplier * 2.236);
-            checkCollision(speedMultiplier * 2.236, speedMultiplier * 2.236);
-            diagonalBuffer = 3;
-            targetRow = 5;
-            break;
-        }
-        case 6: { // Bottom-Left
-            moveBy(speedMultiplier * -2.236, speedMultiplier * 2.236);
-            checkCollision(speedMultiplier * -2.236, speedMultiplier * 2.236);
-            diagonalBuffer = 3;
-            targetRow = 1;
-            break;
-        }
-        case 5: {
-            moveBy(speedMultiplier * -2.236, speedMultiplier * -2.236);
-            checkCollision(speedMultiplier * -2.236, speedMultiplier * -2.236);
-            diagonalBuffer = 3;
-            targetRow = 2;
-            break;  // Top-Left
-        }
+    switch (moveDirection) {
+    case 1: { // Up
+        moveBy(0, speedMultiplier * -2.5);
+        targetRow = 3;
+        checkCollision(0, speedMultiplier * -2.5);
+        break;
+    }
+    case 2: { // Down
+        moveBy(0, speedMultiplier * 2.5);
+        targetRow = 0;
+        checkCollision(0, speedMultiplier * 2.5);
+        break;
+    }
+    case 4: { // Left
+        moveBy(speedMultiplier * -2.5, 0);
+        targetRow = 1;
+        checkCollision(speedMultiplier * -2.5, 0);
+        break;
+    }
+    case 8: { // Right
+        moveBy(speedMultiplier * 2.5, 0);
+        targetRow = 5;
+        checkCollision(speedMultiplier * 2.5, 0);
+        break;
+    }
+    case 9: { // Top-Right
+        moveBy(speedMultiplier * 2.236, speedMultiplier * -2.236);
+        checkCollision(speedMultiplier * 2.236, speedMultiplier * -2.236);
+        diagonalBuffer = 3;
+        targetRow = 4;
+        break;
+    }
+    case 10: { // Bottom-Left
+        moveBy(speedMultiplier * 2.236, speedMultiplier * 2.236);
+        checkCollision(speedMultiplier * 2.236, speedMultiplier * 2.236);
+        diagonalBuffer = 3;
+        targetRow = 5;
+        break;
+    }
+    case 6: { // Bottom-Left
+        moveBy(speedMultiplier * -2.236, speedMultiplier * 2.236);
+        checkCollision(speedMultiplier * -2.236, speedMultiplier * 2.236);
+        diagonalBuffer = 3;
+        targetRow = 1;
+        break;
+    }
+    case 5: {
+        moveBy(speedMultiplier * -2.236, speedMultiplier * -2.236);
+        checkCollision(speedMultiplier * -2.236, speedMultiplier * -2.236);
+        diagonalBuffer = 3;
+        targetRow = 2;
+        break; // Top-Left
+    }
     }
 
     // Saving direction for gun shot. Always trust diagonal.
     if (moveDirection == 9 || moveDirection == 10 || moveDirection == 6 || moveDirection == 5) {
         lastAimDirection = moveDirection;
-    }
-    else if (moveDirection != 0 && diagonalBuffer == 0) { lastAimDirection = moveDirection; } // Only trust non-diagonal if buffer is empty.
+    } else if (moveDirection != 0 && diagonalBuffer == 0) {
+        lastAimDirection = moveDirection;
+    } // Only trust non-diagonal if buffer is empty.
 
-    if(moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 || moveDirection == 6 || moveDirection == 8 || moveDirection == 10 || moveDirection == 9) //check for a valid direction. In cases like 3, 15, 12, the player shouldn't move, so neither should the gun.
+    if (moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 ||
+        moveDirection == 6 || moveDirection == 8 || moveDirection == 10 ||
+        moveDirection == 9) // check for a valid direction. In cases like 3, 15, 12, the player
+                            // shouldn't move, so neither should the gun.
         gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
 }
 
@@ -362,38 +365,56 @@ void Player::updateSprite(int moveDirection, double speedMultiplier) // Sheet ch
 {
     QPixmap* activeSheet = &walkSheet; // Assume walking.
 
-    if(moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow.
+    if (moveDirection == 0 || (isMovingUp && isMovingDown) ||
+        (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping
+                                         // targetRow = lastSpriteRow.
     {
         activeSheet = &idleSheet;
         targetRow = lastSpriteRow;
-        if (diagonalBuffer > 0) {diagonalBuffer--;}
+        if (diagonalBuffer > 0) {
+            diagonalBuffer--;
+        }
     }
 
-    else // Walking animation, bunch of checks to fix bug where letting go of W a second before A leads to left animation.
+    else // Walking animation, bunch of checks to fix bug where letting go of W a second before A
+         // leads to left animation.
     {
-        if (diagonalBuffer > 0 && moveDirection !=5 && moveDirection != 6 && moveDirection != 9 && moveDirection != 10) {diagonalBuffer--; targetRow = lastSpriteRow;} // If buffer isn't empty, and we aren't moving diagonally, decrement buffer and keep the target row the same as last run (to stop flickering to side/up animation before diagonal).
-        if (diagonalBuffer == 0 || moveDirection == 5 || moveDirection == 6 || moveDirection == 9 || moveDirection == 10) {lastSpriteRow = targetRow;} // If the buffer is empty (no recent diagonal movement) OR we're moving diagonally, update lastSpriteRow normally
+        if (diagonalBuffer > 0 && moveDirection != 5 && moveDirection != 6 && moveDirection != 9 &&
+            moveDirection != 10) {
+            diagonalBuffer--;
+            targetRow = lastSpriteRow;
+        } // If buffer isn't empty, and we aren't moving diagonally, decrement buffer and keep the
+          // target row the same as last run (to stop flickering to side/up animation before
+          // diagonal).
+        if (diagonalBuffer == 0 || moveDirection == 5 || moveDirection == 6 || moveDirection == 9 ||
+            moveDirection == 10) {
+            lastSpriteRow = targetRow;
+        } // If the buffer is empty (no recent diagonal movement) OR we're moving diagonally, update
+          // lastSpriteRow normally
     }
 
-    currentFrameIndex = animationTicker / 10; // Variable used to switch between the 8 available images
+    currentFrameIndex =
+        animationTicker / 10; // Variable used to switch between the 8 available images
     animationTicker = (animationTicker + (int)speedMultiplier) % 80; // Ticker.
 
-
-    setPixmap(activeSheet->copy(currentFrameIndex * 48, targetRow * 64, 48, 64)); // Updating Pixmap to current animation
+    setPixmap(activeSheet->copy(currentFrameIndex * 48, targetRow * 64, 48,
+                                64)); // Updating Pixmap to current animation
 }
 
 void Player::handleFootsteps(int moveDirection) // Footsteps sound
 {
-    bool isConflicting =
-    (isMovingUp && isMovingDown) ||
-    (isMovingLeft && isMovingRight);
+    bool isConflicting = (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight);
 
-    if (moveDirection != 0 && !isConflicting) { // Added isColliding to merge Kareem's collide logic with my walking
-        if ((currentFrameIndex == 1 || currentFrameIndex == 5) && currentFrameIndex != previousFrameIndex) {    //Footstep sound, 2 per second.
+    if (moveDirection != 0 &&
+        !isConflicting) { // Added isColliding to merge Kareem's collide logic with my walking
+        if ((currentFrameIndex == 1 || currentFrameIndex == 5) &&
+            currentFrameIndex != previousFrameIndex) { // Footstep sound, 2 per second.
             footstepPool[currentFootSound]->setVolume(sfxVolume);
-            footstepPool[currentFootSound] -> play();
+            footstepPool[currentFootSound]->play();
             currentFootSound++;
-            if(currentFootSound >= 8) {currentFootSound = 0;}
+            if (currentFootSound >= 8) {
+                currentFootSound = 0;
+            }
         }
     }
 
@@ -420,9 +441,7 @@ void Player::checkTrapCollision() {
             trapPlayer->play();
 
             decreaseHealth(30);
-            QTimer::singleShot(4000, [this]() {
-                resetTrapCooldown();
-            });
+            QTimer::singleShot(4000, [this]() { resetTrapCooldown(); });
 
             return;
         }
@@ -522,14 +541,16 @@ void Player::unlockDoor() {
     scene()->addItem(blackout);
 
     // Outer cyan glow frame
-    QGraphicsRectItem* glowFrame = new QGraphicsRectItem(doorX - 6, doorY - 6, doorW + 12, doorH + 12);
+    QGraphicsRectItem* glowFrame =
+        new QGraphicsRectItem(doorX - 6, doorY - 6, doorW + 12, doorH + 12);
     glowFrame->setBrush(Qt::NoBrush);
     glowFrame->setPen(QPen(QColor(0, 255, 255, 220), 4));
     glowFrame->setZValue(301);
     scene()->addItem(glowFrame);
 
     // Inner bright frame
-    QGraphicsRectItem* innerFrame = new QGraphicsRectItem(doorX - 2, doorY - 2, doorW + 4, doorH + 4);
+    QGraphicsRectItem* innerFrame =
+        new QGraphicsRectItem(doorX - 2, doorY - 2, doorW + 4, doorH + 4);
     innerFrame->setBrush(Qt::NoBrush);
     innerFrame->setPen(QPen(QColor(120, 255, 255, 180), 2));
     innerFrame->setZValue(302);
@@ -616,9 +637,10 @@ void Player::unlockDoor() {
     });
 }
 
-
-void Player::keyPressEvent(QKeyEvent* event){
-    if(event->isAutoRepeat()) {return;} // To stop the weird little bug with key holding. a...aaaaaaaaaaaaa for example.
+void Player::keyPressEvent(QKeyEvent* event) {
+    if (event->isAutoRepeat()) {
+        return;
+    } // To stop the weird little bug with key holding. a...aaaaaaaaaaaaa for example.
     if (event->key() == Qt::Key_C) {
         collectNearbyKey();
         return;
@@ -643,35 +665,68 @@ void Player::keyPressEvent(QKeyEvent* event){
     // }
 
     // Setting the booleans true using key press.
-    if (event->key() == Qt::Key_Shift) {isSprinting = true;}
-    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = true;}
-    if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = true;}
-    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = true;}
-    if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = true;}
+    if (event->key() == Qt::Key_Shift) {
+        isSprinting = true;
+    }
+    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {
+        isMovingUp = true;
+    }
+    if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+        isMovingDown = true;
+    }
+    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {
+        isMovingLeft = true;
+    }
+    if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {
+        isMovingRight = true;
+    }
 
     // Cheats
     gunCheat active = NONE;
-    if (event->key() == Qt::Key_L) {fireInAllDirections = fireInAllDirections ? 0 : 1;}
-    if (event->key() == Qt::Key_K) {noCooldown = noCooldown ? 0 : 1;}
-    if (event->key() == Qt::Key_P) {emit skipLevelRequested();}
-    if (event->key() == Qt::Key_H && health) {health->setHP(100);}
-
+    if (event->key() == Qt::Key_L) {
+        fireInAllDirections = fireInAllDirections ? 0 : 1;
+    }
+    if (event->key() == Qt::Key_K) {
+        noCooldown = noCooldown ? 0 : 1;
+    }
+    if (event->key() == Qt::Key_P) {
+        emit skipLevelRequested();
+    }
+    if (event->key() == Qt::Key_H && health) {
+        health->setHP(100);
+    }
 
     event->accept();
 }
 
 void Player::keyReleaseEvent(QKeyEvent* event) {
     // Setting the booleans false using key release.
-    if(event->isAutoRepeat()) {return;}
-    if (event->key() == Qt::Key_Shift) {isSprinting = false;}
-    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {isMovingUp = false;}
-    if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {isMovingDown = false;}
-    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {isMovingLeft = false;}
-    if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {isMovingRight = false;}
+    if (event->isAutoRepeat()) {
+        return;
+    }
+    if (event->key() == Qt::Key_Shift) {
+        isSprinting = false;
+    }
+    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {
+        isMovingUp = false;
+    }
+    if (event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+        isMovingDown = false;
+    }
+    if (event->key() == Qt::Key_Left || event->key() == Qt::Key_A) {
+        isMovingLeft = false;
+    }
+    if (event->key() == Qt::Key_Right || event->key() == Qt::Key_D) {
+        isMovingRight = false;
+    }
     if (event->key() == Qt::Key_Space) {
         gunCheat active = NONE;
-        if(fireInAllDirections) {active = (gunCheat) (active | ALLDIRECTIONS);}
-        if(noCooldown) {active = (gunCheat) (active | NOCOOLDOWN);}
+        if (fireInAllDirections) {
+            active = (gunCheat)(active | ALLDIRECTIONS);
+        }
+        if (noCooldown) {
+            active = (gunCheat)(active | NOCOOLDOWN);
+        }
         gun->shoot(active);
     }
 }
@@ -680,10 +735,6 @@ Player::~Player() {
     delete[] footstepPool;
 }
 
-
 void Player::resetTrapCooldown() {
     trapCooldown = false;
 }
-
-
-
