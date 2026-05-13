@@ -803,6 +803,7 @@ void levelFour::updateTrap4() {
 
         return;
     }
+}
 
     // Shows the portal prompt only while the player is inside the portal interaction zone
     if (sidePlayer->sceneBoundingRect().intersects(trap4ItemZone->sceneBoundingRect())) {

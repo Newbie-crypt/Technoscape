@@ -709,6 +709,7 @@ void levelTwo::setupLogicTimer() {
                         spikeMoveTimer->deleteLater();
                         return;
                     }
+                }
                     // Once the spike wall reaches the left side, it disappears and starts the drone phase.
                     if (spikeWall->x() <= 260) {
                         spikeHitbox->hide();
