@@ -84,13 +84,6 @@ void bossFight::setupScene() {
 
     letsGetReadytoRumble();
 
-    // QObject::connect(this, &BossHealthBar::HalfHealthBossComplete, [this](){
-    //     startWaveTwo();
-    // });
-
-    // QObject::connect(this, &BossHealthBar::BossDead, [this]() {
-    //     emit levelComplete();
-    // });
 }
 
 void bossFight::setupSpawnKeyEvent() {}

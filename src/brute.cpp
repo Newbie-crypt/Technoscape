@@ -74,6 +74,7 @@ brute::brute(Player* t) : Enemy(200, ":/assets/Standing_Robot.png", 5) {
     double spritesheet_width = spritesheets[AnimationState::Running].width();
     double spritesheet_height = spritesheets[AnimationState::Running].height();
 
+    // We need to make the boss VERY BIG.
     const double factor = 2.5;
     spritesheet_width *= factor;
     spritesheet_height *= factor;
@@ -208,7 +209,6 @@ void brute::Move() {
     moveBy(10, 0);
 }
 
-// FOR TRANSPARENCY: THE ENTIRE A* PATHFINDING ALGORITHM IS DEVELOPED BY CLAUDE, NOT WRITTEN BY HAND.
 
 // A* tuning. CELL_SIZE is the side of a grid cell in scene pixels.
 // REPATH_INTERVAL is how many Chase() ticks pass before recomputing the path
@@ -266,6 +266,9 @@ std::vector<QPointF> brute::findPath(int sc, int sr, int gc, int gr) {
         return blockedCells[c][r];
     };
 
+    // gScore[c][r]  — cheapest known path cost from start to cell (c, r).
+    // parent[c][r]  — predecessor cell on that cheapest path, used to retrace the route.
+    // closed[c][r]  — true once the cell's optimal cost is finalised (popped from the open set).
     const double INF = std::numeric_limits<double>::infinity();
     std::vector<std::vector<double>> gScore(gridCols, std::vector<double>(gridRows, INF));
     std::vector<std::vector<std::pair<int,int>>> parent(gridCols,
@@ -284,10 +287,14 @@ std::vector<QPointF> brute::findPath(int sc, int sr, int gc, int gr) {
     gScore[sc][sr] = 0.0;
     open.emplace(heuristic(sc, sr), sc, sr);
 
+    // Column and row deltas for all 8 neighbours, ordered: NW N NE W E SW S SE.
+    // DIAG[i] is true for the four diagonal directions, which cost √2 instead of 1.
     static const int DC[8] = {-1,  0,  1, -1, 1, -1, 0, 1};
     static const int DR[8] = {-1, -1, -1,  0, 0,  1, 1, 1};
     static const bool DIAG[8] = {true, false, true, false, false, true, false, true};
 
+    // Main A* loop: always expand the node with the lowest f = g + h.
+    // Stale duplicates are skipped via the closed set (lazy-deletion open set).
     while (!open.empty()) {
         auto [f, c, r] = open.top();
         open.pop();
@@ -313,8 +320,10 @@ std::vector<QPointF> brute::findPath(int sc, int sr, int gc, int gr) {
         }
     }
 
+    // No path exists if the goal was never reached (parent still sentinel) and it differs from start.
     if (parent[gc][gr].first == -1 && (gc != sc || gr != sr)) return {};
 
+    // Walk the parent chain from goal back to start, convert cells to scene-space centres, then reverse.
     std::vector<QPointF> path;
     int cc = gc, cr = gr;
     while (cc != sc || cr != sr) {
