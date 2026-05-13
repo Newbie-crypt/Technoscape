@@ -183,6 +183,7 @@ void Xman::buildWallGrid() {
 // Diagonal moves cost √2; cardinal moves cost 1. Diagonal corner-cutting
 // through walls is forbidden. Returns a list of waypoints in scene coords from
 // just-after-start to goal. Empty list = no path found.
+// sc = Start Column, Sr = start row, gc = Goal Column, gr = goal row.
 std::vector<QPointF> Xman::findPath(int sc, int sr, int gc, int gr) {
     if (gridCols == 0 || gridRows == 0) return {};
     if (sc < 0 || sc >= gridCols || sr < 0 || sr >= gridRows) return {};
