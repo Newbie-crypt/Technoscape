@@ -32,7 +32,7 @@ enum class AnimationState : int {
 class Player : public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
     private:
-    HealthBar* health = nullptr;
+    // Door, key, and collision stuff.
     bool hasAccessKey = false;
     Door* nearbyDoor = nullptr;
     KeyItem* nearbyKey = nullptr;
@@ -82,6 +82,7 @@ class Player : public QObject, public QGraphicsPixmapItem {
     // Timer for everything.
     QTimer* movementTimer;
     // Related Objects.
+    HealthBar* health = nullptr;
     Weapon* gun;
     LegHitbox* legs;
 

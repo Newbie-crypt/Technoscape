@@ -137,50 +137,57 @@ void Player::increaseHealth(int h) {
     health->setHP(next);
 }
 
+
 void Player::showInteractionText(const QString& text) {
-    if (!scene()) {
+    if (!scene()) { // Can't attach text without a scene to host it.
         return;
     }
 
-    if (!interactionText) {
+    if (!interactionText) { // create on first call so the item is reused across prompts.
         interactionText = scene()->addText("");
         interactionText->setDefaultTextColor(Qt::white);
         interactionText->setFont(QFont("Arial", 18, QFont::Bold));
-        interactionText->setZValue(2000);
+        interactionText->setZValue(2000); // Above gameplay sprites, below UI overlays.
     }
 
     interactionText->setPlainText(text);
 
+    // Re-centre horizontally with changes to the size of the text
     QRectF rect = interactionText->boundingRect();
     double textX = (800 - rect.width()) / 2;
-    double textY = 555;
+    double textY = 555; // Fixed near the bottom of the gameplay area.
 
     interactionText->setPos(textX, textY);
     interactionText->show();
 }
 
+// Hides the on-screen prompt if it has been created.
 void Player::hideInteractionText() {
     if (interactionText) {
         interactionText->hide();
     }
 }
 
+// Re-scans for nearby keys and locked doors each tick and surfaces the matching prompt — collect
+// key, use key, or "door locked" — or hides the prompt when nothing is in reach.
 void Player::updateInteractionPrompt() {
-    nearbyDoor = nullptr;
+    nearbyDoor = nullptr; // Assume both point to null
     nearbyKey = nullptr;
 
+    // Collision check with player for key and door.
     QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
     // Key Detection
     for (int i = 0; i < colliding_items.size(); i++) {
         KeyItem* key = dynamic_cast<KeyItem*>(colliding_items[i]);
-        if (key && key != hudKey) {
+        if (key && key != hudKey) { // Skip the inventory icon since only world keys are collectable.
             nearbyKey = key;
         }
     }
 
     // Door Detection
     if (scene()) {
+        // Slightly inflated rect so the door prompt appears just before the player is literally touching the door.
         QRectF playerRect = legs->sceneBoundingRect().adjusted(-8, -8, 8, 8);
         QList<QGraphicsItem*> sceneItems = scene()->items();
 
@@ -190,6 +197,7 @@ void Player::updateInteractionPrompt() {
                 continue;
             }
 
+            // Only locked doors get a prompt, unlocked doors are walked through silently.
             if (door->isLocked() && playerRect.intersects(door->sceneBoundingRect())) {
                 nearbyDoor = door;
                 break;
@@ -197,6 +205,8 @@ void Player::updateInteractionPrompt() {
         }
     }
 
+    // Priority: collectable key beats nearby door (avoids "Door locked" hiding a key prompt when
+    // the items overlap).
     if (nearbyKey && !hasAccessKey) {
         showInteractionText("Press C to collect");
         return;
@@ -204,52 +214,57 @@ void Player::updateInteractionPrompt() {
 
     if (nearbyDoor) {
         if (hasAccessKey) {
-            showInteractionText("Press O to use the key");
+            showInteractionText("Press O to use the key"); // Player has the key, prompt to use it.
         } else {
-            showInteractionText("Door locked");
+            showInteractionText("Door locked"); // Player is at a locked door without the key.
         }
         return;
     }
 
-    hideInteractionText();
+    hideInteractionText(); // Nothing in reach, clear any old prompt.
 }
 
+
 void Player::collectNearbyKey() {
-    if (!nearbyKey || hasAccessKey) {
+    if (!nearbyKey || hasAccessKey) { // Returns early if nothing to collect or already carrying one.
         return;
     }
 
-    hasAccessKey = true;
+    hasAccessKey = true; // Flip the inventory bool.
 
     if (hudKey) {
-        hudKey->show();
+        hudKey->show(); // Reveal the HUD icon so the player sees they have the key.
     }
 
     if (scene()) {
-        scene()->removeItem(nearbyKey);
+        scene()->removeItem(nearbyKey); // Detach from the scene before deleting to avoid dangling.
     }
 
     delete nearbyKey;
-    nearbyKey = nullptr;
+    nearbyKey = nullptr; // Clear so the next prompt scan starts from a clean slate.
 
-    hideInteractionText();
+    hideInteractionText(); // Prompt no longer relevant — key is now in inventory.
 }
 
+
 void Player::useKeyOnDoor() {
+    // Refuse if the player has no key, isn't near a door, or the door is somehow already open.
     if (!hasAccessKey || !nearbyDoor || !nearbyDoor->isLocked()) {
         return;
     }
 
-    hasAccessKey = false;
+    hasAccessKey = false; // Key is consumed.
 
     if (hudKey) {
-        hudKey->hide();
+        hudKey->hide(); // Inventory icon disappears now that the key is spent.
     }
 
-    hideInteractionText();
-    unlockDoor();
+    hideInteractionText(); // "Press O to use the key" prompt is no longer relevant.
+    unlockDoor();          // Trigger the door's unlock animation / state change.
 }
 
+
+// Mostly helper functions being called, 3 for movement, a
 void Player::processMovement() {
     if (paused) {
         return;
@@ -272,7 +287,7 @@ void Player::processMovement() {
     updateInteractionPrompt();
 }
 
-int Player::getInputMask() // Get the direction in which the player is moving.
+int Player::getInputMask() // Get the direction in which the player is moving. Used that sequence of number so the sum is always unique
 {
     int inputSum = 0;
     if (isMovingUp) {
@@ -317,6 +332,10 @@ void Player::applyPhysics(int moveDirection, double speedMultiplier) // Moves th
         checkCollision(speedMultiplier * 2.5, 0);
         break;
     }
+
+    // Diagonal cases, the diagonalBuffer exists to fix a bug to do with the animation instantly changing to the true last held direction,
+    // meaning if the player was walking diagonally, then let go of the up key a millisecond before the right key, the right animation would play.
+    // This int being reset with diagonal movement fixes that.
     case 9: { // Top-Right
         moveBy(speedMultiplier * 2.236, speedMultiplier * -2.236);
         checkCollision(speedMultiplier * 2.236, speedMultiplier * -2.236);
@@ -354,10 +373,9 @@ void Player::applyPhysics(int moveDirection, double speedMultiplier) // Moves th
         lastAimDirection = moveDirection;
     } // Only trust non-diagonal if buffer is empty.
 
-    if (moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 ||
-        moveDirection == 6 || moveDirection == 8 || moveDirection == 10 ||
-        moveDirection == 9) // check for a valid direction. In cases like 3, 15, 12, the player
-                            // shouldn't move, so neither should the gun.
+    // Check for a valid direction. In cases like 3, 15, 12, the player shouldn't move, so neither should the gun. I don't check for those
+    //cases alone since more bugs kept showing up when I did (I hadn't covered all the numbers), so I decided checking for the stable/known numbers was better.
+    if (moveDirection == 1 || moveDirection == 2 || moveDirection == 4 || moveDirection == 5 ||moveDirection == 6 || moveDirection == 8 || moveDirection == 10 ||moveDirection == 9)
         gun->aimAt(lastAimDirection); // Update gun's visuals using lastAimDirection
 }
 
@@ -365,9 +383,7 @@ void Player::updateSprite(int moveDirection, double speedMultiplier) // Sheet ch
 {
     QPixmap* activeSheet = &walkSheet; // Assume walking.
 
-    if (moveDirection == 0 || (isMovingUp && isMovingDown) ||
-        (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping
-                                         // targetRow = lastSpriteRow.
+    if (moveDirection == 0 || (isMovingUp && isMovingDown) || (isMovingLeft && isMovingRight)) // Handles Idling by switching to idle sheet and keeping targetRow = lastSpriteRow.
     {
         activeSheet = &idleSheet;
         targetRow = lastSpriteRow;
@@ -376,8 +392,7 @@ void Player::updateSprite(int moveDirection, double speedMultiplier) // Sheet ch
         }
     }
 
-    else // Walking animation, bunch of checks to fix bug where letting go of W a second before A
-         // leads to left animation.
+    else // Walking animation, bunch of checks to fix bug where letting go of W a second before A leads to left animation (as discussed above).
     {
         if (diagonalBuffer > 0 && moveDirection != 5 && moveDirection != 6 && moveDirection != 9 &&
             moveDirection != 10) {
@@ -421,6 +436,7 @@ void Player::handleFootsteps(int moveDirection) // Footsteps sound
     previousFrameIndex = currentFrameIndex;
 }
 
+// Simple collision check with level 1 trap.
 void Player::checkTrapCollision() {
     if (trapCooldown) {
         return;
@@ -448,6 +464,7 @@ void Player::checkTrapCollision() {
     }
 }
 
+// More generic collision check, moves player back if colliding with wall, furniture, or closed door.
 void Player::checkCollision(double dx, double dy) {
     QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
@@ -475,6 +492,7 @@ void Player::checkCollision(double dx, double dy) {
     }
 }
 
+// Collison check as well, but just with the door being open.
 void Player::checkDoorOpen() {
     QList<QGraphicsItem*> colliding_items = legs->collidingItems();
 
@@ -523,7 +541,7 @@ void Player::unlockDoor() {
     if (targetDoor == nullptr || bg == nullptr) {
         return;
     }
-
+    // Animation done by Kareem6
     // Unlock logically first
     targetDoor->unlock();
 
@@ -681,8 +699,7 @@ void Player::keyPressEvent(QKeyEvent* event) {
         isMovingRight = true;
     }
 
-    // Cheats
-    gunCheat active = NONE;
+    // Cheats, just setting bools equal to true here. Bitwise calculations done in keyReleaseEvenet.
     if (event->key() == Qt::Key_L) {
         fireInAllDirections = fireInAllDirections ? 0 : 1;
     }
@@ -696,11 +713,11 @@ void Player::keyPressEvent(QKeyEvent* event) {
         health->setHP(100);
     }
 
-    event->accept();
+    event->accept(); // Just tells Qt that the event was handled by player, so it doesn't get passed up the object hierarchy.
 }
 
 void Player::keyReleaseEvent(QKeyEvent* event) {
-    // Setting the booleans false using key release.
+    // Setting the booleans false using key release, mostly copy-pasted from above.
     if (event->isAutoRepeat()) {
         return;
     }
@@ -722,12 +739,12 @@ void Player::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Space) {
         gunCheat active = NONE;
         if (fireInAllDirections) {
-            active = (gunCheat)(active | ALLDIRECTIONS);
+            active = (gunCheat)(active | ALLDIRECTIONS); // Do the bitwise operation on the int versions of active, then type cast back to gunCheat manually so that the compiler doesn't cry.
         }
         if (noCooldown) {
             active = (gunCheat)(active | NOCOOLDOWN);
         }
-        gun->shoot(active);
+        gun->shoot(active); //passing the cheats to the gun.
     }
 }
 

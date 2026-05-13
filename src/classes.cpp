@@ -17,11 +17,9 @@ Projectile::Projectile(double x, double y, int d, QGraphicsItem* shooter)
     this->setScale(0.125);
     setPos(x - (bulletSheet.width() / 2), y - (bulletSheet.height() / 2)); // Offset
 
-    // setFlag(QGraphicsItem::ItemStacksBehindParent); // Use this later to make the bullets appear
-    // from inside the gun, instead of behind the scene.
-
     int angle = 0;
 
+    //Projectile direciton is passed once, doesn't need updating, so set it in constructor.
     switch (dir) {
     case 8:
         angle = 0;
@@ -49,7 +47,7 @@ Projectile::Projectile(double x, double y, int d, QGraphicsItem* shooter)
         break; // Top-Right
     }
 
-    setTransformOriginPoint(boundingRect().center());
+    setTransformOriginPoint(boundingRect().center()); // Flip around center, not top-left corner.
     setRotation(angle);
 
     movementTimer = new QTimer(this);
@@ -57,6 +55,8 @@ Projectile::Projectile(double x, double y, int d, QGraphicsItem* shooter)
     movementTimer->start(16);
 }
 
+
+// If a collision is detected, this function is called. Pauses movement timer, and changes to collision animation.
 void Projectile::playImpactAndDelete() {
     if (movementTimer) {
         movementTimer->stop();
@@ -128,7 +128,7 @@ void Projectile::processMovement() {
         moveBy(-7.071, -7.071);
         break;
     }
-    if (ignoreWorldCollisions) {
+    if (ignoreWorldCollisions) { // Was used for testing in milestone 1 (without the ignoreWorldCollisions bool), just makes sure that the projectile is deleted if it leaves the scene.
         if (x() >= 780) {
             movementTimer->stop();
 
@@ -142,14 +142,12 @@ void Projectile::processMovement() {
 
         return;
     }
+    // Collisions check, bullet can't collide with specific objects, so we check for them, and check for damageable (hittable) entities too.
+    // Same for other
     auto colliding_items = collidingItems();
 
     for (int i = 0; i < colliding_items.size(); i++) {
         auto item = colliding_items[i];
-
-        if (item == Player || item->zValue() < 0) {
-            continue;
-        }
 
         if (item->data(0).toString() == "ignoreBullet") {
             continue;
@@ -159,65 +157,29 @@ void Projectile::processMovement() {
             continue;
         }
         if (item->parentItem() != nullptr || item == Player || item->zValue() < 0) continue;
-        if (dynamic_cast<Projectile*>(item))
-            continue; // Added for the ALLDIRECTIONS cheat, since the bullets collided with
-                      // themselves.
+        if (dynamic_cast<Projectile*>(item)) continue; // Added for the ALLDIRECTIONS cheat, since the bullets collided with themselves.
         // qDebug() << "\nColliding with:" << typeid(*item).name(); // For debugging collisions.
-        if (dynamic_cast<brute*>(item) && !(dynamic_cast<Hittable*>(item))) continue;
+        if (dynamic_cast<brute*>(item) && !(dynamic_cast<Hittable*>(item))) continue; // to deal with the brute's larger hitbox than its hittable hitbox.
         Hittable* h = dynamic_cast<Hittable*>(item);
         if (h) {
             h->onHit(damage);
         }
 
-        movementTimer->stop();
+        playImpactAndDelete();
 
-        QPixmap collide(":/assets/collide.png");
-        setPixmap(collide.copy(0, 0, 273, 375));
-        switch (dir) // for offsets with bullets
-        {
-        case 1:
-            moveBy(-0.125 * collide.height() / 2, 0);
-            break;
-        case 2:
-            moveBy(0.125 * collide.height() / 2, 0);
-            break;
-        case 4:
-            moveBy(0, 0.125 * collide.height() / 2);
-            break;
-        case 8:
-            moveBy(0, -0.125 * collide.height() / 2);
-            break;
-        case 9:
-            moveBy(-0.125 * collide.height() / 2, 0);
-            break; // This (top right)
-        case 10:
-            moveBy(0.125 * collide.height() / 2, 0);
-            break;
-        case 6:
-            moveBy(0.125 * collide.height() / 2, 0);
-            break; // This (bottom left)
-        case 5:
-            moveBy(-0.125 * collide.height() / 2, 0);
-            break;
-        }
-
-        QTimer::singleShot(200, [this]() {
-            scene()->removeItem(this);
-            delete this;
-        });
         return;
     }
 }
 
 Coin::Coin(bool fake) : isFake(fake) {
     coinSheet = QPixmap(":/assets/Level4/spr_coin_azu.png");
-    setPixmap(coinSheet.copy(0, 0, 16,
-                             16)); // Initially set the pixmap to the first frame of the animation
+    setPixmap(coinSheet.copy(0, 0, 16, 16)); // Initially set the pixmap to the first frame of the animation
     coinTimer = new QTimer(this);
     QObject::connect(coinTimer, &QTimer::timeout, this, &Coin::processFrame);
     coinTimer->start(200); // Change animation every 200 milliseconds
 }
 
+    // Handles glowing animation of coins. Actual movement (up and down) is in levelFour
 void Coin::processFrame() {
     setPixmap(coinSheet.copy(currentAnimation * 16, 0, 16, 16));
     currentAnimation++;
@@ -233,7 +195,7 @@ Turret::Turret(double x, double y, int dir, int rate) : fireDirection(dir), fire
 
     damage = 10;
     canShoot = true;
-    randomShot = 50; // % chance of firing on each fireTimer tick
+    randomShot = 75; // % chance of firing on each fireTimer tick
 
     // Audio pool, mirrors Weapon.
     shotPool = new QSoundEffect*[5];
@@ -259,7 +221,7 @@ void Turret::shoot() {
     }
 
     Projectile* bullet = new Projectile(c.x(), c.y(), fireDirection, this);
-    bullet->setIgnoreWorldCollisions(true);
+    bullet->setIgnoreWorldCollisions(true); // So that it exits the scene cleanly
     scene()->addItem(bullet);
 
     shotPool[currentShotSound]->setVolume(sfxVolume / 3);
@@ -277,7 +239,7 @@ void Turret::stopFiring() {
 }
 
 Turret::~Turret() {
-    delete[] shotPool;
+    delete[] shotPool; // Qt handles the deletion of the individual pointers :)
 }
 
 Coin::~Coin() {

@@ -644,7 +644,7 @@ void levelFour::updateTrap3() {
                 coins[i] = nullptr;
             }
         }
-        turret = new Turret(32, 430, 8, 750);
+        turret = new Turret(32, 430, 8, 1250);
         turret->setScale(2);
         turret->setZValue(20);
         scene->addItem(turret);

@@ -22,8 +22,6 @@ SidePlayer::SidePlayer() {
     setZValue(500);
 
     setFlag(QGraphicsItem::ItemIsFocusable);
-    // setShapeMode(QGraphicsPixmapItem::BoundingRectShape); //To make sure the jumping doesn't lead
-    // to bugging into the ground (QT ShapeMode disregarding transparent pixels)
     setFocus();
 
     footstepPool = new QSoundEffect*[8];
@@ -139,7 +137,7 @@ void SidePlayer::updateAnimation() {
     case JUMP:
         currentFrame += 3;
         currentFrame = currentFrame % 100;
-        break; //!!These two will be a bit problematic later.
+        break;
     case FALL:
         currentFrame += 2;
         currentFrame = currentFrame % 100;
@@ -154,7 +152,8 @@ void SidePlayer::updateAnimation() {
     activeSheet = &sheetVault[currentState];
     setPixmap(activeSheet->copy(71 * (currentFrame / 20), 0, 71, 67));
 
-    //!!Lama teb2a rayeb implement proper jumping seperately to make sure it matches better.
+    //!!Lama teb2a raye2 implement proper jumping seperately to make sure it matches better.
+    //Esara7a 3omry ma 3amaltaha.
 
     // Check which way to face
     if (isMovingLeft && !isMovingRight) {
@@ -175,27 +174,32 @@ void SidePlayer::handleFootSteps() {
     }
 }
 
-void SidePlayer::playerDied(int type) {
+void SidePlayer::playerDied(int type) { // Type exists because we have an explosion animation and a normal death animation. Type 1 is just the normal death animation.
     if (type == 1) {
         activeSheet = &sheetVault[DAMAGED];
         setPixmap(sheetVault[DAMAGED]);
     }
     if (type == 2) {
         QTimer* explosionAnimation = new QTimer(this);
+
+        // These aren't initialized in the constructor because they'd only be used once any way.
         QPixmap explosionPixmap = QPixmap(":/assets/Level4/kaboom.png");
         QSoundEffect* explosionSound = new QSoundEffect(this);
         explosionSound->setSource(QUrl("qrc:/assets/sounds/kablaw.wav"));
         explosionSound->setVolume(sfxVolume);
         explosionSound->play();
 
+        // I hate how clang-tidy structures code. -Elsabagh
         QObject::connect(explosionAnimation, &QTimer::timeout, this,
-                         [this, counter = 0, explosionPixmap]() mutable {
+                         [this, counter = 0, explosionPixmap]() mutable { // mutable makes it so we can modify the counter variable declared only for the lambda function.
                              setPixmap(explosionPixmap.copy(48 * counter, 0, 48, 48));
                              counter++;
                              if (counter > 7) counter = 0;
                          });
 
         explosionAnimation->start(50);
+
+        // No deletion here. The player object does not own itself.
     }
 }
 
@@ -231,7 +235,7 @@ void SidePlayer::keyPressEvent(QKeyEvent* event) {
         emit skipLevelRequested();
     }
 
-    QGraphicsPixmapItem::keyPressEvent(event);
+    event->accept(); // sideplayer has handled this. Don't propagate up the parent chain.
 }
 
 void SidePlayer::keyReleaseEvent(QKeyEvent* event) {
@@ -241,5 +245,5 @@ void SidePlayer::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_D || event->key() == Qt::Key_Right) isMovingRight = false;
     if (event->key() == Qt::Key_Shift) isSprinting = false;
 
-    QGraphicsPixmapItem::keyReleaseEvent(event);
+    event->accept(); // sideplayer has handled this. Don't propagate up the parent chain.
 }

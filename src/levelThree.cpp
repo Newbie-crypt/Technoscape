@@ -26,6 +26,13 @@ void levelThree::setupScene() {
 
     scene->setSceneRect(0, 0, levelBg.width(), levelBg.height());
 
+    if (auto* fv = qobject_cast<FittedView*>(view)) {
+        fv->setAutoFit(false);
+        QObject::connect(
+            fv, &FittedView::resized, this,
+            [this]() { view->fitInView(200, 200, 800, 600); }, Qt::SingleShotConnection);
+    }
+
     setupWalls();
 
     QPixmap health_symbol_image(":/assets/health_symbol.png");

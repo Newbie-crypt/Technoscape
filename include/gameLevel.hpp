@@ -18,17 +18,26 @@ class FittedView : public QGraphicsView {
     FittedView(QWidget* parent = nullptr) : QGraphicsView(parent) {
     }
 
+    // Levels with a custom player-follow camera (level 3, boss fight) set this
+    // to false so the auto-fit doesn't clobber their `centerOn` lerp.
+    void setAutoFit(bool on) {
+        autoFit = on;
+    }
+
     signals:
     void resized();
 
     protected:
     void resizeEvent(QResizeEvent* event) override {
         QGraphicsView::resizeEvent(event);
-        if (scene()) {
+        if (autoFit && scene()) {
             fitInView(scene()->sceneRect(), Qt::IgnoreAspectRatio);
         }
         emit resized();
     }
+
+    private:
+    bool autoFit = true;
 };
 
 class gameLevel : public QObject {
