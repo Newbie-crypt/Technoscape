@@ -8,7 +8,7 @@
 extern bool paused;
 
 QRectF brute::boundingRect() const {
-    return QRectF(0, 120, frame_width - 120, frame_height - 120);
+    return QRectF(0, 90, frame_width - 120, frame_height - 90);
 }
 
 void brute::Attack() {
@@ -205,8 +205,8 @@ void brute::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     }
 
     // Uncomment this if you want to see the boundaries of the object
-    // painter->setPen(QPen(Qt::red, 1));
-    // painter->drawRect(boundingRect());
+    painter->setPen(QPen(Qt::red, 1));
+    painter->drawRect(boundingRect());
 }
 
 void brute::Move() {
